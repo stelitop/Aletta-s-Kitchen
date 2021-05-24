@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.GameRelated
 {
-    enum Tribe
+    public enum Tribe
     {
+        NoTribe,
         Murloc,
         Beast,
         Elemental,

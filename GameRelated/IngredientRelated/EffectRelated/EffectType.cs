@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 {
-    enum EffectType
+    public enum EffectType
     {
 		OnBeingPicked,
 		OnBeingCooked,
