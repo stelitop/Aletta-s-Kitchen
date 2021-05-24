@@ -27,7 +27,10 @@ namespace Aletta_s_Kitchen.GameRelated
         public void Cook()
         {
             throw new NotImplementedException();
+        }       
+        public void NextRound()
+        {
+            throw new NotImplementedException();
         }
-
     }
 }

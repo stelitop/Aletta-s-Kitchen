@@ -94,16 +94,16 @@ namespace Aletta_s_Kitchen
             this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(104, 255);
+            this.comboBox1.Location = new System.Drawing.Point(104, 256);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(264, 21);
+            this.comboBox1.Size = new System.Drawing.Size(260, 21);
             this.comboBox1.TabIndex = 5;
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(374, 255);
+            this.button2.Location = new System.Drawing.Point(370, 255);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(115, 21);
+            this.button2.Size = new System.Drawing.Size(119, 21);
             this.button2.TabIndex = 6;
             this.button2.Text = "Ingredient Info";
             this.button2.UseVisualStyleBackColor = true;
@@ -111,12 +111,13 @@ namespace Aletta_s_Kitchen
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(167, 282);
+            this.button3.Location = new System.Drawing.Point(370, 480);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(119, 30);
             this.button3.TabIndex = 7;
-            this.button3.Text = "button3";
+            this.button3.Text = "Random Testing";
             this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // label2
             // 

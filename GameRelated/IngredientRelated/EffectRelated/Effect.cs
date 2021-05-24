@@ -32,7 +32,6 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
             return ret;
         }
 
-
         public static async Task CallEffects(List<Effect> effects, EffectType type, Ingredient caller, Game game, EffectArgs args, bool removeAfterCall = false)
         {
             List<Effect> toBeCast = new List<Effect>();

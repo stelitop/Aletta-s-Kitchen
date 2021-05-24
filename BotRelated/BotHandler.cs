@@ -10,6 +10,8 @@ namespace Aletta_s_Kitchen.BotRelated
 {
     public class BotHandler
     {
+        public static Random globalRandom = new Random();
+
         public static Bot bot = new Bot();
 
         public static Dictionary<ulong, Game> playerGames;

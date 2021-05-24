@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,19 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         [GameIngredient]
         public class TestIngredient3 : Ingredient
         {
-            public TestIngredient3() : base("Another Test Ingredient", 8, Rarity.Epic) { }
+            public TestIngredient3() : base("Another Test Ingredient", 8, Rarity.Epic) 
+            {
+                this.effects.Add(new G());
+            }
+            private class G : Effect
+            {
+                public G() : base(EffectType.NullType) { }
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    game.player.curPoints += 5;
+                    return Task.CompletedTask;
+                }
+            }
         }
     }
 }
