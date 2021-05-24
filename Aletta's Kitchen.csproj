@@ -150,6 +150,10 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="BotRelated\BotHandler.cs" />
+    <Compile Include="BotRelated\Commands\DebugCommands.cs" />
+    <Compile Include="BotRelated\Commands\GameRelatedCommands.cs" />
+    <Compile Include="BotRelated\Commands\InformationCommands.cs" />
+    <Compile Include="BotRelated\Commands\InGameCommands.cs" />
     <Compile Include="BotRelated\RequiredUserStateAttribute.cs" />
     <Compile Include="BotRelated\UserState.cs" />
     <Compile Include="ConfigJson.cs" />
@@ -202,8 +206,6 @@
   <ItemGroup>
     <Content Include="Class Tree.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="BotRelated\Commands\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

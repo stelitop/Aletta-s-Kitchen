@@ -1,4 +1,5 @@
-﻿using DSharpPlus;
+﻿using Aletta_s_Kitchen.BotRelated.Commands;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
@@ -61,7 +62,11 @@ namespace Aletta_s_Kitchen
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
-            //Commands.RegisterCommands<GameSettingsCommands>();
+            Commands.RegisterCommands<GameRelatedCommands>();
+            Commands.RegisterCommands<InGameCommands>();
+            Commands.RegisterCommands<InformationCommands>();
+
+            Commands.RegisterCommands<DebugCommands>();
 
             await Client.ConnectAsync();
 

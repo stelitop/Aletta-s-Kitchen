@@ -31,7 +31,7 @@ namespace Aletta_s_Kitchen
 
         private void ButtonBotStart_Click(object sender, EventArgs e)
         {
-            BotHandler.bot.RunAsync();
+            BotHandler.bot.RunAsync();            
             ButtonBotStart.Enabled = false;
         }
     }
