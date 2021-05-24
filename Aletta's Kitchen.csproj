@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="BotRelated\BotHandler.cs" />
+    <Compile Include="BotRelated\RequiredUserStateAttribute.cs" />
     <Compile Include="BotRelated\UserState.cs" />
     <Compile Include="ConfigJson.cs" />
     <Compile Include="Form1.cs">
@@ -163,6 +164,7 @@
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
+    <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />
     <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />
     <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
     <Compile Include="GameRelated\Kitchen.cs" />
