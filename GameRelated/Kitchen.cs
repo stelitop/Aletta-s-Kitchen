@@ -14,18 +14,16 @@ namespace Aletta_s_Kitchen.GameRelated
         private List<Ingredient> _options;
         public Ingredient nextOption { get; private set; }
 
-        public void Restart(IngredientPool pool)
+        public async Task Restart(Game game)
         {
             this._options.Clear();
 
             for (int i=0; i<5; i++)
             {
-                int pick = BotHandler.globalRandom.Next(pool.ingredients.Count);
-
-                _options.Add(pool.ingredients[pick].Copy());
+                await this.AddIngredient(game);
             }
 
-            this.nextOption = pool.ingredients[BotHandler.globalRandom.Next(pool.ingredients.Count)].Copy();
+            this.nextOption = game.pool.ingredients[BotHandler.globalRandom.Next(game.pool.ingredients.Count)].Copy();
         }
         public async Task<Ingredient> AddIngredient(Game game)
         {
@@ -44,16 +42,32 @@ namespace Aletta_s_Kitchen.GameRelated
         }
         public async Task BuyIngredient(Game game, int pos)
         {
-            if (0 <= pos && pos < this._options.Count && game.player.hand.ingredients.Count < 3)
+            if (0 <= pos && pos < this._options.Count)
             {
+                int newSpot = game.player.hand.ingredients.Count;
+                if (game.player.hand.ingredients.Count >= 3)
+                {
+                    //should ask the player where to put it instead
+                    throw new NotImplementedException();
+                }
+
                 Ingredient ingr = this._options[pos];
+
+                this._options.RemoveAt(pos);
 
                 EffectArgs args = new EffectArgs(EffectType.OnBeingPicked);
                 await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);
 
-                this._options.RemoveAt(pos);
+                if (game.player.hand.ingredients.Count < 3)
+                {
+                    game.player.hand.ingredients.Add(ingr);
+                }
+                else
+                {
+                    game.player.hand.ingredients[newSpot] = ingr;
+                }
 
-                game.player.hand.ingredients.Add(ingr);
+                game.player.buyHistory.Add(ingr.Copy());
 
                 await this.FillEmptySpots(game);
             }
