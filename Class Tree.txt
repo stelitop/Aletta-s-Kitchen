@@ -22,7 +22,7 @@ Game
 	void Cook();
 	
 		
-Ingredient - abstract (the Ingredients would require a GameIngredient attribute)
+Ingredient - virtual (the Ingredients would require a GameIngredient attribute)
 	name - string
 	tribe - enum
 	points - int

@@ -8,6 +8,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 {
     public enum EffectType
     {
+		NullType,
 		OnBeingPicked,
 		OnBeingCooked,
 		WheneverThisGainsPoints,
