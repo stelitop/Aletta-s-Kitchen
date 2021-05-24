@@ -1,0 +1,1 @@
+Add a special instance of Effects -> TimerEffects whose Call would be to Tick.

@@ -12,7 +12,13 @@ namespace Aletta_s_Kitchen.GameRelated
     public class Kitchen
     {
         private List<Ingredient> _options;
-        public Ingredient nextOption { get; private set; }
+        public Ingredient nextOption { get; private set; } = new Ingredient();
+        public int Count { get { return _options.Count; } }
+
+        public Kitchen()
+        {
+            this._options = new List<Ingredient>();
+        }
 
         public async Task Restart(Game game)
         {
@@ -28,15 +34,17 @@ namespace Aletta_s_Kitchen.GameRelated
         public async Task<Ingredient> AddIngredient(Game game)
         {
             if (this._options.Count >= 5) return null;
-
-            int pick = BotHandler.globalRandom.Next(game.pool.ingredients.Count);
-
-            Ingredient ret = game.pool.ingredients[pick].Copy();
+            
+            Ingredient ret = this.nextOption;
 
             _options.Add(ret);
 
             EffectArgs args = new EffectArgs(EffectType.OnEnteringKitchen);
             await Effect.CallEffects(ret.effects, EffectType.OnEnteringKitchen, ret, game, args);
+
+            int pick = BotHandler.globalRandom.Next(game.pool.ingredients.Count);
+
+            this.nextOption = game.pool.ingredients[pick];
 
             return ret;
         }

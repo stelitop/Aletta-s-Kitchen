@@ -74,6 +74,7 @@ namespace Aletta_s_Kitchen
             // ListBoxFeedback
             // 
             this.ListBoxFeedback.FormattingEnabled = true;
+            this.ListBoxFeedback.HorizontalScrollbar = true;
             this.ListBoxFeedback.Location = new System.Drawing.Point(42, 62);
             this.ListBoxFeedback.Name = "ListBoxFeedback";
             this.ListBoxFeedback.Size = new System.Drawing.Size(447, 186);

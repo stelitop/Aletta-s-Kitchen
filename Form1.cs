@@ -83,13 +83,6 @@ namespace Aletta_s_Kitchen
         private async void button3_Click(object sender, EventArgs e)
         {
             ListBoxFeedback.Items.Clear();
-
-            Game game = new Game();
-
-            Ingredient ing = new GameIngredients.TestIngredient3();
-            await Effect.CallEffects(ing.effects, EffectType.NullType, ing, game, new EffectArgs(EffectType.NullType));
-
-            ListBoxFeedback.Items.Add(game.player.curPoints);
         }
     }
 
