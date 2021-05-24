@@ -17,7 +17,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
         public void LoadDefaultPool()
         {
-            ingredients.Clear();
+            ingredients = new List<Ingredient>();
             throw new NotImplementedException();
         }
     }

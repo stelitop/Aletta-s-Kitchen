@@ -150,6 +150,7 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="BotRelated\BotHandler.cs" />
+    <Compile Include="BotRelated\UserState.cs" />
     <Compile Include="ConfigJson.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -199,6 +200,8 @@
   <ItemGroup>
     <Content Include="Class Tree.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="BotRelated\Commands\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
