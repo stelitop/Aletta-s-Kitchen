@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen
@@ -18,6 +19,8 @@ namespace Aletta_s_Kitchen
     public class Bot
     {
         public static Bot DiscordBot = new Bot();
+
+        private CancellationTokenSource _cancelToken = new CancellationTokenSource();
 
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
@@ -67,10 +70,23 @@ namespace Aletta_s_Kitchen
             //Commands.RegisterCommands<InformationCommands>();
 
             Commands.RegisterCommands<DebugCommands>();
-
+            
             await Client.ConnectAsync();
 
-            await Task.Delay(-1);
+            this._cancelToken = new CancellationTokenSource();
+
+            try { await Task.Delay(-1, this._cancelToken.Token); }
+            catch (Exception) { }
+
+            await Client.DisconnectAsync();            
+        }
+
+        public void StopBot()
+        {
+            if (this._cancelToken.Token.CanBeCanceled)
+            {
+                this._cancelToken.Cancel();
+            }
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously

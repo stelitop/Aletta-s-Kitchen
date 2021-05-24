@@ -1,4 +1,5 @@
 ﻿using Aletta_s_Kitchen.BotRelated;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +23,11 @@ namespace Aletta_s_Kitchen
 
             Console.SetOut(tr);
             Console.SetError(tr);
+
+            for (int i=0; i<BotHandler.genericPool.ingredients.Count(); i++)
+            {
+                comboBox1.Items.Add(BotHandler.genericPool.ingredients[i].name);
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -33,12 +39,49 @@ namespace Aletta_s_Kitchen
         {
             BotHandler.bot.RunAsync();            
             ButtonBotStart.Enabled = false;
+            ButtonBotStop.Enabled = true;
         }
+        private void ButtonBotStop_Click(object sender, EventArgs e)
+        {
+            BotHandler.bot.StopBot();
+            ButtonBotStart.Enabled = true;
+            ButtonBotStop.Enabled = false;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ListBoxFeedback.Items.Clear();
+
+            ListBoxFeedback.Items.Add("General Game Statistics");
+            ListBoxFeedback.Items.Add("");
+
+            IngredientPool pool = BotHandler.genericPool;            
+
+            ListBoxFeedback.Items.Add($"Total Ingredients: {pool.ingredients.Count}");
+
+            ListBoxFeedback.Items.Add($"Common: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Common).Count()}");
+            ListBoxFeedback.Items.Add($"Rare: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Rare).Count()}");
+            ListBoxFeedback.Items.Add($"Epic: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Epic).Count()}");
+            ListBoxFeedback.Items.Add($"Legendary: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Legendary).Count()}");
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            ListBoxFeedback.Items.Clear();
+            if (comboBox1.SelectedItem == null)
+            {
+                ListBoxFeedback.Items.Add("Please select an ingredient from the dropdown menu.");
+            }
+            else
+            {
+                ListBoxFeedback.Items.Add(BotHandler.genericPool.ingredients[comboBox1.SelectedIndex].GetInfo());
+            }
+        }        
     }
 
     public class ControlWriter : TextWriter
     {
-        private TextBox textBox;
+        private readonly TextBox textBox;
         public ControlWriter(TextBox tb)
         {
             this.textBox = tb;

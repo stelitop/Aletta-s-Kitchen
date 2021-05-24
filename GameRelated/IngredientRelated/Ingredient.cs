@@ -13,6 +13,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         public int points;
         public Rarity rarity;
         public Tribe tribe;
+        public string text;
 
         public List<Effect> effects;
 
@@ -22,6 +23,17 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             this.rarity = Rarity.None;
             this.tribe = Tribe.NoTribe;
             this.points = 1;
+            this.text = string.Empty;
+            this.effects = new List<Effect>();
+        }
+
+        public Ingredient(string name, int points, Rarity rarity, Tribe tribe = Tribe.NoTribe, string cardText = "")
+        {
+            this.name = name;
+            this.points = points;
+            this.rarity = rarity;
+            this.tribe = tribe;
+            this.text = cardText;
             this.effects = new List<Effect>();
         }
 
@@ -48,6 +60,14 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 ret.effects.Add(effect.Copy());
             }
 
+            return ret;
+        }
+
+        public virtual string GetInfo()
+        {
+            string ret = string.Empty;
+            ret = $"{this.name} - {this.points} Points - {this.rarity}";
+            if (!this.text.Equals(string.Empty)) ret += $" - {this.text}";
             return ret;
         }
 
