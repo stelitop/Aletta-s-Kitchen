@@ -1,6 +1,6 @@
 Game
 	curRound - int
-	ingredientPool
+	IngredientPool
 		ingredients - List of Ingredients
 		void LoadDefaultPool();
 	Player

@@ -157,6 +157,15 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="GameRelated\Game.cs" />
+    <Compile Include="GameRelated\Hand.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />
+    <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
+    <Compile Include="GameRelated\Kitchen.cs" />
+    <Compile Include="GameRelated\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -189,8 +198,6 @@
   <ItemGroup>
     <Content Include="Class Tree.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GameRelated\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
