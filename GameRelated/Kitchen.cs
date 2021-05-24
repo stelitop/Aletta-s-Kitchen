@@ -24,12 +24,12 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             this._options.Clear();
 
+            this.nextOption = game.pool.ingredients[BotHandler.globalRandom.Next(game.pool.ingredients.Count)].Copy();
+
             for (int i=0; i<5; i++)
             {
                 await this.AddIngredient(game);
             }
-
-            this.nextOption = game.pool.ingredients[BotHandler.globalRandom.Next(game.pool.ingredients.Count)].Copy();
         }
         public async Task<Ingredient> AddIngredient(Game game)
         {

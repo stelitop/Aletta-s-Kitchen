@@ -84,6 +84,22 @@ namespace Aletta_s_Kitchen
         {
             ListBoxFeedback.Items.Clear();
         }
+
+        private async void button4_Click(object sender, EventArgs e)
+        {
+            ListBoxFeedback.Items.Clear();
+
+            Game game = new Game();
+
+            await game.player.kitchen.Restart(game);
+
+            for (int i=0; i<game.player.kitchen.Count; i++)
+            {
+                ListBoxFeedback.Items.Add(game.player.kitchen.OptionAt(i).GetInfo());
+            }
+
+            ListBoxFeedback.Items.Add($"Next Ingredient: {game.player.kitchen.nextOption.GetInfo()}");
+        }
     }
 
     public class ControlWriter : TextWriter
