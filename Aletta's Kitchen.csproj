@@ -173,6 +173,7 @@
     <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
     <Compile Include="GameRelated\Kitchen.cs" />
     <Compile Include="GameRelated\Player.cs" />
+    <Compile Include="GameRelated\Rarity.cs" />
     <Compile Include="GameRelated\Tribe.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

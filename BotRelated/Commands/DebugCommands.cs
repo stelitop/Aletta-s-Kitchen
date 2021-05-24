@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
     public class DebugCommands : BaseCommandModule
     {
         [Group("debug")]
+        [Description("Commands only accessable to the bot owner. Only for debugging.")]
         public class DebugCommandsGroup : BaseCommandModule
         {
             [Command("roll")]
@@ -33,7 +35,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 var embedBuilder = new DiscordEmbedBuilder
                 {
                     Title = $"You rolled: {msg}",
-                    Color = DiscordColor.Blue
+                    Color = DiscordColor.Azure
                 };
 
                 await ctx.Channel.SendMessageAsync(embed: embedBuilder).ConfigureAwait(false);

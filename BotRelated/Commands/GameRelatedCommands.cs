@@ -9,5 +9,6 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 {
     public class GameRelatedCommands : BaseCommandModule
     {
+
     }
 }

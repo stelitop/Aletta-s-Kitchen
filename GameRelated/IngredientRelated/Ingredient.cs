@@ -7,17 +7,19 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 {
-    public class Ingredient
+    public class Ingredient : IComparable<Ingredient>
     {
         public string name;
-        public Tribe tribe;
         public int points;
+        public Rarity rarity;
+        public Tribe tribe;
 
         public List<Effect> effects;
 
         public Ingredient()
         {
             this.name = "Default Ingredient";
+            this.rarity = Rarity.None;
             this.tribe = Tribe.NoTribe;
             this.points = 1;
             this.effects = new List<Effect>();
@@ -47,6 +49,17 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             }
 
             return ret;
+        }
+
+        public int CompareTo(Ingredient other)
+        {
+            if (this.rarity > other.rarity) return -1;
+            else if (this.rarity < other.rarity) return 1;
+
+            if (this.points > other.points) return -1;
+            else if (this.points < other.points) return 1;
+
+            return this.name.CompareTo(other.name);
         }
     }
 }
