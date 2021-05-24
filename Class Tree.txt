@@ -1,0 +1,51 @@
+Game
+	curRound - int
+	ingredientPool
+		ingredients - List of Ingredients
+		void LoadDefaultPool();
+	Player
+		Hand
+			ingredients - List of Ingredients
+			void Clear();
+		Kitchen
+			options - List of Ingredients {private}
+			nextOption - Ingredient {get; private set}
+			void Refresh(ingredientPool);
+			void BuyIngredient(Game, kitchenPos(int))
+			void RemoveIngredient(Game, kitchenPos(int));
+			Ingredient IngredientAt(kitchenPos(int));
+			
+		curPoints - int
+		buyHistory - List of Ingredients
+		cookHistory - List of Ingredients		
+	void Start();
+	void Cook();
+	
+		
+Ingredient - abstract (the Ingredients would require a GameIngredient attribute)
+	name - string
+	tribe - enum
+	points - int
+	effects - List of Effects	
+	void Buy(Game, kitchenPos(int));
+	virtual bool CanBeBought(Game, kitchenPos(int));	
+	virtual Ingredient Copy();
+
+Effect - abstract
+	effectType - List of EffectTypes(enum)
+	abstract void Call(Caller(Ingredient), Game, EffectArgs(inheritable));
+	virtual Effect Copy();
+	
+EffectArgs
+	ctx - CommandContext D#+ (might be required)
+	calledEffect - EffectType(enum)
+	
+EffectTypes - enum
+	OnBeingPicked
+	OnBeingCooked
+	WheneverThisGainsPoints
+	WheneverAddPointsToScore
+	OnBuyingAnIngredient
+	OnEnteringKitchen
+	Deathrattle
+	
