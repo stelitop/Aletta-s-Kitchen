@@ -83,6 +83,11 @@ namespace Aletta_s_Kitchen
         private async void button3_Click(object sender, EventArgs e)
         {
             ListBoxFeedback.Items.Clear();
+
+            foreach (var ingr in BotHandler.genericPool.ingredients)
+            {
+                ListBoxFeedback.Items.Add(ingr.effects.Count);
+            }            
         }
 
         private async void button4_Click(object sender, EventArgs e)

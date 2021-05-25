@@ -12,11 +12,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 
         public bool ToBeRemoved { get; protected set; } = false;
 
-        protected Effect(EffectType type) 
+        public Effect()
+        {
+            this.Type = new List<EffectType>();
+        }
+        public Effect(EffectType type) 
         {
             this.Type = new List<EffectType> { type };
         }
-        protected Effect(List<EffectType> types)
+        public Effect(List<EffectType> types)
         {
             this.Type = types.ToList();
         }
@@ -25,11 +29,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
         
         public virtual Effect Copy()
         {
-            Effect ret = (Effect)Activator.CreateInstance(this.GetType());
-
-            for (int i = 0; i < this.Type.Count; i++) ret.Type.Add(this.Type[i]);
-
-            return ret;
+            return (Effect)Activator.CreateInstance(this.GetType());                                  
         }
 
         public static async Task CallEffects(List<Effect> effects, EffectType type, Ingredient caller, Game game, EffectArgs args, bool removeAfterCall = false)
@@ -38,19 +38,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 
             if (args != null) args.calledEffect = type;
 
-            for (int i = 0; i < effects.Count(); i++)
-            {
-                if (effects[i].Type.Contains(type))
-                {
-                    toBeCast.Add(effects[i]);
-                }
-            }
+            toBeCast = effects.FindAll(x => x.Type.Contains(type));
+
+            Console.WriteLine("Size Effects: " + effects.Count);
+            Console.WriteLine("Size ToBeCast: " + toBeCast.Count);
 
             if (removeAfterCall) effects.RemoveAll(x => x.Type.Contains(type));
 
-            foreach (var effect in toBeCast)
+            for (int i=0; i<toBeCast.Count; i++)
             {
-                await effect.Call(caller, game, args);
+                await toBeCast[i].Call(caller, game, args);                
             }
 
             if (!removeAfterCall)

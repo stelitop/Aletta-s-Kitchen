@@ -164,13 +164,13 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GameRelated\Game.cs" />
+    <Compile Include="GameRelated\GameState.cs" />
     <Compile Include="GameRelated\GoalTypes\Goal.cs" />
     <Compile Include="GameRelated\GoalTypes\PointsGoal.cs" />
     <Compile Include="GameRelated\Hand.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
-    <Compile Include="GameRelated\IngredientRelated\EffectRelated\FeedbackEffectArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\OnBeingCookedArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerEffect.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />

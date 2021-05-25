@@ -44,15 +44,16 @@ namespace Aletta_s_Kitchen.GameRelated
 
             int pick = BotHandler.globalRandom.Next(game.pool.ingredients.Count);
 
-            this.nextOption = game.pool.ingredients[pick];
+            this.nextOption = game.pool.ingredients[pick].Copy();
 
             return ret;
         }
-        public async Task BuyIngredient(Game game, int pos)
+        public async Task PickIngredient(Game game, int pos)
         {
             if (0 <= pos && pos < this._options.Count)
-            {
+            {                
                 int newSpot = game.player.hand.ingredients.Count;
+                
                 if (game.player.hand.ingredients.Count >= 3)
                 {
                     newSpot = await game.ChooseAHandSpot();
@@ -74,7 +75,7 @@ namespace Aletta_s_Kitchen.GameRelated
                     game.player.hand.ingredients[newSpot] = ingr;
                 }
 
-                game.player.buyHistory.Add(ingr.Copy());
+                game.player.pickHistory.Add(ingr.Copy());
 
                 await this.FillEmptySpots(game);
             }
@@ -97,6 +98,10 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             if (0 <= pos && pos < this._options.Count) return _options[pos];
             else return null;
+        }
+        public List<Ingredient> GetAllIngredients()
+        {
+            return _options;
         }
         public async Task FillEmptySpots(Game game)
         {

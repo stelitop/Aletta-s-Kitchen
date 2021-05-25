@@ -43,7 +43,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         [GameIngredient]
         public class CoconutJuice : Ingredient
         {
-            public CoconutJuice() : base("Coconut Juice", 2, Rarity.Common) { }
+            public CoconutJuice() : base("Coconut Juice", 2, Rarity.Common) {}
         }
 
         [GameIngredient]
@@ -64,13 +64,108 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                         if (game.player.kitchen.OptionAt(i).points > 0) cands.Add(game.player.kitchen.OptionAt(i));
                     }
 
-                    if (cands.Count == 0) return Task.CompletedTask;
+                    if (cands.Count == 0)
+                    {
+                        args.feedback.Add("Gruel Imp couldn't steal a point from anything.");
+                        return Task.CompletedTask;
+                    }
 
                     int pick = BotHandler.globalRandom.Next(cands.Count);
 
                     cands[pick].points--;
                     caller.points++;
-                    
+
+                    args.feedback.Add($"Gruel Imp stole a point from {cands[pick].name}.");
+                    return Task.CompletedTask;
+                }
+            }
+        }
+    
+        [GameIngredient]
+        public class PuddleJumper : Ingredient
+        {
+            public PuddleJumper() : base("Puddle Jumper", 2, Rarity.Common, Tribe.Murloc, "When picked, give all Murlocs in your dish +1.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingPicked) { }
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    for (int i = 0; i < game.player.hand.ingredients.Count; i++)
+                    {
+                        if (game.player.hand.ingredients[i].tribe == Tribe.Murloc)
+                            game.player.hand.ingredients[i].points++;
+                    }
+
+                    args.feedback.Add("Puddle Jumper gave all Murlocs in your dish +1 point.");
+
+                    return Task.CompletedTask;
+                }
+            }
+        }
+
+        [GameIngredient]
+        public class MountainDewdrop : Ingredient
+        {
+            public MountainDewdrop() : base("Mountain Dewdrop", 2, Rarity.Common, Tribe.Elemental, "If you picked an Elemental last, gain +1.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingPicked) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    if (game.player.pickHistory.Count == 0) return Task.CompletedTask;
+
+                    if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
+                    {
+                        caller.points++;
+                        args.feedback.Add("Your Mountain Dewdrop gains +1 point.");
+                    }
+                    else
+                    {
+                        args.feedback.Add("Your Mountain Dewdrop fails to trigger.");
+                    }
+
+                    return Task.CompletedTask;
+                }
+            }
+        }
+
+        [GameIngredient]
+        public class Creampooch : Ingredient
+        {
+            public Creampooch() : base("Creampooch", 2, Rarity.Common, Tribe.Elemental, "If you picked an Elemental last, give all Elementals in your kitchen +1.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingPicked) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    if (game.player.pickHistory.Count == 0) return Task.CompletedTask;
+
+                    if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
+                    {
+                        var kitchen = game.player.kitchen.GetAllIngredients();
+                        foreach (var ingr in kitchen)
+                        {
+                            if (ingr.tribe == Tribe.Elemental) ingr.points++;
+                        }
+
+                        args.feedback.Add("Your Creampooch gives all Elementals in the Kitchen +1 point.");
+                    }
+                    else
+                    {
+                        args.feedback.Add("Your Creampooch fails to trigger.");
+                    }
+
                     return Task.CompletedTask;
                 }
             }

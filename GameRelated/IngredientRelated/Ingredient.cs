@@ -55,18 +55,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             ret.points = this.points;
             ret.tribe = this.tribe;
 
-            foreach (var effect in this.effects)
-            {
-                ret.effects.Add(effect.Copy());
-            }
-
             return ret;
         }
 
         public virtual string GetInfo()
         {
             string ret = string.Empty;
-            ret = $"{this.name} - {this.points} Points - {this.rarity}";
+            ret = $"{this.name} - {this.points}p";
+
+            if (this.tribe != Tribe.NoTribe) ret += $" - {this.tribe}";
+            ret += $" - { this.rarity}";
             if (!this.text.Equals(string.Empty)) ret += $" - {this.text}";
             return ret;
         }

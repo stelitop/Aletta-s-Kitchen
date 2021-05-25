@@ -10,26 +10,25 @@ namespace Aletta_s_Kitchen.GameRelated
 {
     public class Player
     {
+        public string name;
+
         public Hand hand;
         public Kitchen kitchen;
 
         public int curPoints;
-        public List<Ingredient> buyHistory;
+        public List<Ingredient> pickHistory;
         public List<Ingredient> cookHistory;
 
         public Player()
         {
+            this.name = "Player";
+
             this.hand = new Hand();
             this.kitchen = new Kitchen();
 
             this.curPoints = 0;
-            this.buyHistory = new List<Ingredient>();
+            this.pickHistory = new List<Ingredient>();
             this.cookHistory = new List<Ingredient>();
-        }
-
-        public DiscordEmbedBuilder GetUIEmbed(Game game)
-        {
-            throw new NotImplementedException();
-        }
+        }        
     }
 }

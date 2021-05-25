@@ -12,6 +12,11 @@ namespace Aletta_s_Kitchen.GameRelated
     {
         public List<Ingredient> ingredients;
 
+        public Hand()
+        {
+            this.ingredients = new List<Ingredient>();
+        }
+
         public void Clear()
         {
             this.ingredients.Clear();
