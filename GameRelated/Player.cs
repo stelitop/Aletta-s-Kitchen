@@ -1,4 +1,5 @@
 ﻿using Aletta_s_Kitchen.GameRelated.IngredientRelated;
+using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,11 @@ namespace Aletta_s_Kitchen.GameRelated
             this.curPoints = 0;
             this.buyHistory = new List<Ingredient>();
             this.cookHistory = new List<Ingredient>();
+        }
+
+        public DiscordEmbedBuilder GetUIEmbed(Game game)
+        {
+            throw new NotImplementedException();
         }
     }
 }

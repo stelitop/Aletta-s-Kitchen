@@ -55,8 +55,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 int newSpot = game.player.hand.ingredients.Count;
                 if (game.player.hand.ingredients.Count >= 3)
                 {
-                    //should ask the player where to put it instead
-                    throw new NotImplementedException();
+                    newSpot = await game.ChooseAHandSpot();
                 }
 
                 Ingredient ingr = this._options[pos];

@@ -15,6 +15,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             this.LoadDefaultPool();
         }
 
+        public IngredientPool(IngredientPool copy)
+        {
+            this.ingredients = new List<Ingredient>();
+
+            foreach (var ingr in copy.ingredients)
+            {
+                this.ingredients.Add(ingr.Copy());
+            }
+        }
+
         public void LoadDefaultPool()
         {
             ingredients = new List<Ingredient>();

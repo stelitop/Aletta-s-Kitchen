@@ -20,15 +20,29 @@ namespace Aletta_s_Kitchen.GameRelated
             this.player = new Player();
         }
 
-        public void Start()
+        public async Task Start(IngredientPool pool)
+        {
+            this.curRound = 1;            
+            this.pool = new IngredientPool(pool);
+
+            this.player = new Player();
+
+            await this.player.kitchen.FillEmptySpots(this);
+        }
+
+        public void NextRound()
+        {
+            this.curRound++;
+
+            throw new NotImplementedException();
+        }
+
+        public void EndGame()
         {
             throw new NotImplementedException();
         }
-        public void Cook()
-        {
-            throw new NotImplementedException();
-        }       
-        public void NextRound()
+
+        public async Task<int> ChooseAHandSpot()
         {
             throw new NotImplementedException();
         }
