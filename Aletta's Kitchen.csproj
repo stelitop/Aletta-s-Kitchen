@@ -164,6 +164,8 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GameRelated\Game.cs" />
+    <Compile Include="GameRelated\GoalTypes\Goal.cs" />
+    <Compile Include="GameRelated\GoalTypes\PointsGoal.cs" />
     <Compile Include="GameRelated\Hand.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
