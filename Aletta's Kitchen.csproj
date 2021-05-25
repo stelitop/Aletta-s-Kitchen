@@ -170,6 +170,9 @@
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\FeedbackEffectArgs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\OnBeingCookedArgs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerEffect.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredients.cs" />
     <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />

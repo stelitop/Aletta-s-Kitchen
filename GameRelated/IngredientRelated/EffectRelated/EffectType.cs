@@ -16,6 +16,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 		WheneverAddPointsToScore,
 		OnBuyingAnIngredient,
 		OnEnteringKitchen,
-		Deathrattle
+		Deathrattle,
+		Timer
 	}
 }

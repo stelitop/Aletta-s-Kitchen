@@ -8,7 +8,7 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
 {
     public class PointsGoal : Goal
     {
-        private readonly int _pointsRequired;
+        private int _pointsRequired;
         public PointsGoal(int pointsRequired, int round)
         {
             this._pointsRequired = pointsRequired;
@@ -17,7 +17,7 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
 
         public override bool IsGoalFulfilled(Game game)
         {
-            throw new NotFiniteNumberException();
+            return game.player.curPoints >= this._pointsRequired;
         }
 
         public override string GetDescription()

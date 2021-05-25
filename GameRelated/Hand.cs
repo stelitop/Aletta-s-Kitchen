@@ -26,10 +26,17 @@ namespace Aletta_s_Kitchen.GameRelated
          */
         public async Task Cook(Game game)
         {
+            int dishPoints = 0;
+            for (int i=0; i<this.ingredients.Count; i++)
+            {
+                dishPoints += this.ingredients[i].points;
+            }
+
+            var args = new EffectArgs.OnBeingCookedArgs(EffectType.OnBeingCookedBefore, dishPoints);
+
             //1)
             for (int i=0; i<this.ingredients.Count; i++)
             {
-                EffectArgs args = new EffectArgs(EffectType.OnBeingCookedBefore);
                 await Effect.CallEffects(this.ingredients[i].effects, EffectType.OnBeingCookedBefore, this.ingredients[i], game, args);                
             }
 
@@ -37,10 +44,11 @@ namespace Aletta_s_Kitchen.GameRelated
             //2)
             this.Clear();
 
+            args.calledEffect = EffectType.OnBeingCookedAfter;
+
             //3)
             for (int i=0; i<handTemp.Count; i++)
             {
-                EffectArgs args = new EffectArgs(EffectType.OnBeingCookedAfter);
                 await Effect.CallEffects(handTemp[i].effects, EffectType.OnBeingCookedAfter, handTemp[i], game, args);
             }
 
@@ -49,6 +57,8 @@ namespace Aletta_s_Kitchen.GameRelated
             {
                 game.player.cookHistory.Add(handTemp[i].Copy());
             }
+
+            game.player.curPoints += args.dishPoints;
         }
     }
 }

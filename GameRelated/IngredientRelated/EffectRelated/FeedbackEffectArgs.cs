@@ -8,13 +8,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 {
     public partial class EffectArgs
     {
-        //public CommandContext ctx;
-
-        public EffectType calledEffect;
-
-        public EffectArgs(EffectType calledEffect)
+        public class FeedbackEffectArgs : EffectArgs
         {
-            this.calledEffect = calledEffect;
+            public string feedback = string.Empty;
+
+            public FeedbackEffectArgs(EffectType calledEffect) : base(calledEffect) {}
         }
     }
 }

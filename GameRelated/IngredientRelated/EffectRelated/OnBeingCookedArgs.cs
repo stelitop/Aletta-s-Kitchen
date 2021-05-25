@@ -8,13 +8,13 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 {
     public partial class EffectArgs
     {
-        //public CommandContext ctx;
-
-        public EffectType calledEffect;
-
-        public EffectArgs(EffectType calledEffect)
+        public int dishPoints;
+        public class OnBeingCookedArgs : EffectArgs
         {
-            this.calledEffect = calledEffect;
+            public OnBeingCookedArgs(EffectType effectType, int dishPoints) : base(effectType)
+            {
+                this.dishPoints = dishPoints;
+            }
         }
     }
 }
