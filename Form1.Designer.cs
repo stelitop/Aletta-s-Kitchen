@@ -61,7 +61,6 @@ namespace Aletta_s_Kitchen
             this.TextBoxConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.TextBoxConsole.Size = new System.Drawing.Size(567, 448);
             this.TextBoxConsole.TabIndex = 1;
-            this.TextBoxConsole.UseWaitCursor = true;
             // 
             // label1
             // 

@@ -42,9 +42,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             return true;
         }
 
-        public void Buy(Game game, int kitchenPos)
+        public virtual bool IsSpecialConditionFulfilled(Game game, int kitchenPos)
         {
-            throw new NotImplementedException();
+            return false;
         }
 
         public virtual Ingredient Copy()

@@ -9,8 +9,9 @@ namespace Aletta_s_Kitchen.GameRelated
     public enum GameState
     {
         None,
+        Loading,
         PickFromKitchen,
-        ChooseInHand,
+        ChooseInHandForIngredient,
         GameOver
     }
 }

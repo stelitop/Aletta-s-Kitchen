@@ -114,8 +114,20 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 DiscordEmbedBuilder embed;
                 Game game = new Game();
 
-                await game.player.kitchen.Restart(game);
-                
+                await game.Start(new GameRelated.IngredientRelated.IngredientPool());
+                game.gameState = GameState.PickFromKitchen;
+
+                //embed = game.GetUIEmbed();
+                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+
+                //game.gameState = GameState.PickFromKitchen;
+                //embed = game.GetUIEmbed();
+                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+
+                //game.gameState = GameState.ChooseInHandForIngredient;
+                //embed = game.GetUIEmbed();
+                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+
                 embed = game.GetUIEmbed();
                 await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
 

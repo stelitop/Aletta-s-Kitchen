@@ -65,7 +65,7 @@ namespace Aletta_s_Kitchen
 
             Commands = Client.UseCommandsNext(commandsConfig);
 
-            //Commands.RegisterCommands<GameRelatedCommands>();
+            Commands.RegisterCommands<GameRelatedCommands>();
             //Commands.RegisterCommands<InGameCommands>();
             //Commands.RegisterCommands<InformationCommands>();
 

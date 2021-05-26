@@ -51,29 +51,25 @@ namespace Aletta_s_Kitchen.GameRelated
         public async Task PickIngredient(Game game, int pos)
         {
             if (0 <= pos && pos < this._options.Count)
-            {                
-                int newSpot = game.player.hand.ingredients.Count;
-                
-                if (game.player.hand.ingredients.Count >= 3)
+            {
+                game.feedback.Clear();
+
+                if (!this._options[pos].CanBeBought(game, pos))
                 {
-                    newSpot = await game.ChooseAHandSpot();
+                    game.feedback.Add($"{this._options[pos].name} can't be bought currently!");
+                    return;
                 }
 
+                int newSpot = await game.ChooseAHandSpot();
+                
                 Ingredient ingr = this._options[pos];
 
                 this._options.RemoveAt(pos);
 
                 EffectArgs args = new EffectArgs(EffectType.OnBeingPicked);
                 await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);
-
-                if (game.player.hand.ingredients.Count < 3)
-                {
-                    game.player.hand.ingredients.Add(ingr);
-                }
-                else
-                {
-                    game.player.hand.ingredients[newSpot] = ingr;
-                }
+                
+                game.player.hand.ingredients[newSpot] = ingr;                
 
                 game.player.pickHistory.Add(ingr.Copy());
 

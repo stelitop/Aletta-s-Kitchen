@@ -66,7 +66,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                     if (cands.Count == 0)
                     {
-                        args.feedback.Add("Gruel Imp couldn't steal a point from anything.");
+                        game.feedback.Add("Gruel Imp couldn't steal a point from anything.");
                         return Task.CompletedTask;
                     }
 
@@ -75,7 +75,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                     cands[pick].points--;
                     caller.points++;
 
-                    args.feedback.Add($"Gruel Imp stole a point from {cands[pick].name}.");
+                    game.feedback.Add($"Gruel Imp stole a point from {cands[pick].name}.");
                     return Task.CompletedTask;
                 }
             }
@@ -93,13 +93,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 public EF() : base(EffectType.OnBeingPicked) { }
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    for (int i = 0; i < game.player.hand.ingredients.Count; i++)
+                    for (int i = 0; i < 3; i++)
                     {
+                        if (game.player.hand.ingredients[i] == null) continue;
+
                         if (game.player.hand.ingredients[i].tribe == Tribe.Murloc)
                             game.player.hand.ingredients[i].points++;
                     }
 
-                    args.feedback.Add("Puddle Jumper gave all Murlocs in your dish +1 point.");
+                    game.feedback.Add("Puddle Jumper gave all Murlocs in your dish +1 point.");
 
                     return Task.CompletedTask;
                 }
@@ -124,15 +126,22 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                     if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
                     {
                         caller.points++;
-                        args.feedback.Add("Your Mountain Dewdrop gains +1 point.");
+                        game.feedback.Add("Your Mountain Dewdrop gains +1 point.");
                     }
                     else
                     {
-                        args.feedback.Add("Your Mountain Dewdrop fails to trigger.");
+                        game.feedback.Add("Your Mountain Dewdrop fails to trigger.");
                     }
 
                     return Task.CompletedTask;
                 }
+            }
+
+            public override bool IsSpecialConditionFulfilled(Game game, int kitchenPos)
+            {
+                if (game.player.pickHistory.Count == 0) return false;
+                if (game.player.pickHistory.Last().tribe == Tribe.Elemental) return true;
+                return false;
             }
         }
 
@@ -149,7 +158,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (game.player.pickHistory.Count == 0) return Task.CompletedTask;
+                    if (game.player.pickHistory.Count == 0)
+                    {
+                        game.feedback.Add("Your Creampooch fails to trigger.");
+                        return Task.CompletedTask;
+                    }
 
                     if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
                     {
@@ -159,13 +172,39 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                             if (ingr.tribe == Tribe.Elemental) ingr.points++;
                         }
 
-                        args.feedback.Add("Your Creampooch gives all Elementals in the Kitchen +1 point.");
+                        game.feedback.Add("Your Creampooch gives all Elementals in the Kitchen +1 point.");
                     }
                     else
                     {
-                        args.feedback.Add("Your Creampooch fails to trigger.");
+                        game.feedback.Add("Your Creampooch fails to trigger.");
                     }
 
+                    return Task.CompletedTask;
+                }
+            }
+
+            public override bool IsSpecialConditionFulfilled(Game game, int kitchenPos)
+            {
+                if (game.player.pickHistory.Count == 0) return false;
+                if (game.player.pickHistory.Last().tribe == Tribe.Elemental) return true;
+                return false;
+            }
+        }
+
+        [GameIngredient]
+        public class BoxOfChocolate : Ingredient
+        {
+            public BoxOfChocolate() : base("Box of Chocolate", 0, Rarity.Common, Tribe.NoTribe, "Each turn in your kitchen, change between 0-4 points.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : TimerEffect
+            {
+                public EF() : base(1) { }
+
+                public override Task Tick(Ingredient caller, Game game, EffectArgs args)
+                {
+                    caller.points = BotHandler.globalRandom.Next(5);
                     return Task.CompletedTask;
                 }
             }
