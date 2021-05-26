@@ -82,6 +82,11 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                                 await game.player.kitchen.PickIngredient(game);
                             }
                         }
+                        else if (emojiIndex == 6)
+                        {
+                            game.pickingChoices.Clear();
+                            game.gameState = GameState.PickFromKitchen;
+                        }
 
                         break;
 

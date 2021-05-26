@@ -215,7 +215,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 embed.AddField(handTitle, handDesc, true);
             }
 
-
+            // Feedback messages from Ingredients
             string feedbackMsg = string.Empty;
 
             for (int i=0; i<this.feedback.Count; i++)
@@ -229,16 +229,17 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
 
+            // Instructions on what buttons to click
             string instrTitle = string.Empty, instrDescription = string.Empty;
             switch (this.gameState)
             {
                 case GameState.PickFromKitchen:
                     instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
-                    instrDescription = ":one::two::three::four::five: - Pick an ingredient\n:fork_knife_plate: - Cook your dish";
+                    instrDescription = ":one::two::three::four::five: - Pick an ingredient\n:fork_knife_plate: - Cook your dish";                    
                     break;
                 case GameState.ChooseInHandForIngredient:
                     instrTitle = "Choose where to put your ingredient.";
-                    instrDescription = ":one::two::three: - Place on this spot.";
+                    instrDescription = ":one::two::three: - Place on this spot.\n:no_entry_sign: - Cancel picking an ingredient.";
                     break;                    
                 default:
                     break;
