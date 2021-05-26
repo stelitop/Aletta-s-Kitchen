@@ -94,8 +94,6 @@ namespace Aletta_s_Kitchen.GameRelated
                 await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
 
                 this._options.RemoveAt(pos);
-
-                await this.FillEmptySpots(game);
             }
         }
         public Ingredient OptionAt(int pos)

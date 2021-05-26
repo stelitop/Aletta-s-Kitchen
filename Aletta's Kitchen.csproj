@@ -165,7 +165,9 @@
     </Compile>
     <Compile Include="GameRelated\Game.cs" />
     <Compile Include="GameRelated\GameState.cs" />
+    <Compile Include="GameRelated\GoalTypes\SquareIncrGoalGenerator.cs" />
     <Compile Include="GameRelated\GoalTypes\Goal.cs" />
+    <Compile Include="GameRelated\GoalTypes\GoalGenerator.cs" />
     <Compile Include="GameRelated\GoalTypes\PointsGoal.cs" />
     <Compile Include="GameRelated\Hand.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
@@ -175,6 +177,7 @@
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerEffect.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredients.cs" />
+    <Compile Include="GameRelated\IngredientRelated\GameLocation.cs" />
     <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />
     <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
     <Compile Include="GameRelated\Kitchen.cs" />

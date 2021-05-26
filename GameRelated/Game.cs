@@ -15,13 +15,12 @@ namespace Aletta_s_Kitchen.GameRelated
     {
         public int curRound;
         public IngredientPool pool;
-        public Player player;
-
-        public Queue<Goal> goals;
+        public Player player;        
 
         public GameState gameState;
 
         public List<string> feedback;
+        public GoalGenerator goalGenerator;
 
         public PickingChoices pickingChoices;
 
@@ -32,21 +31,23 @@ namespace Aletta_s_Kitchen.GameRelated
             this.player = new Player();
             this.gameState = GameState.None;
 
-            this.goals = new Queue<Goal>();
-
             this.feedback = new List<string>();
 
             this.pickingChoices = new PickingChoices();
+
+            this.goalGenerator = null;
         }
 
-        public async Task Start() => await this.Start(BotHandler.genericPool);
-        public async Task Start(IngredientPool pool)
+        public async Task Start() => await this.Start(BotHandler.genericPool, new SquareIncrGoalGenerator());
+        public async Task Start(IngredientPool pool, GoalGenerator goalGenerator)
         { 
             this.gameState = GameState.Loading;
             this.curRound = 1;            
             this.pool = new IngredientPool(pool);
             this.player = new Player();
             this.pickingChoices = new PickingChoices();
+
+            this.goalGenerator = goalGenerator;
 
             await this.player.kitchen.Restart(this);
         }
@@ -116,16 +117,27 @@ namespace Aletta_s_Kitchen.GameRelated
                 return embed;
             }
 
-            string kitchentStatsString = $"Current Score: {this.player.curPoints}\nCurrent Round: {this.curRound}";
+            string kitchentStatsString = $"Current Score: {this.player.curPoints}p\nCurrent Round: {this.curRound}";
             // Check if there's a quota next round \n(Quota next Round!)"
             embed.AddField("Kitchen Stats", kitchentStatsString, true);
             embed.AddField("\u200B", "\u200B\n\n**The Kitchen**\n\u200B", true);
             //haven't been done yet
-            embed.AddField("Next Quota: Round #", "The Quota's Description.", true);
+
+            try
+            {
+                Goal goal = this.goalGenerator.CurrentGoal(this);
+
+                embed.AddField($"Next Quota: Round {goal.round}", goal.GetDescription(), true);
+            }
+            catch (Exception)
+            {
+                embed.AddField("There's no next quota.", "\u200B", true);
+            }            
 
 
             var kitchen = this.player.kitchen.GetAllIngredients();
 
+            // The kitchen field
             for (int i=0; i<kitchen.Count && i<5; i++)
             {
                 string kitchenTitle = string.Empty;
@@ -151,13 +163,22 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 if (this.pickingChoices.pick == i)
                 {
-                    kitchenDesc = $"```ini\n[{kitchenDesc}]```";
+                    if (kitchen[i].text.Equals(string.Empty)) kitchenDesc = "ini\n[selected]";
+                    else kitchenDesc = $"ini\n[{kitchenDesc}]";
                 }
                 else
                 {
-                    if (kitchen[i].IsSpecialConditionFulfilled(this, i)) kitchenDesc = $"fix\n{kitchenDesc}";
-                    kitchenDesc = $"```{kitchenDesc} ```";
+                    if (kitchen[i].glowLocation == GameLocation.Kitchen || kitchen[i].glowLocation == GameLocation.Any)
+                    {
+                        if (kitchen[i].GlowCondition(this, i))
+                        {
+                            kitchenDesc = $"fix\n{kitchenDesc}";
+                        }
+                    }
                 }
+
+                kitchenDesc = $"```{kitchenDesc} ```";
+
                 embed.AddField(kitchenTitle, kitchenDesc, true);
             }
 
@@ -207,11 +228,25 @@ namespace Aletta_s_Kitchen.GameRelated
                 else handTitle += $"{this.player.hand.ingredients[i].tribe}";
 
                 if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
+                
+                if (this.player.hand.ingredients[i].text.Equals(string.Empty))
+                {
+                    handDesc = "\u200B";
+                }
+                else
+                {
+                    handDesc = this.player.hand.ingredients[i].text;
 
-                handDesc = this.player.hand.ingredients[i].text;                
-                if (this.player.hand.ingredients[i].text.Equals(string.Empty)) handDesc = "\u200B";
+                    if (this.player.hand.ingredients[i].glowLocation == GameLocation.Hand || this.player.hand.ingredients[i].glowLocation == GameLocation.Any)
+                    {
+                        if (this.player.hand.ingredients[i].GlowCondition(this, i))
+                        {
+                            handDesc = $"fix\n{handDesc}";
+                        }
+                    }
+                }
 
-                handDesc = "```" + handDesc + " ```";
+                handDesc = $"```{handDesc} ```";
                 embed.AddField(handTitle, handDesc, true);
             }
 
@@ -220,7 +255,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             for (int i=0; i<this.feedback.Count; i++)
             {
-                feedbackMsg += $"- {this.feedback[i]}";
+                feedbackMsg += $"- {this.feedback[i]}\n";
             }
 
             if (!(this.feedback.Count == 0 || feedbackMsg.Equals(string.Empty)))

@@ -63,6 +63,13 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                         if (emojiIndex < 5)
                         {                            
+                            if (!game.player.kitchen.OptionAt(emojiIndex).CanBeBought(game, emojiIndex))
+                            {
+                                game.feedback.Clear();
+                                game.feedback.Add($"{game.player.kitchen.OptionAt(emojiIndex).name} can't be bought currently!");
+                                break;
+                            }
+
                             game.pickingChoices.pick = emojiIndex;
                             game.gameState = GameState.ChooseInHandForIngredient;
                         }

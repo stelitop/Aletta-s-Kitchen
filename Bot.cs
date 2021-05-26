@@ -67,7 +67,7 @@ namespace Aletta_s_Kitchen
 
             Commands.RegisterCommands<GameRelatedCommands>();
             //Commands.RegisterCommands<InGameCommands>();
-            //Commands.RegisterCommands<InformationCommands>();
+            Commands.RegisterCommands<InformationCommands>();
 
             Commands.RegisterCommands<DebugCommands>();
             

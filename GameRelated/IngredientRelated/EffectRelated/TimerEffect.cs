@@ -17,16 +17,17 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
             this._tickInterval = this._currentTime = tickInterval;
         }
         
+        //Equivalent to the timer ticking by 1
         public override async Task Call(Ingredient caller, Game game, EffectArgs args)
         {
             _currentTime--;
             if (_currentTime == 0)
             {
                 _currentTime = _tickInterval;
-                await Tick(caller, game, args);
+                await Trigger(caller, game, args);
             }
         }
 
-        public abstract Task Tick(Ingredient caller, Game game, EffectArgs args);
+        protected abstract Task Trigger(Ingredient caller, Game game, EffectArgs args);
     }
 }

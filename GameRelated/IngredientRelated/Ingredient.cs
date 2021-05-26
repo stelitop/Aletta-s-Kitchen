@@ -17,6 +17,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
         public List<Effect> effects;
 
+        public GameLocation glowLocation;
+
         public Ingredient()
         {
             this.name = "Default Ingredient";
@@ -25,6 +27,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             this.points = 1;
             this.text = string.Empty;
             this.effects = new List<Effect>();
+            this.glowLocation = GameLocation.None;
         }
 
         public Ingredient(string name, int points, Rarity rarity, Tribe tribe = Tribe.NoTribe, string cardText = "")
@@ -42,7 +45,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             return true;
         }
 
-        public virtual bool IsSpecialConditionFulfilled(Game game, int kitchenPos)
+        public virtual bool GlowCondition(Game game, int kitchenPos)
         {
             return false;
         }
@@ -54,6 +57,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             ret.name = this.name;
             ret.points = this.points;
             ret.tribe = this.tribe;
+            ret.text = this.text;
+            ret.glowLocation = this.glowLocation;
+            ret.rarity = this.rarity;
+
+            ret.effects.Clear();
+
+            foreach (var effect in this.effects)
+            {
+                ret.effects.Add(effect.Copy());
+            }
 
             return ret;
         }

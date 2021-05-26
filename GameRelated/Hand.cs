@@ -33,6 +33,8 @@ namespace Aletta_s_Kitchen.GameRelated
          */
         public async Task Cook(Game game)
         {
+            game.feedback.Clear();
+
             int dishPoints = 0;
             List<Ingredient> allIngr = new List<Ingredient>();
 
@@ -60,7 +62,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 await Effect.CallEffects(this.ingredients[i].effects, EffectType.OnBeingCookedBefore, this.ingredients[i], game, args);                
             }
 
-            var handTemp = this.ingredients;
+            var handTemp = this.ingredients.ToList();
             //2)
             this.Clear();
 
@@ -69,8 +71,10 @@ namespace Aletta_s_Kitchen.GameRelated
             //3)
             for (int i=0; i<3; i++)
             {
+                Console.WriteLine(1);
                 if (handTemp[i] == null) continue;
                 await Effect.CallEffects(handTemp[i].effects, EffectType.OnBeingCookedAfter, handTemp[i], game, args);
+                Console.WriteLine(-1);
             }
 
             //4)
@@ -82,11 +86,9 @@ namespace Aletta_s_Kitchen.GameRelated
 
             game.player.curPoints += args.dishPoints;
 
-            game.feedback.Clear();
-
 
             feedbackMsg += $" worth {args.dishPoints} points!";
-            game.feedback.Add(feedbackMsg);
+            game.feedback.Insert(0, feedbackMsg);
         }
     }
 }
