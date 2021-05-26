@@ -12,6 +12,8 @@ namespace Aletta_s_Kitchen.GameRelated
         Loading,
         PickFromKitchen,
         ChooseInHandForIngredient,
-        GameOver
+        BeforeQuota,
+        GameOver,
+        TimedOut
     }
 }

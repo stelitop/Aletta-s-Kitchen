@@ -52,7 +52,7 @@ namespace Aletta_s_Kitchen
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
-                Timeout = TimeSpan.FromSeconds(60)
+                Timeout = TimeSpan.FromMinutes(10)
             });
 
             var commandsConfig = new CommandsNextConfiguration

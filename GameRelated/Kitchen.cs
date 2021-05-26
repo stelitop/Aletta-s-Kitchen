@@ -48,32 +48,40 @@ namespace Aletta_s_Kitchen.GameRelated
 
             return ret;
         }
-        public async Task PickIngredient(Game game, int pos)
+        public async Task PickIngredient(Game game)
         {
-            if (0 <= pos && pos < this._options.Count)
+            int kitchenPos = game.pickingChoices.pick;
+            int newSpot = game.pickingChoices.spot;
+
+            if (0 <= kitchenPos && kitchenPos < this._options.Count)
             {
                 game.feedback.Clear();
 
-                if (!this._options[pos].CanBeBought(game, pos))
+                if (!this._options[kitchenPos].CanBeBought(game, kitchenPos))
                 {
-                    game.feedback.Add($"{this._options[pos].name} can't be bought currently!");
+                    game.feedback.Add($"{this._options[kitchenPos].name} can't be bought currently!");
                     return;
                 }
-
-                int newSpot = await game.ChooseAHandSpot();
+                if (newSpot >= 3)
+                {
+                    game.feedback.Add($"You chose an incorrect hand spot.");
+                    return;
+                }
                 
-                Ingredient ingr = this._options[pos];
+                Ingredient ingr = this._options[kitchenPos];
 
-                this._options.RemoveAt(pos);
+                this._options.RemoveAt(kitchenPos);
 
                 EffectArgs args = new EffectArgs(EffectType.OnBeingPicked);
                 await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);
                 
-                game.player.hand.ingredients[newSpot] = ingr;                
+                game.player.hand.ingredients[newSpot] = ingr;
 
                 game.player.pickHistory.Add(ingr.Copy());
 
-                await this.FillEmptySpots(game);
+                game.pickingChoices.Clear();
+
+                await game.NextRound();
             }
         }
         public async Task DestroyIngredient(Game game, int pos)

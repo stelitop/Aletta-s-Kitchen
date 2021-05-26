@@ -105,48 +105,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 embed.AddField("Instructions on what to do next", "Could be \"Pick an Ingredient in the Kitchen.\", \"Choose an Ingredient in Hand to replace.\" or some other instruction for the title. Would show which reactions are available for a response for the description.");
 
                 await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-            }
-
-            [Command("playeruiexample")]
-            [Description("Prototype of how the Player UI will look")]
-            public async Task RandomPlayerUI(CommandContext ctx)
-            {
-                DiscordEmbedBuilder embed;
-                Game game = new Game();
-
-                await game.Start(new GameRelated.IngredientRelated.IngredientPool());
-                game.gameState = GameState.PickFromKitchen;
-
-                //embed = game.GetUIEmbed();
-                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                //game.gameState = GameState.PickFromKitchen;
-                //embed = game.GetUIEmbed();
-                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                //game.gameState = GameState.ChooseInHandForIngredient;
-                //embed = game.GetUIEmbed();
-                //await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                embed = game.GetUIEmbed();
-                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                await game.player.kitchen.PickIngredient(game, 2);
-                embed = game.GetUIEmbed();
-                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                await game.player.kitchen.PickIngredient(game, 2);
-                embed = game.GetUIEmbed();
-                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                await game.player.kitchen.PickIngredient(game, 2);
-                embed = game.GetUIEmbed();
-                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-
-                await game.player.hand.Cook(game);
-                embed = game.GetUIEmbed();
-                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
-            }
-        }        
+            }            
+        }
     }
 }

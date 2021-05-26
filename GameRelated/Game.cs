@@ -1,6 +1,7 @@
 ﻿using Aletta_s_Kitchen.BotRelated;
 using Aletta_s_Kitchen.GameRelated.GoalTypes;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public List<string> feedback;
 
+        public PickingChoices pickingChoices;
+
         public Game()
         {
             this.curRound = 1;
@@ -32,6 +35,8 @@ namespace Aletta_s_Kitchen.GameRelated
             this.goals = new Queue<Goal>();
 
             this.feedback = new List<string>();
+
+            this.pickingChoices = new PickingChoices();
         }
 
         public async Task Start() => await this.Start(BotHandler.genericPool);
@@ -41,13 +46,25 @@ namespace Aletta_s_Kitchen.GameRelated
             this.curRound = 1;            
             this.pool = new IngredientPool(pool);
             this.player = new Player();
+            this.pickingChoices = new PickingChoices();
 
             await this.player.kitchen.Restart(this);
         }
 
-        public void NextRound()
+        public async Task NextRound()
         {
             this.curRound++;
+
+            int curIngrInShop = this.player.kitchen.Count;
+            await this.player.kitchen.FillEmptySpots(this);
+
+            for (int i=0; i<curIngrInShop; i++)
+            {
+                EffectArgs args = new EffectArgs(EffectType.Timer);
+                await Effect.CallEffects(this.player.kitchen.OptionAt(i).effects, EffectType.Timer, this.player.kitchen.OptionAt(i), this, args);
+            }
+
+            this.gameState = GameState.PickFromKitchen;
 
             //if (this.goals.Count > 0)
             //{
@@ -99,15 +116,6 @@ namespace Aletta_s_Kitchen.GameRelated
                 return embed;
             }
 
-            Dictionary<int, string> numToEmoji = new Dictionary<int, string>
-            {
-                { 1, ":one:"},
-                { 2, ":two:"},
-                { 3, ":three:"},
-                { 4, ":four:"},
-                { 5, ":five"}
-            };
-
             string kitchentStatsString = $"Current Score: {this.player.curPoints}\nCurrent Round: {this.curRound}";
             // Check if there's a quota next round \n(Quota next Round!)"
             embed.AddField("Kitchen Stats", kitchentStatsString, true);
@@ -136,11 +144,20 @@ namespace Aletta_s_Kitchen.GameRelated
                 else kitchenTitle += $"{kitchen[i].tribe}";
                 if (i >= 3) kitchenTitle = $"\u200B\n{kitchenTitle}";
 
+                if (this.gameState == GameState.PickFromKitchen) kitchenTitle += $" - {BotHandler.numToEmoji[i+1]}";
+
                 kitchenDesc = kitchen[i].text;
                 if (kitchen[i].text.Equals(string.Empty)) kitchenDesc = "\u200B";
 
-                if (kitchen[i].IsSpecialConditionFulfilled(this, i)) kitchenDesc = $"fix\n{kitchenDesc}";
-                kitchenDesc = "```" + kitchenDesc + " ```";
+                if (this.pickingChoices.pick == i)
+                {
+                    kitchenDesc = $"```ini\n[{kitchenDesc}]```";
+                }
+                else
+                {
+                    if (kitchen[i].IsSpecialConditionFulfilled(this, i)) kitchenDesc = $"fix\n{kitchenDesc}";
+                    kitchenDesc = $"```{kitchenDesc} ```";
+                }
                 embed.AddField(kitchenTitle, kitchenDesc, true);
             }
 
@@ -150,6 +167,7 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
 
+            // The field about the next ingredient coming
             string nextTitle = "__Next in the Kitchen__\n";
             string nextDesc = string.Empty;
 
@@ -166,18 +184,19 @@ namespace Aletta_s_Kitchen.GameRelated
             embed.AddField(nextTitle, nextDesc, true);
 
 
-            //empty field to add some spacing
+            // Empty field to add some spacing
             embed.AddField("\u200B", "\u200B");
 
-
+            // The hand field
             for (int i=0; i<3; i++)
             {
                 string handTitle = string.Empty;
                 string handDesc = string.Empty;
 
                 if (this.player.hand.ingredients[i] == null)
-                {                   
-                    handTitle += $"Empty Dish Slot #{i + 1}";
+                {
+                    if (this.gameState == GameState.ChooseInHandForIngredient) handTitle = $"Empty Dish Slot {BotHandler.numToEmoji[i+1]}";
+                    else handTitle = $"Empty Dish Slot #{i + 1}";
                     embed.AddField(handTitle, "\u200B", true);
                     continue;
                 }
@@ -187,7 +206,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 if (this.player.hand.ingredients[i].tribe == Tribe.NoTribe) handTitle += "No Type";
                 else handTitle += $"{this.player.hand.ingredients[i].tribe}";
 
-                if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {numToEmoji[i + 1]}";
+                if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
 
                 handDesc = this.player.hand.ingredients[i].text;                
                 if (this.player.hand.ingredients[i].text.Equals(string.Empty)) handDesc = "\u200B";

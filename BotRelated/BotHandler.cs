@@ -8,15 +8,24 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.BotRelated
 {
-    public class BotHandler
+    public sealed class BotHandler
     {
         public static Random globalRandom = new Random();
 
         public static Bot bot = new Bot();
 
-        public static Dictionary<ulong, Game> playerGames;
+        public static Dictionary<ulong, Game> playerGames = new Dictionary<ulong, Game>();
 
         private static Dictionary<ulong, UserState> _userState = new Dictionary<ulong, UserState>();
+
+        public static Dictionary<int, string> numToEmoji { get; } = new Dictionary<int, string>{
+            { 1, ":one:"},
+            { 2, ":two:"},
+            { 3, ":three:"},
+            { 4, ":four:"},
+            { 5, ":five:"}
+        };
+
         public static UserState GetUserState(ulong id)
         {
             if (_userState.ContainsKey(id)) return _userState[id];

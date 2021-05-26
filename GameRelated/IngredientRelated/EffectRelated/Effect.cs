@@ -40,9 +40,6 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 
             toBeCast = effects.FindAll(x => x.Type.Contains(type));
 
-            Console.WriteLine("Size Effects: " + effects.Count);
-            Console.WriteLine("Size ToBeCast: " + toBeCast.Count);
-
             if (removeAfterCall) effects.RemoveAll(x => x.Type.Contains(type));
 
             for (int i=0; i<toBeCast.Count; i++)
