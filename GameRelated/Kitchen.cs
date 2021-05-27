@@ -70,9 +70,9 @@ namespace Aletta_s_Kitchen.GameRelated
                 
                 Ingredient ingr = this._options[kitchenPos];
 
-                this._options.RemoveAt(kitchenPos);
+                this._options[kitchenPos] = null;
 
-                EffectArgs args = new EffectArgs(EffectType.OnBeingPicked);
+                EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.OnBeingPicked, kitchenPos, newSpot);
                 await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);
                 
                 game.player.hand.ingredients[newSpot] = ingr;
@@ -93,7 +93,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 EffectArgs args = new EffectArgs(EffectType.Deathrattle);
                 await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
 
-                this._options.RemoveAt(pos);
+                this._options[pos] = null;
             }
         }
         public Ingredient OptionAt(int pos)
@@ -107,6 +107,8 @@ namespace Aletta_s_Kitchen.GameRelated
         }
         public async Task FillEmptySpots(Game game)
         {
+            this._options.RemoveAll(x => x == null);                         
+
             while (this._options.Count < 5)
             {
                 await this.AddIngredient(game);

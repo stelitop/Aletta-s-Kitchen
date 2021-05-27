@@ -71,10 +71,8 @@ namespace Aletta_s_Kitchen.GameRelated
             //3)
             for (int i=0; i<3; i++)
             {
-                Console.WriteLine(1);
                 if (handTemp[i] == null) continue;
                 await Effect.CallEffects(handTemp[i].effects, EffectType.OnBeingCookedAfter, handTemp[i], game, args);
-                Console.WriteLine(-1);
             }
 
             //4)
@@ -88,7 +86,22 @@ namespace Aletta_s_Kitchen.GameRelated
 
 
             feedbackMsg += $" worth {args.dishPoints} points!";
-            game.feedback.Insert(0, feedbackMsg);
+            game.feedback.Add(feedbackMsg);
+        }
+
+        public async Task DestroyIngredient(Game game, int pos)
+        {
+            if (0 <= pos && pos < this.ingredients.Length)
+            {
+                if (this.ingredients[pos] == null) return;
+
+                Ingredient ingr = this.ingredients[pos];
+
+                EffectArgs args = new EffectArgs(EffectType.Deathrattle);
+                await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
+
+                this.ingredients[pos] = null;
+            }
         }
     }
 }

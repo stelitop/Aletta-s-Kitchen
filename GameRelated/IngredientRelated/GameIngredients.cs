@@ -61,6 +61,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                     List<Ingredient> cands = new List<Ingredient>();
                     for (int i=0; i<game.player.kitchen.Count; i++)
                     {
+                        if (game.player.kitchen.OptionAt(i) == null) continue;
                         if (game.player.kitchen.OptionAt(i).points > 0) cands.Add(game.player.kitchen.OptionAt(i));
                     }
 
@@ -171,6 +172,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                         var kitchen = game.player.kitchen.GetAllIngredients();
                         foreach (var ingr in kitchen)
                         {
+                            if (ingr == null) continue;
                             if (ingr.tribe == Tribe.Elemental) ingr.points++;
                         }
 
@@ -239,7 +241,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    var curArgs = args as EffectArgs.OnBeingCookedArgs;
+                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
 
                     bool hasDragon = false;
                     foreach (var ingr in game.player.kitchen.GetAllIngredients())
@@ -253,8 +255,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                     if (hasDragon)
                     {
-                        game.player.curPoints++;
-                        game.feedback.Add("Steamscale Soba gives you +1 point.");
+                        cookArgs.dishPoints++;
+                        caller.points++;
+                        game.feedback.Add("Steamscale Soba gains +1p.");
                     }
 
                     return Task.CompletedTask;
@@ -289,7 +292,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    var curArgs = args as EffectArgs.OnBeingCookedArgs;
+                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
 
                     bool hasDragon = false;
                     foreach (var ingr in game.player.kitchen.GetAllIngredients())
@@ -303,8 +306,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                     if (hasDragon)
                     {
-                        game.player.curPoints+=3;
-                        game.feedback.Add("Stovebelly Griller gives you +3 points.");
+                        cookArgs.dishPoints+=3;
+                        caller.points+=3;
+                        game.feedback.Add("Steamscale Soba gains +3p.");
                     }
 
                     return Task.CompletedTask;
@@ -396,7 +400,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (args.dishPoints == 8)
+                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
+
+                    if (cookArgs.dishPoints == 8)
                     {
                         foreach (var ingr in game.player.kitchen.GetAllIngredients())
                         {
@@ -507,6 +513,118 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 protected override Task Trigger(Ingredient caller, Game game, EffectArgs args)
                 {
                     caller.points++;
+                    return Task.CompletedTask;
+                }
+            }
+        }
+
+        [GameIngredient]
+        public class BakusMooncake : Ingredient
+        {
+            public BakusMooncake() : base("Baku's Mooncake", 9, Rarity.Legendary, Tribe.NoTribe, "Can only be played if every ingredient in your kitchen is odd-point.")
+            {
+                this.glowLocation = GameLocation.Kitchen;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                foreach (var ingr in game.player.kitchen.GetAllIngredients())
+                {
+                    if (ingr.points % 2 == 0) return false;
+                }
+                return true;
+            }
+
+            public override bool CanBeBought(Game game, int kitchenPos) => this.GlowCondition(game, kitchenPos);            
+        }
+
+        [GameIngredient]
+        public class KeywordSoup : Ingredient
+        {
+            public KeywordSoup() : base("Keyword Soup", 2, Rarity.Rare, Tribe.NoTribe, "Cook: Gain +1 for each different tribe you've cooked this game.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
+
+                    HashSet<Tribe> tribes = new HashSet<Tribe>();
+
+                    foreach (var ingr in game.player.cookHistory)
+                    {
+                        if (ingr.tribe != Tribe.NoTribe && !tribes.Contains(ingr.tribe)) tribes.Add(ingr.tribe);
+                    }
+
+                    cookArgs.dishPoints += tribes.Count;
+                    caller.points += tribes.Count;
+
+                    if (tribes.Count > 0) game.feedback.Add($"Keyword Soup gains +{tribes.Count}p.");
+
+                    return Task.CompletedTask;
+                }
+            }
+
+            public override string GetDescriptionText(Game game)
+            {
+                HashSet<Tribe> tribes = new HashSet<Tribe>();
+
+                foreach (var ingr in game.player.cookHistory)
+                {
+                    if (ingr.tribe != Tribe.NoTribe && !tribes.Contains(ingr.tribe)) tribes.Add(ingr.tribe);
+                }
+
+                return base.GetDescriptionText(game) + $" ({tribes.Count})";
+            }
+        }
+
+        [GameIngredient] 
+        public class BeatRoot : Ingredient
+        {
+            public BeatRoot() : base("Beat Root", 1, Rarity.Common, Tribe.NoTribe, "When picked, destroy adjacent ingredients in your dish.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingPicked) { }
+
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    var pickArgs = args as EffectArgs.OnBeingPickedArgs;
+
+                    game.feedback.Add("Beat Root destroyed adjacent ingredients in your dish,");
+
+                    await game.player.hand.DestroyIngredient(game, pickArgs.handPos - 1);
+                    await game.player.hand.DestroyIngredient(game, pickArgs.handPos + 1);
+                }
+            }
+        }
+    
+        [GameIngredient]
+        public class ChestNut : Ingredient
+        {
+            public ChestNut() : base("Chest Nut", 1, Rarity.Rare, Tribe.NoTribe, "Deathrattle: Give +5p to all ingredients in your dish.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.Deathrattle) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    foreach (var ingr in game.player.hand.ingredients)
+                    {
+                        if (ingr == null) continue;
+                        ingr.points += 5;
+                    }
+
+                    game.feedback.Add("Chest Nut gives +5p to all ingredients in your dish.");
+
                     return Task.CompletedTask;
                 }
             }

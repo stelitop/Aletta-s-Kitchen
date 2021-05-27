@@ -43,5 +43,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
             this.ingredients.Sort();
         }
+
+        public Ingredient GetVanillaIngredient(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

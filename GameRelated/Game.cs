@@ -65,42 +65,33 @@ namespace Aletta_s_Kitchen.GameRelated
                 await Effect.CallEffects(this.player.kitchen.OptionAt(i).effects, EffectType.Timer, this.player.kitchen.OptionAt(i), this, args);
             }
 
-            this.gameState = GameState.PickFromKitchen;
+            this.gameState = GameState.PickFromKitchen;            
 
-            //if (this.goals.Count > 0)
-            //{
-            //    while (this.curRound >= this.goals.Peek().round)
-            //    {
-            //        if (this.curRound > this.goals.Peek().round)
-            //        {
-            //            this.goals.Dequeue();
-            //        }
-            //        else if (this.curRound == this.goals.Peek().round)
-            //        {
-            //            bool result = this.goals.Peek().IsGoalFulfilled(this);
+            if (this.goalGenerator.CurrentGoal(this).round == this.curRound)
+            {
+                this.gameState = GameState.BeforeQuota;                
+            }
+        }
 
-            //            if (!result)
-            //            {
-            //                this.EndGame();
-            //                return;
-            //            }
-            //        }
+        public void CheckQuota()
+        {
+            var curGoal = this.goalGenerator.CurrentGoal(this);
 
-            //        if (this.goals.Count == 0) break;
-            //    }
-            //}            
+            if (!curGoal.IsGoalFulfilled(this))
+            {
+                this.EndGame();
+            }
+            else
+            {
+                this.feedback.Add("You fulfilled the quota!");
+                this.gameState = GameState.PickFromKitchen;
+            }
         }
 
         public void EndGame()
         {
             //should send a new embed
-            throw new NotImplementedException();
-        }
-
-        public async Task<int> ChooseAHandSpot()
-        {
-            //throw new NotImplementedException();
-            return BotHandler.globalRandom.Next(3);
+            this.gameState = GameState.GameOver;
         }
 
         public DiscordEmbedBuilder GetUIEmbed()
@@ -114,6 +105,20 @@ namespace Aletta_s_Kitchen.GameRelated
             if (this.gameState == GameState.Loading)
             {
                 embed.Description = $"Preparing your Kitchen. This may take a while... :hourglass_flowing_sand:";
+                return embed;
+            }
+            if (this.gameState == GameState.GameOver)
+            {
+                string emptyDesc = "\u200B";
+
+                for (int i = 0; i < 50; i++) emptyDesc += " \u200B";
+
+                embed.AddField("\u200B", emptyDesc, true);
+                embed.AddField("\u200B", "```\u200B    Game Over!```", true);
+                embed.AddField("\u200B", emptyDesc, true);
+
+                embed.AddField("\u200B", $"```fix\n\u200BYou've finished the game with a score of {this.player.curPoints}p and lasted {this.curRound} rounds! To play again, use a!play.```");
+
                 return embed;
             }
 
@@ -139,27 +144,21 @@ namespace Aletta_s_Kitchen.GameRelated
 
             // The kitchen field
             for (int i=0; i<kitchen.Count && i<5; i++)
-            {
-                string kitchenTitle = string.Empty;
-                string kitchenDesc = string.Empty;
+            {                
+                if (kitchen[i] == null)
+                {
+                    embed.AddField($"Empty Kitchen Slot #{i+1}", "\u200B", true);
 
-                //if (kitchen[i].tribe != Tribe.NoTribe) kitchenDesc += $"{kitchen[i].tribe}";
-                //if (!kitchen[i].text.Equals(string.Empty))
-                //{
-                //    if (!kitchenDesc.Equals(string.Empty)) kitchenDesc += " - ";
-                //    kitchenDesc += kitchen[i].text;
-                //}
-                //if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
+                    continue;
+                }
 
-                kitchenTitle = $"{kitchen[i].name}\n{kitchen[i].points}p - ";
-                if (kitchen[i].tribe == Tribe.NoTribe) kitchenTitle += "No Type";
-                else kitchenTitle += $"{kitchen[i].tribe}";
+
+                string kitchenTitle = kitchen[i].GetTitleText();
                 if (i >= 3) kitchenTitle = $"\u200B\n{kitchenTitle}";
-
                 if (this.gameState == GameState.PickFromKitchen) kitchenTitle += $" - {BotHandler.numToEmoji[i+1]}";
 
-                kitchenDesc = kitchen[i].text;
-                if (kitchen[i].text.Equals(string.Empty)) kitchenDesc = "\u200B";
+                string kitchenDesc = kitchen[i].GetDescriptionText(this);
+                if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
 
                 if (this.pickingChoices.pick == i)
                 {
@@ -190,16 +189,13 @@ namespace Aletta_s_Kitchen.GameRelated
 
             // The field about the next ingredient coming
             string nextTitle = "__Next in the Kitchen__\n";
-            string nextDesc = string.Empty;
 
             Ingredient nextIngr = this.player.kitchen.nextOption;
 
-            nextTitle += $"{nextIngr.name}\n{nextIngr.points}p - ";
-            if (nextIngr.tribe == Tribe.NoTribe) nextTitle += "No Type";
-            else nextTitle += $"{nextIngr.tribe}";
+            nextTitle += nextIngr.GetTitleText();
             
-            nextDesc = nextIngr.text;
-            if (nextIngr.text.Equals(string.Empty)) nextDesc = "\u200B";
+            string nextDesc = nextIngr.GetDescriptionText(this);
+            if (nextDesc.Equals(string.Empty)) nextDesc = "\u200B";
 
             nextDesc = "```" + nextDesc + " ```";
             embed.AddField(nextTitle, nextDesc, true);
@@ -222,20 +218,17 @@ namespace Aletta_s_Kitchen.GameRelated
                     continue;
                 }
 
-                handTitle = $"{this.player.hand.ingredients[i].name}\n{this.player.hand.ingredients[i].points}p - ";
-
-                if (this.player.hand.ingredients[i].tribe == Tribe.NoTribe) handTitle += "No Type";
-                else handTitle += $"{this.player.hand.ingredients[i].tribe}";
+                handTitle = this.player.hand.ingredients[i].GetTitleText();
 
                 if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
                 
-                if (this.player.hand.ingredients[i].text.Equals(string.Empty))
+                if (this.player.hand.ingredients[i].GetDescriptionText(this).Equals(string.Empty))
                 {
                     handDesc = "\u200B";
                 }
                 else
                 {
-                    handDesc = this.player.hand.ingredients[i].text;
+                    handDesc = this.player.hand.ingredients[i].GetDescriptionText(this);
 
                     if (this.player.hand.ingredients[i].glowLocation == GameLocation.Hand || this.player.hand.ingredients[i].glowLocation == GameLocation.Any)
                     {
@@ -270,13 +263,19 @@ namespace Aletta_s_Kitchen.GameRelated
             {
                 case GameState.PickFromKitchen:
                     instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
-                    instrDescription = ":one::two::three::four::five: - Pick an ingredient\n:fork_knife_plate: - Cook your dish";                    
+                    instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
                     break;
                 case GameState.ChooseInHandForIngredient:
                     instrTitle = "Choose where to put your ingredient.";
                     instrDescription = ":one::two::three: - Place on this spot.\n:no_entry_sign: - Cancel picking an ingredient.";
-                    break;                    
+                    break;
+                case GameState.BeforeQuota:
+                    instrTitle = "Quota this round! Do you want to cook your dish before the quota?";
+                    instrDescription = ":fork_knife_plate: - Cook your dish.\n:no_entry_sign: - Proceed without cooking.";
+                    break;
                 default:
+                    instrTitle = "Instructions";
+                    instrDescription = "Instructions Description";
                     break;
             }
 

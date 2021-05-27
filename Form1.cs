@@ -76,7 +76,7 @@ namespace Aletta_s_Kitchen
             }
             else
             {
-                ListBoxFeedback.Items.Add(BotHandler.genericPool.ingredients[comboBox1.SelectedIndex].GetInfo());
+                ListBoxFeedback.Items.Add(BotHandler.genericPool.ingredients[comboBox1.SelectedIndex].GetFullInfo());
             }
         }
 
@@ -100,10 +100,10 @@ namespace Aletta_s_Kitchen
 
             for (int i=0; i<game.player.kitchen.Count; i++)
             {
-                ListBoxFeedback.Items.Add(game.player.kitchen.OptionAt(i).GetInfo());
+                ListBoxFeedback.Items.Add(game.player.kitchen.OptionAt(i).GetFullInfo());
             }
 
-            ListBoxFeedback.Items.Add($"Next Ingredient: {game.player.kitchen.nextOption.GetInfo()}");
+            ListBoxFeedback.Items.Add($"Next Ingredient: {game.player.kitchen.nextOption.GetFullInfo()}");
         }
     }
 

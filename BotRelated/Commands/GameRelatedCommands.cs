@@ -57,6 +57,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                     x => x.User.Id == ctx.User.Id && x.Message.Id == gameMessage.Id && emojiButtons.Contains(x.Emoji)).ConfigureAwait(false);
 
                 int emojiIndex = emojiButtons.IndexOf(interaction.Result.Emoji);
+
+                Console.WriteLine(game.gameState);
                 switch (game.gameState)
                 {
                     case GameState.PickFromKitchen:                        
@@ -66,7 +68,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                             if (!game.player.kitchen.OptionAt(emojiIndex).CanBeBought(game, emojiIndex))
                             {
                                 game.feedback.Clear();
-                                game.feedback.Add($"{game.player.kitchen.OptionAt(emojiIndex).name} can't be bought currently!");
+                                game.feedback.Add($"{game.player.kitchen.OptionAt(emojiIndex).name} can't be picked currently!");
                                 break;
                             }
 
@@ -97,10 +99,30 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                         break;
 
+                    case GameState.BeforeQuota:
+
+                        if (emojiIndex >= 5)
+                        {
+                            if (emojiIndex == 5)
+                            {
+                                await game.player.hand.Cook(game);
+                            }
+                            else if (emojiIndex == 6) ;                            
+
+                            game.CheckQuota();
+                        }
+
+                        break;
+
                     default:
                         break;
                 }
+
+                if (game.gameState == GameState.GameOver) break;
             }
+
+            BotHandler.SetUserState(ctx.User.Id, UserState.Idle);
+            if (BotHandler.playerGames.ContainsKey(ctx.User.Id)) BotHandler.playerGames.Remove(ctx.User.Id);
         }
     }
 }

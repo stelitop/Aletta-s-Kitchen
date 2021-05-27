@@ -40,6 +40,18 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             this.effects = new List<Effect>();
         }
 
+        public string GetTitleText()
+        {
+            string ret = $"{this.name}\n{this.points}p - ";
+            if (this.tribe == Tribe.NoTribe) ret += "No Type";
+            else ret += $"{this.tribe}";
+            return ret;
+        }
+        public virtual string GetDescriptionText(Game game)
+        {
+            return this.text;
+        }
+
         public virtual bool CanBeBought(Game game, int kitchenPos)
         {
             return true;
@@ -71,7 +83,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             return ret;
         }
 
-        public virtual string GetInfo()
+        public virtual string GetFullInfo()
         {
             string ret = string.Empty;
             ret = $"{this.name} - {this.points}p";

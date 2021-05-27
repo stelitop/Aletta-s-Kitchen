@@ -106,6 +106,34 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                 await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
             }            
+        
+            [Command("embedtest")]
+            public async Task EmbedTest(CommandContext ctx)
+            {
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+                {
+                    Title = "steli2's Kitchen",
+                    Color = DiscordColor.Azure
+                };
+
+                string emptyDesc = "\u200B";
+
+                for (int i = 0; i < 70; i++) emptyDesc += " \u200B";
+
+                embed.AddField("\u200B", emptyDesc, true);
+                embed.AddField("\u200B", "```\u200B    Game Over!```", true);
+                embed.AddField("\u200B", emptyDesc, true);
+
+                embed.AddField("\u200B", "```fix\n\u200BYou've finished the game with a score of ###p and lasted ## rounds! To play again, type a!play.```");
+
+                await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
+            }
+        
+            [Command("replaceingr")]
+            public async Task ReplaceIngameIngredient(CommandContext ctx, DiscordUser player, int kitchenPos, string ingredientName)
+            {
+
+            }
         }
     }
 }
