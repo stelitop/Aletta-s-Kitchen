@@ -1,6 +1,8 @@
-﻿using Aletta_s_Kitchen.BotRelated.Commands;
+﻿using Aletta_s_Kitchen.BotRelated;
+using Aletta_s_Kitchen.BotRelated.Commands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
@@ -41,7 +43,7 @@ namespace Aletta_s_Kitchen
                 Token = configJson.Token,
                 TokenType = TokenType.Bot,
                 AutoReconnect = true,
-                MinimumLogLevel = LogLevel.Debug,                
+                MinimumLogLevel = LogLevel.Debug,
                 //UseInternalLoggingHandler = true
             };
 
@@ -89,12 +91,40 @@ namespace Aletta_s_Kitchen
             }
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        private async Task OnClientReady(DiscordClient client, ReadyEventArgs e)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
-
-            return;
+            this.Client.MessageReactionAdded += InGameButtonClickReactionAdded;
+            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;
+            return Task.CompletedTask;
         }
+
+        private async Task InGameButtonClick(DiscordClient client, ulong id, DiscordMessage msg, DiscordEmoji emoji)
+        {
+            if (BotHandler.GetUserState(id) != UserState.InGame) return;
+            if (!BotHandler.playerGames.ContainsKey(id)) return;
+            if (BotHandler.playerGames[id].UIMessage != msg) return;
+
+            List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>
+            {
+                DiscordEmoji.FromName(client, ":one:"),
+                DiscordEmoji.FromName(client, ":two:"),
+                DiscordEmoji.FromName(client, ":three:"),
+                DiscordEmoji.FromName(client, ":four:"),
+                DiscordEmoji.FromName(client, ":five:"),
+                DiscordEmoji.FromName(client, ":fork_knife_plate:"),
+                DiscordEmoji.FromName(client, ":no_entry_sign:")
+            };
+
+            int emojiIndex = emojiButtons.IndexOf(emoji);
+            if (emojiIndex == -1) return;
+
+            await BotHandler.playerGames[id].ProceedButtonPress(emojiIndex);
+        }
+
+        private async Task InGameButtonClickReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
+            => await InGameButtonClick(client, args.User.Id, args.Message, args.Emoji);
+
+        private async Task InGameButtonClickReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
+            => await InGameButtonClick(client, args.User.Id, args.Message, args.Emoji);
     }
 }

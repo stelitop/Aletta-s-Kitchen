@@ -8,22 +8,22 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 {
     public abstract class TimerEffect : Effect
     {
-        private int _tickInterval;
-        private int _currentTime;
+        public int tickInterval { get; private set; }
+        public int currentTime { get; private set; }
 
         protected TimerEffect(int tickInterval) : base(EffectType.Timer)
         {
             if (tickInterval < 1) tickInterval = 1;
-            this._tickInterval = this._currentTime = tickInterval;
+            this.tickInterval = this.currentTime = tickInterval;
         }
         
         //Equivalent to the timer ticking by 1
         public override async Task Call(Ingredient caller, Game game, EffectArgs args)
         {
-            _currentTime--;
-            if (_currentTime == 0)
+            currentTime--;
+            if (currentTime == 0)
             {
-                _currentTime = _tickInterval;
+                currentTime = tickInterval;
                 await Trigger(caller, game, args);
             }
         }

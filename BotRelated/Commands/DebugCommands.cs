@@ -1,4 +1,5 @@
 ﻿using Aletta_s_Kitchen.GameRelated;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
@@ -130,9 +131,49 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             }
         
             [Command("replaceingr")]
-            public async Task ReplaceIngameIngredient(CommandContext ctx, DiscordUser player, int kitchenPos, string ingredientName)
+            public async Task ReplaceIngameIngredient(CommandContext ctx, DiscordUser player, int kitchenPos, [RemainingText]string ingredientName)
             {
+                kitchenPos--;
 
+                if (!BotHandler.playerGames.ContainsKey(player.Id))
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:")).ConfigureAwait(false);
+                    return;
+                }
+
+                if (!(0 <= kitchenPos && kitchenPos < 6))
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:")).ConfigureAwait(false);
+                    return;
+                }
+
+                Ingredient ingr = BotHandler.playerGames[player.Id].pool.GetVanillaIngredient(ingredientName);
+
+                if (ingr == null)
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:")).ConfigureAwait(false);
+                    return;
+                }
+
+                if (kitchenPos < 5) BotHandler.playerGames[player.Id].player.kitchen.ReplaceIngredient(kitchenPos, ingr);
+                else BotHandler.playerGames[player.Id].player.kitchen.nextOption = ingr;
+
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
+            }
+        
+            [Command("info")]
+            public async Task GetIngredientInfo(CommandContext ctx, [RemainingText] string ingredientName)
+            {
+                Ingredient ingr = BotHandler.genericPool.GetVanillaIngredient(ingredientName);
+
+                if (ingr == null)
+                {
+                    await ctx.RespondAsync("No Such Ingredient Found").ConfigureAwait(false);                    
+                }
+                else
+                {
+                    await ctx.RespondAsync(ingr.GetFullInfo()).ConfigureAwait(false);
+                }
             }
         }
     }

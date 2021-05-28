@@ -12,7 +12,7 @@ namespace Aletta_s_Kitchen.GameRelated
     public class Kitchen
     {
         private List<Ingredient> _options;
-        public Ingredient nextOption { get; private set; } = new Ingredient();
+        public Ingredient nextOption { get; set; } = new Ingredient();
         public int Count { get { return _options.Count; } }
 
         public Kitchen()
@@ -48,10 +48,9 @@ namespace Aletta_s_Kitchen.GameRelated
 
             return ret;
         }
-        public async Task PickIngredient(Game game)
+        public async Task PickIngredient(Game game, int kitchenPos)
         {
-            int kitchenPos = game.pickingChoices.pick;
-            int newSpot = game.pickingChoices.spot;
+            int newSpot = game.player.hand.ingredients.Count;
 
             if (0 <= kitchenPos && kitchenPos < this._options.Count)
             {
@@ -64,7 +63,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 }
                 if (newSpot >= 3)
                 {
-                    game.feedback.Add($"You chose an incorrect hand spot.");
+                    game.feedback.Add("Your dish is full!");
                     return;
                 }
                 
@@ -72,14 +71,12 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 this._options[kitchenPos] = null;
 
+                game.player.hand.ingredients.Add(ingr);
+
                 EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.OnBeingPicked, kitchenPos, newSpot);
-                await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);
-                
-                game.player.hand.ingredients[newSpot] = ingr;
+                await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);                
 
                 game.player.pickHistory.Add(ingr.Copy());
-
-                game.pickingChoices.Clear();
 
                 await game.NextRound();
             }
@@ -88,12 +85,38 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             if (0 <= pos && pos < this._options.Count)
             {
-                Ingredient ingr = this._options[pos];
-
-                EffectArgs args = new EffectArgs(EffectType.Deathrattle);
-                await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
+                Ingredient ingr = this._options[pos].Copy();
 
                 this._options[pos] = null;
+
+                EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, pos, GameLocation.Kitchen);
+                await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
+            }
+        }
+        public async Task DestroyMultipleIngredients(Game game, List<int> pos)
+        {
+            List<int> posFiltered = pos.FindAll(x => 0 <= x && x < this._options.Count && this.OptionAt(x) != null).Distinct().ToList();
+            posFiltered.Sort();
+
+            List<Ingredient> ingredients = new List<Ingredient>();
+
+            for (int i=0; i<posFiltered.Count; i++)
+            {
+                ingredients.Add(this._options[posFiltered[i]].Copy());
+                this._options[posFiltered[i]] = null;
+            }
+
+            for (int i = 0; i < posFiltered.Count; i++)
+            {
+                EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, posFiltered[i], GameLocation.Kitchen);
+                await Effect.CallEffects(ingredients[i].effects, EffectType.Deathrattle, ingredients[i], game, args);
+            }
+        }
+        public void ReplaceIngredient(int pos, Ingredient newIngr)
+        {
+            if (0 <= pos && pos < this._options.Count)
+            {
+                _options[pos] = newIngr;
             }
         }
         public Ingredient OptionAt(int pos)

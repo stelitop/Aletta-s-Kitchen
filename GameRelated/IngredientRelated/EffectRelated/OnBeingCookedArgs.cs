@@ -11,9 +11,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
         public class OnBeingCookedArgs : EffectArgs
         {
             public int dishPoints;
-            public OnBeingCookedArgs(EffectType effectType, int dishPoints) : base(effectType)
+            public int handPos;
+            public OnBeingCookedArgs(EffectType effectType, int dishPoints, int handPos) : base(effectType)
             {
                 this.dishPoints = dishPoints;
+                this.handPos = handPos;
             }
         }
     }

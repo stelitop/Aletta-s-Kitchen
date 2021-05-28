@@ -42,9 +42,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
         public string GetTitleText()
         {
-            string ret = $"{this.name}\n{this.points}p - ";
-            if (this.tribe == Tribe.NoTribe) ret += "No Type";
-            else ret += $"{this.tribe}";
+            string ret = $"{this.name}\n{this.points}p";
+            if (this.tribe != Tribe.NoTribe) ret += $" - {this.tribe}";
             return ret;
         }
         public virtual string GetDescriptionText(Game game)

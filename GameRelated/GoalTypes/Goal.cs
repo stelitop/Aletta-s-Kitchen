@@ -11,6 +11,6 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
         public int round;
        
         public abstract bool IsGoalFulfilled(Game game);
-        public abstract string GetDescription();
+        public abstract string GetDescription(Game game);
     }   
 }

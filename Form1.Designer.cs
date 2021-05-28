@@ -54,6 +54,7 @@ namespace Aletta_s_Kitchen
             // 
             // TextBoxConsole
             // 
+            this.TextBoxConsole.Cursor = System.Windows.Forms.Cursors.Default;
             this.TextBoxConsole.Location = new System.Drawing.Point(534, 62);
             this.TextBoxConsole.Multiline = true;
             this.TextBoxConsole.Name = "TextBoxConsole";
@@ -61,6 +62,7 @@ namespace Aletta_s_Kitchen
             this.TextBoxConsole.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.TextBoxConsole.Size = new System.Drawing.Size(567, 448);
             this.TextBoxConsole.TabIndex = 1;
+            this.TextBoxConsole.TabStop = false;
             // 
             // label1
             // 

@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity.Extensions;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             game.player.name = ctx.User.Username;
 
             DiscordMessage gameMessage = await ctx.RespondAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
+            game.UIMessage = gameMessage;
 
             List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>
             {
@@ -45,79 +47,12 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 await gameMessage.CreateReactionAsync(emojiButtons[i]).ConfigureAwait(false);
             }
 
-            game.gameState = GameState.PickFromKitchen;
+            await game.UIMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
 
-            var interactivity = ctx.Client.GetInteractivity();
+            game.gameState = GameState.PickFromKitchen;
 
             while (true)
             {
-                await gameMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
-
-                var interaction = await interactivity.WaitForReactionAsync(
-                    x => x.User.Id == ctx.User.Id && x.Message.Id == gameMessage.Id && emojiButtons.Contains(x.Emoji)).ConfigureAwait(false);
-
-                int emojiIndex = emojiButtons.IndexOf(interaction.Result.Emoji);
-
-                Console.WriteLine(game.gameState);
-                switch (game.gameState)
-                {
-                    case GameState.PickFromKitchen:                        
-
-                        if (emojiIndex < 5)
-                        {                            
-                            if (!game.player.kitchen.OptionAt(emojiIndex).CanBeBought(game, emojiIndex))
-                            {
-                                game.feedback.Clear();
-                                game.feedback.Add($"{game.player.kitchen.OptionAt(emojiIndex).name} can't be picked currently!");
-                                break;
-                            }
-
-                            game.pickingChoices.pick = emojiIndex;
-                            game.gameState = GameState.ChooseInHandForIngredient;
-                        }
-                        else if (emojiIndex == 5)
-                        {
-                            await game.player.hand.Cook(game);
-                        }
-                        break;
-
-                    case GameState.ChooseInHandForIngredient:
-
-                        if (emojiIndex < 3)
-                        {
-                            game.pickingChoices.spot = emojiIndex;
-                            if (game.pickingChoices.pick > -1)
-                            {
-                                await game.player.kitchen.PickIngredient(game);
-                            }
-                        }
-                        else if (emojiIndex == 6)
-                        {
-                            game.pickingChoices.Clear();
-                            game.gameState = GameState.PickFromKitchen;
-                        }
-
-                        break;
-
-                    case GameState.BeforeQuota:
-
-                        if (emojiIndex >= 5)
-                        {
-                            if (emojiIndex == 5)
-                            {
-                                await game.player.hand.Cook(game);
-                            }
-                            else if (emojiIndex == 6) ;                            
-
-                            game.CheckQuota();
-                        }
-
-                        break;
-
-                    default:
-                        break;
-                }
-
                 if (game.gameState == GameState.GameOver) break;
             }
 

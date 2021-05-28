@@ -20,9 +20,14 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
             return game.player.curPoints >= this._pointsRequired;
         }
 
-        public override string GetDescription()
+        public override string GetDescription(Game game)
         {
-            return $"You need to have at least {_pointsRequired} Points to continue to the next round";
+            string ret = $"You need to have at least {_pointsRequired}p to continue to the next round.";
+
+            if (this.IsGoalFulfilled(game)) ret += " *(done!)*";
+            else ret += $" *({this._pointsRequired-game.player.curPoints}p needed)*";
+
+            return ret;
         }
     }
 }

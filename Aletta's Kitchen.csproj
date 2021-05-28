@@ -170,11 +170,13 @@
     <Compile Include="GameRelated\GoalTypes\GoalGenerator.cs" />
     <Compile Include="GameRelated\GoalTypes\PointsGoal.cs" />
     <Compile Include="GameRelated\Hand.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\DeathrattleArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\OnBeingCookedArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\OnBeingPickedArgs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerEffect.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredients.cs" />
@@ -182,7 +184,6 @@
     <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />
     <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
     <Compile Include="GameRelated\Kitchen.cs" />
-    <Compile Include="GameRelated\PickingChoices.cs" />
     <Compile Include="GameRelated\Player.cs" />
     <Compile Include="GameRelated\Rarity.cs" />
     <Compile Include="GameRelated\Tribe.cs" />
