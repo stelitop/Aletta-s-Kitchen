@@ -65,6 +65,14 @@ namespace Aletta_s_Kitchen
             ListBoxFeedback.Items.Add($"Rare: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Rare).Count()}");
             ListBoxFeedback.Items.Add($"Epic: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Epic).Count()}");
             ListBoxFeedback.Items.Add($"Legendary: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Legendary).Count()}");
+
+            ListBoxFeedback.Items.Add("");
+            ListBoxFeedback.Items.Add("Type Breakdown:");
+
+            foreach (Tribe type in Enum.GetValues(typeof(Tribe)))
+            {                
+                ListBoxFeedback.Items.Add($"{type}: {pool.ingredients.FindAll(x => x.tribe == type).Count}");
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -98,7 +106,7 @@ namespace Aletta_s_Kitchen
 
             await game.player.kitchen.Restart(game);
 
-            for (int i=0; i<game.player.kitchen.Count; i++)
+            for (int i=0; i<game.player.kitchen.OptionsCount; i++)
             {
                 ListBoxFeedback.Items.Add(game.player.kitchen.OptionAt(i).GetFullInfo());
             }
@@ -125,6 +133,8 @@ namespace Aletta_s_Kitchen
             {
                 this.textBox.Text += value + Environment.NewLine;
             }
+
+            this.textBox.Text = string.Empty;
         }
         public override void WriteLine(string value)
         {
@@ -136,6 +146,8 @@ namespace Aletta_s_Kitchen
             {
                 this.textBox.Text += value + Environment.NewLine;
             }
+
+            this.textBox.Text = string.Empty;
         }
 
         public override Encoding Encoding

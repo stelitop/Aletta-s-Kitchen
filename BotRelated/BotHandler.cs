@@ -1,5 +1,6 @@
 ﻿using Aletta_s_Kitchen.GameRelated;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated;
+using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.BotRelated
-{
+{    
     public sealed class BotHandler
     {
         public static Random globalRandom = new Random();
@@ -25,6 +26,8 @@ namespace Aletta_s_Kitchen.BotRelated
             { 4, ":four:"},
             { 5, ":five:"}
         };
+
+        public static List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>();
 
         public static UserState GetUserState(ulong id)
         {

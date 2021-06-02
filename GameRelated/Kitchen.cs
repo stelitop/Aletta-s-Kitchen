@@ -13,7 +13,7 @@ namespace Aletta_s_Kitchen.GameRelated
     {
         private List<Ingredient> _options;
         public Ingredient nextOption { get; set; } = new Ingredient();
-        public int Count { get { return _options.Count; } }
+        public int OptionsCount { get { return _options.Count; } }        
 
         public Kitchen()
         {
@@ -26,32 +26,89 @@ namespace Aletta_s_Kitchen.GameRelated
 
             this.nextOption = game.pool.ingredients[BotHandler.globalRandom.Next(game.pool.ingredients.Count)].Copy();
 
-            for (int i=0; i<5; i++)
-            {
-                await this.AddIngredient(game);
-            }
+            await this.FillEmptySpots(game);
+        }
+        private void FillNextOption(Game game)
+        {
+
+            this.nextOption = game.pool.GetRandomIngredient();
         }
         public async Task<Ingredient> AddIngredient(Game game)
         {
-            if (this._options.Count >= 5) return null;
+            int newSpot = -1;
             
-            Ingredient ret = this.nextOption;
+            for (int i=0; i<this._options.Count; i++)
+            {
+                if (this._options[i] == null)
+                {
+                    newSpot = i;
+                    break;
+                }
+            }
+            if (newSpot == -1 && this._options.Count < 5)
+            {
+                this._options.Add(null);
+                newSpot = this._options.Count - 1;
+            }
+            if (newSpot == -1) return null;
 
-            _options.Add(ret);
+
+            Ingredient ret = this.nextOption;
+            ret.roundEntered = game.curRound;
+            _options[newSpot] = ret;
+            this.FillNextOption(game);
 
             EffectArgs args = new EffectArgs(EffectType.OnEnteringKitchen);
-            await Effect.CallEffects(ret.effects, EffectType.OnEnteringKitchen, ret, game, args);
-
-            int pick = BotHandler.globalRandom.Next(game.pool.ingredients.Count);
-
-            this.nextOption = game.pool.ingredients[pick].Copy();
+            await Effect.CallEffects(ret.effects, EffectType.OnEnteringKitchen, ret, game, args);                       
 
             return ret;
+        }        
+        public async Task FillEmptySpots(Game game)
+        {
+            //could add this part back to go back to adding at the end of the line
+            //this._options.RemoveAll(x => x == null);
+
+            //while (this._options.Count < 5)
+            //{
+            //    await this.AddIngredient(game);
+            //    this._options.RemoveAll(x => x == null);
+            //}
+
+            List<int> filledSpots = new List<int>();
+
+            for (int i=0; i<this._options.Count; i++)
+            {
+                if (this._options[i] == null)
+                {                   
+                    Ingredient newIngr = this.nextOption;
+                    newIngr.roundEntered = game.curRound;
+                    _options[i] = newIngr;
+
+                    this.FillNextOption(game);
+
+                    filledSpots.Add(i);
+                }
+            }
+
+            while (this._options.Count < 5)
+            {
+                Ingredient newIngr = this.nextOption;
+                newIngr.roundEntered = game.curRound;
+                this._options.Add(newIngr);
+
+                this.FillNextOption(game);
+
+                filledSpots.Add(this._options.Count - 1);
+            }
+
+            for (int i=0; i<filledSpots.Count; i++)
+            {
+                EffectArgs args = new EffectArgs(EffectType.OnEnteringKitchen);
+                await Effect.CallEffects(this._options[filledSpots[i]].effects, EffectType.OnEnteringKitchen, this._options[filledSpots[i]], game, args);
+            }
         }
         public async Task PickIngredient(Game game, int kitchenPos)
         {
-            int newSpot = game.player.hand.ingredients.Count;
-
             if (0 <= kitchenPos && kitchenPos < this._options.Count)
             {
                 game.feedback.Clear();
@@ -61,7 +118,8 @@ namespace Aletta_s_Kitchen.GameRelated
                     game.feedback.Add($"{this._options[kitchenPos].name} can't be bought currently!");
                     return;
                 }
-                if (newSpot >= 3)
+
+                if (!game.player.hand.AvailableSpot())
                 {
                     game.feedback.Add("Your dish is full!");
                     return;
@@ -71,10 +129,10 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 this._options[kitchenPos] = null;
 
-                game.player.hand.ingredients.Add(ingr);
+                var newIngrInfo = game.player.hand.AddIngredient(ingr);
 
-                EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.OnBeingPicked, kitchenPos, newSpot);
-                await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, ingr, game, args);                
+                EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.OnBeingPicked, kitchenPos, newIngrInfo.handPos);
+                await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, newIngrInfo.ingredient, game, args);                
 
                 game.player.pickHistory.Add(ingr.Copy());
 
@@ -128,14 +186,6 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             return _options;
         }
-        public async Task FillEmptySpots(Game game)
-        {
-            this._options.RemoveAll(x => x == null);                         
-
-            while (this._options.Count < 5)
-            {
-                await this.AddIngredient(game);
-            }
-        }
+        
     }
 }

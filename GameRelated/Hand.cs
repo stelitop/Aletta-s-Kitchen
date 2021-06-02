@@ -1,26 +1,93 @@
-﻿using Aletta_s_Kitchen.GameRelated.IngredientRelated;
-using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
+﻿using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aletta_s_Kitchen.GameRelated
+namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 {
+    public struct NewIngredientAddedData
+    {
+        public Ingredient ingredient;
+        public int handPos;
+
+        public NewIngredientAddedData(Ingredient ingredient, int handPos)
+        {
+            this.ingredient = ingredient;
+            this.handPos = handPos;
+        }
+    }
+
     public class Hand
     {
-        //public List<Ingredient> ingredients;
-        public List<Ingredient> ingredients;
+        public int handLimit;
+
+        private List<Ingredient> _ingredients;
+
+        public int OptionsCount { get { return _ingredients.Count; } }
 
         public Hand()
         {
-            this.ingredients = new List<Ingredient>();            
+            this._ingredients = new List<Ingredient>();
+            this.handLimit = 3;
         }
 
         public void Clear()
         {
-            this.ingredients = new List<Ingredient>();
+            this._ingredients.Clear();
+        }
+        public Ingredient IngredientAt(int handPos)
+        {
+            if (handPos >= this._ingredients.Count) return null;
+            return this._ingredients[handPos];
+        }
+        public List<Ingredient> GetAllIngredients()
+        {
+            return _ingredients;
+        }
+        public void ReplaceIngredient(int pos, Ingredient newIngr)
+        {
+            if (0 <= pos && pos < this._ingredients.Count)
+            {
+                _ingredients[pos] = newIngr;
+            }
+        }
+        public NewIngredientAddedData AddIngredient(Ingredient newIngr)
+        {
+            for (int i = 0; i < this._ingredients.Count; i++)
+            {
+                if (this._ingredients[i] == null)
+                {
+                    this._ingredients[i] = newIngr;
+                    return new NewIngredientAddedData(this._ingredients[i], i);
+                }
+            }
+
+            if (this._ingredients.Count < this.handLimit)
+            {
+                this._ingredients.Add(newIngr);
+                return new NewIngredientAddedData(this._ingredients.Last(), this._ingredients.Count-1);
+            }
+
+            return new NewIngredientAddedData(null, -1);
+        }
+        public bool AvailableSpot()
+        {
+            for (int i = 0; i < this._ingredients.Count; i++)
+            {
+                if (this._ingredients[i] == null)
+                {
+                    return true;
+                }
+            }
+
+            if (this._ingredients.Count < this.handLimit)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -37,11 +104,11 @@ namespace Aletta_s_Kitchen.GameRelated
             int dishPoints = 0;
             List<Ingredient> allIngr = new List<Ingredient>();
 
-            for (int i=0; i<this.ingredients.Count; i++)
+            for (int i = 0; i < this._ingredients.Count; i++)
             {
-                if (this.ingredients[i] == null) continue;
-                dishPoints += this.ingredients[i].points;
-                allIngr.Add(this.ingredients[i]);
+                if (this._ingredients[i] == null) continue;
+                dishPoints += this._ingredients[i].points;
+                allIngr.Add(this._ingredients[i]);
             }
 
             if (allIngr.Count == 0) return;
@@ -55,21 +122,21 @@ namespace Aletta_s_Kitchen.GameRelated
             var args = new EffectArgs.OnBeingCookedArgs(EffectType.OnBeingCookedBefore, dishPoints, -1);
 
             //1)
-            for (int i=0; i<this.ingredients.Count; i++)
+            for (int i = 0; i < this._ingredients.Count; i++)
             {
-                if (this.ingredients[i] == null) continue;
+                if (this._ingredients[i] == null) continue;
                 args.handPos = i;
-                await Effect.CallEffects(this.ingredients[i].effects, EffectType.OnBeingCookedBefore, this.ingredients[i], game, args);                
+                await Effect.CallEffects(this._ingredients[i].effects, EffectType.OnBeingCookedBefore, this._ingredients[i], game, args);
             }
 
-            var handTemp = this.ingredients.ToList();
+            var handTemp = this._ingredients.ToList();
             //2)
             this.Clear();
 
             args.calledEffect = EffectType.OnBeingCookedAfter;
 
             //3)
-            for (int i=0; i<handTemp.Count; i++)
+            for (int i = 0; i < handTemp.Count; i++)
             {
                 if (handTemp[i] == null) continue;
                 args.handPos = i;
@@ -88,41 +155,6 @@ namespace Aletta_s_Kitchen.GameRelated
 
             feedbackMsg += $" worth {args.dishPoints} points!";
             game.feedback.Add(feedbackMsg);
-        }
-
-        public async Task DestroyIngredient(Game game, int pos)
-        {
-            if (0 <= pos && pos < this.ingredients.Count)
-            {
-                if (this.ingredients[pos] == null) return;
-
-                Ingredient ingr = this.ingredients[pos];
-
-                EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, pos, GameLocation.Hand);
-                await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
-
-                this.ingredients[pos] = null;
-            }
-        }
-
-        public async Task DestroyMultipleIngredients(Game game, List<int> pos)
-        {
-            List<int> posFiltered = pos.FindAll(x => 0 <= x && x < this.ingredients.Count && this.ingredients[x] != null).Distinct().ToList();
-            posFiltered.Sort();
-
-            List<Ingredient> ingredients = new List<Ingredient>();
-
-            for (int i = 0; i < posFiltered.Count; i++)
-            {
-                ingredients.Add(this.ingredients[posFiltered[i]].Copy());
-                this.ingredients[posFiltered[i]] = null;
-            }
-
-            for (int i = 0; i < posFiltered.Count; i++)
-            {
-                EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, posFiltered[i], GameLocation.Hand);
-                await Effect.CallEffects(ingredients[i].effects, EffectType.Deathrattle, ingredients[i], game, args);
-            }
         }
     }
 }

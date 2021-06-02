@@ -93,8 +93,22 @@ namespace Aletta_s_Kitchen
 
         private Task OnClientReady(DiscordClient client, ReadyEventArgs e)
         {
+            //load the button emojis
+
+            BotHandler.emojiButtons.Clear();
+            
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":one:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":two:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":three:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":four:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":five:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":fork_knife_plate:"));
+            //BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":no_entry_sign:"));            
+
+            //load the events for clicking buttons
             this.Client.MessageReactionAdded += InGameButtonClickReactionAdded;
-            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;
+            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;            
+
             return Task.CompletedTask;
         }
 
@@ -104,18 +118,7 @@ namespace Aletta_s_Kitchen
             if (!BotHandler.playerGames.ContainsKey(id)) return;
             if (BotHandler.playerGames[id].UIMessage != msg) return;
 
-            List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>
-            {
-                DiscordEmoji.FromName(client, ":one:"),
-                DiscordEmoji.FromName(client, ":two:"),
-                DiscordEmoji.FromName(client, ":three:"),
-                DiscordEmoji.FromName(client, ":four:"),
-                DiscordEmoji.FromName(client, ":five:"),
-                DiscordEmoji.FromName(client, ":fork_knife_plate:"),
-                DiscordEmoji.FromName(client, ":no_entry_sign:")
-            };
-
-            int emojiIndex = emojiButtons.IndexOf(emoji);
+            int emojiIndex = BotHandler.emojiButtons.IndexOf(emoji);
             if (emojiIndex == -1) return;
 
             await BotHandler.playerGames[id].ProceedButtonPress(emojiIndex);
@@ -126,5 +129,6 @@ namespace Aletta_s_Kitchen
 
         private async Task InGameButtonClickReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
             => await InGameButtonClick(client, args.User.Id, args.Message, args.Emoji);
+        
     }
 }

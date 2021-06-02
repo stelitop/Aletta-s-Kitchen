@@ -56,7 +56,7 @@ namespace Aletta_s_Kitchen.GameRelated
             this.curRound++;
 
             await this.player.kitchen.FillEmptySpots(this);
-            int curIngrInShop = this.player.kitchen.Count;
+            int curIngrInShop = this.player.kitchen.OptionsCount;
 
             for (int i=0; i<curIngrInShop; i++)
             {
@@ -114,6 +114,8 @@ namespace Aletta_s_Kitchen.GameRelated
             }
             if (this.gameState == GameState.GameOver)
             {
+                embed.Color = DiscordColor.Gray;
+
                 string emptyDesc = "\u200B";
 
                 for (int i = 0; i < 50; i++) emptyDesc += " \u200B";
@@ -172,9 +174,9 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 string kitchenTitle = kitchen[i].GetTitleText();
                 if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
-                if (this.gameState == GameState.PickFromKitchen && this.player.hand.ingredients.Count < 3) kitchenTitle += $" - {BotHandler.numToEmoji[i+1]}";
+                if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3) kitchenTitle += $" - {BotHandler.numToEmoji[i+1]}";
 
-                string kitchenDesc = kitchen[i].GetDescriptionText(this);
+                string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
                 if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
 
                 if (kitchen[i].glowLocation == GameLocation.Kitchen || kitchen[i].glowLocation == GameLocation.Any)
@@ -203,7 +205,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             nextTitle += nextIngr.GetTitleText();
             
-            string nextDesc = nextIngr.GetDescriptionText(this);
+            string nextDesc = nextIngr.GetDescriptionText(this, GameLocation.NextIngredient);
             if (nextDesc.Equals(string.Empty)) nextDesc = "\u200B";
 
             nextDesc = "```" + nextDesc + " ```";
@@ -214,12 +216,12 @@ namespace Aletta_s_Kitchen.GameRelated
             embed.AddField("\u200B", "\u200B");
 
             // The hand field
-            for (int i=0; i<this.player.hand.ingredients.Count; i++)
+            for (int i=0; i<this.player.hand.OptionsCount && i<3; i++)
             {
                 string handTitle = string.Empty;
                 string handDesc = string.Empty;
 
-                if (this.player.hand.ingredients[i] == null)
+                if (this.player.hand.IngredientAt(i) == null)
                 {
                     //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle = $"Empty Dish Slot {BotHandler.numToEmoji[i+1]}";
                     //else
@@ -228,21 +230,21 @@ namespace Aletta_s_Kitchen.GameRelated
                     continue;
                 }
 
-                handTitle = this.player.hand.ingredients[i].GetTitleText();
+                handTitle = this.player.hand.IngredientAt(i).GetTitleText();
 
                 //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
                 
-                if (this.player.hand.ingredients[i].GetDescriptionText(this).Equals(string.Empty))
+                if (this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand).Equals(string.Empty))
                 {
                     handDesc = "\u200B";
                 }
                 else
                 {
-                    handDesc = this.player.hand.ingredients[i].GetDescriptionText(this);
+                    handDesc = this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand);
 
-                    if (this.player.hand.ingredients[i].glowLocation == GameLocation.Hand || this.player.hand.ingredients[i].glowLocation == GameLocation.Any)
+                    if (this.player.hand.IngredientAt(i).glowLocation == GameLocation.Hand || this.player.hand.IngredientAt(i).glowLocation == GameLocation.Any)
                     {
-                        if (this.player.hand.ingredients[i].GlowCondition(this, i))
+                        if (this.player.hand.IngredientAt(i).GlowCondition(this, i))
                         {
                             handDesc = $"fix\n{handDesc}";
                         }
@@ -253,7 +255,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 embed.AddField(handTitle, handDesc, true);
             }
 
-            for (int i=this.player.hand.ingredients.Count; i<3; i++)
+            for (int i=this.player.hand.OptionsCount; i<3; i++)
             {
                 string handTitle = string.Empty;
                 string handDesc = string.Empty;
@@ -284,7 +286,7 @@ namespace Aletta_s_Kitchen.GameRelated
             {
                 case GameState.PickFromKitchen:
                     instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
-                    if (this.player.hand.ingredients.Count < 3) instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
+                    if (this.player.hand.OptionsCount < 3 && this.player.hand.OptionsCount < this.player.hand.handLimit) instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
                     else instrDescription = ":fork_knife_plate: - Cook your dish.";
                     break;
                 //case GameState.ChooseInHandForIngredient:
@@ -293,7 +295,8 @@ namespace Aletta_s_Kitchen.GameRelated
                 //    break;
                 case GameState.BeforeQuota:
                     instrTitle = "Quota this round! Do you want to cook your dish before the quota?";
-                    instrDescription = ":fork_knife_plate: - Cook your dish.\n:no_entry_sign: - Proceed without cooking.";
+                    //instrDescription = ":fork_knife_plate: - Cook your dish.\n:no_entry_sign: - Proceed without cooking.";
+                    instrDescription = ":fork_knife_plate: - Cook your dish.";
                     break;
                 default:
                     instrTitle = "Instructions";

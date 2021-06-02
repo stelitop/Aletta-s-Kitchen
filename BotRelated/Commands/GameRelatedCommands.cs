@@ -31,25 +31,14 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             DiscordMessage gameMessage = await ctx.RespondAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
             game.UIMessage = gameMessage;
 
-            List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>
+            for (int i=0; i<BotHandler.emojiButtons.Count; i++)
             {
-                DiscordEmoji.FromName(ctx.Client, ":one:"),
-                DiscordEmoji.FromName(ctx.Client, ":two:"),
-                DiscordEmoji.FromName(ctx.Client, ":three:"),
-                DiscordEmoji.FromName(ctx.Client, ":four:"),
-                DiscordEmoji.FromName(ctx.Client, ":five:"),
-                DiscordEmoji.FromName(ctx.Client, ":fork_knife_plate:"),
-                DiscordEmoji.FromName(ctx.Client, ":no_entry_sign:")
-            };
-
-            for (int i=0; i<emojiButtons.Count; i++)
-            {
-                await gameMessage.CreateReactionAsync(emojiButtons[i]).ConfigureAwait(false);
+                await gameMessage.CreateReactionAsync(BotHandler.emojiButtons[i]).ConfigureAwait(false);
             }
 
-            await game.UIMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
-
             game.gameState = GameState.PickFromKitchen;
+
+            await game.UIMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
 
             while (true)
             {

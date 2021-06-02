@@ -178,6 +178,15 @@
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\OnBeingPickedArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\TimerEffect.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Archived.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Beasts.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Demons.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Dragons.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Elementals.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Fruits.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Murlocs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\Vegetables.cs" />
+    <Compile Include="GameRelated\IngredientRelated\Game Ingredients\WithoutTribe.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredientAttribute.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameIngredients.cs" />
     <Compile Include="GameRelated\IngredientRelated\GameLocation.cs" />

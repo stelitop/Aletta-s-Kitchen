@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Aletta_s_Kitchen.BotRelated;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,5 +56,20 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             }
             return null;
         }
+
+        public Ingredient GetRandomIngredient()
+        {
+            int pick = BotHandler.globalRandom.Next(this.ingredients.Count);
+            return this.ingredients[pick].Copy();
+        }
+        public Ingredient GetRandomIngredient(RandomIngredientCondition condition)
+        {
+            List<Ingredient> subList = this.ingredients.FindAll(x => condition(x));
+
+            int pick = BotHandler.globalRandom.Next(subList.Count);
+            return subList[pick].Copy();
+        }
+
+        public delegate bool RandomIngredientCondition(Ingredient ingredient);
     }
 }

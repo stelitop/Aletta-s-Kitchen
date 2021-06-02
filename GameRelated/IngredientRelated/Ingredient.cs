@@ -15,6 +15,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         public Tribe tribe;
         public string text;
 
+        public int roundEntered = -1;
+
         public List<Effect> effects;
 
         public GameLocation glowLocation;
@@ -46,7 +48,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             if (this.tribe != Tribe.NoTribe) ret += $" - {this.tribe}";
             return ret;
         }
-        public virtual string GetDescriptionText(Game game)
+        public virtual string GetDescriptionText(Game game, GameLocation gameLocation)
         {
             return this.text;
         }
@@ -71,6 +73,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             ret.text = this.text;
             ret.glowLocation = this.glowLocation;
             ret.rarity = this.rarity;
+
+            ret.roundEntered = this.roundEntered;
 
             ret.effects.Clear();
 

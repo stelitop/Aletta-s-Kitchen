@@ -13,6 +13,8 @@ namespace Aletta_s_Kitchen.GameRelated
         Beast,
         Elemental,
         Dragon,
-        Demon
+        Demon,
+        Fruit,
+        Vegetable,
     }
 }

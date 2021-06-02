@@ -17,7 +17,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = "Aletta's Kitchen",
-                Color = DiscordColor.Gold
+                Color = DiscordColor.Azure
             };
 
             embed.AddField("About",
@@ -32,6 +32,11 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 "3) The kitchen holds a maximum of 5 ingredients. Whenever you select an ingredient, a new one takes its place. You can preview what the next ingredient will be.\n" +
                 "4) Once you cook your dish, the points will be tallied to your total score.\n" +
                 "5) You must meet an ever-increasing score quota every 5 turns or you will lose the game.```");
+
+            embed.AddField("How To Use The Bot",
+                "```1) To play, use the command a!play in a channel or in DMs.\n" +
+                "2) The bot would then create a message which would be used for the entire game.\n" +
+                "3) There would be reactions that act as buttons through which you interact with the game.```");
 
             await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
         }

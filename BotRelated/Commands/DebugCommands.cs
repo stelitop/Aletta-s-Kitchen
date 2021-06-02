@@ -159,6 +159,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 else BotHandler.playerGames[player.Id].player.kitchen.nextOption = ingr;
 
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
+
+                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
             }
         
             [Command("info")]
@@ -174,6 +176,20 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 {
                     await ctx.RespondAsync(ingr.GetFullInfo()).ConfigureAwait(false);
                 }
+            }
+        
+            [Command("setpoints")]
+            public async Task SetPoints(CommandContext ctx, DiscordUser player, int points)
+            {
+                if (!BotHandler.playerGames.ContainsKey(player.Id))
+                {
+                    await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":-1:")).ConfigureAwait(false);
+                    return;
+                }
+
+                BotHandler.playerGames[player.Id].player.curPoints = points;
+
+                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
             }
         }
     }

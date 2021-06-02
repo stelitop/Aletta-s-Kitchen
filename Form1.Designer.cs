@@ -63,6 +63,7 @@ namespace Aletta_s_Kitchen
             this.TextBoxConsole.Size = new System.Drawing.Size(567, 448);
             this.TextBoxConsole.TabIndex = 1;
             this.TextBoxConsole.TabStop = false;
+            this.TextBoxConsole.Visible = false;
             // 
             // label1
             // 

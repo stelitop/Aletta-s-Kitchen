@@ -11,6 +11,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         None,
         Kitchen,
         Hand,
+        NextIngredient,
         Any
     }
 }
