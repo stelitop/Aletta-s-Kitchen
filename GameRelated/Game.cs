@@ -212,8 +212,10 @@ namespace Aletta_s_Kitchen.GameRelated
             embed.AddField(nextTitle, nextDesc, true);
 
 
-            // Empty field to add some spacing
-            embed.AddField("\u200B", "\u200B");
+            // The Dish title
+            embed.AddField("\u200B", "\u200B", true);
+            embed.AddField("\u200B", "**The Dish**", true);
+            embed.AddField("\u200B", "\u200B", true);
 
             // The hand field
             for (int i=0; i<this.player.hand.OptionsCount && i<3; i++)
@@ -361,5 +363,34 @@ namespace Aletta_s_Kitchen.GameRelated
 
             if (this.gameState == GameState.GameOver) this.EndGame();
         }
+
+        public void RestOfGameBuff(RoGCondition condition, RoGBuff buff, bool includeHand = true)
+        {
+            foreach (var ingr in this.player.kitchen.GetAllNonNullIngredients())
+            {
+                if (condition(ingr)) buff(ingr);
+            }
+
+            if (includeHand)
+                foreach (var ingr in this.player.hand.GetAllIngredients())
+                {
+                    if (ingr == null) continue;
+                    if (condition(ingr)) buff(ingr);
+                }   
+
+            if (this.player.kitchen.nextOption != null)
+            {
+                if (condition(this.player.kitchen.nextOption)) buff(this.player.kitchen.nextOption);
+            }
+
+            foreach (var ingr in this.pool.ingredients)
+            {
+                if (ingr == null) continue;
+                if (condition(ingr)) buff(ingr);
+            }
+        }
+
+        public delegate bool RoGCondition(Ingredient ingr);
+        public delegate void RoGBuff(Ingredient ingr);
     }
 }

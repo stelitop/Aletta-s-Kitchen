@@ -48,5 +48,24 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             BotHandler.SetUserState(ctx.User.Id, UserState.Idle);
             if (BotHandler.playerGames.ContainsKey(ctx.User.Id)) BotHandler.playerGames.Remove(ctx.User.Id);
         }
+
+        [Command("report")]
+        public async Task UserReport(CommandContext ctx, [RemainingText]string report)
+        {
+            var channel = ctx.Guild.GetChannel(849630044288843786);
+
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+            {
+                Color = DiscordColor.Brown,
+                Title = $"{ctx.User.Username} Submitted a Report",
+                Description = report,
+                Timestamp = ctx.Message.Timestamp,
+                Footer = new DiscordEmbedBuilder.EmbedFooter()
+            };
+            embed.Footer.IconUrl = ctx.User.AvatarUrl;
+            embed.Footer.Text = "\u200B";
+
+            await channel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
+        }
     }
 }

@@ -27,6 +27,17 @@ namespace Aletta_s_Kitchen.BotRelated
             { 5, ":five:"}
         };
 
+        public static Dictionary<Tribe, string> tribeToEmoji { get; } = new Dictionary<Tribe, string>{
+            { Tribe.NoTribe, ""},
+            { Tribe.Beast, ":lion_face:"},
+            { Tribe.Demon, ":smiling_imp:"},
+            { Tribe.Dragon, ":dragon:"},
+            { Tribe.Elemental, ":cloud_tornado:"},
+            { Tribe.Fruit, ":apple:"},
+            { Tribe.Murloc, ":fish:"},
+            { Tribe.Vegetable, ":carrot:"},
+        };
+
         public static List<DiscordEmoji> emojiButtons = new List<DiscordEmoji>();
 
         public static UserState GetUserState(ulong id)

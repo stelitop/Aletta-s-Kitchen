@@ -1,4 +1,5 @@
-﻿using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
+﻿using Aletta_s_Kitchen.BotRelated;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,7 +46,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         public string GetTitleText()
         {
             string ret = $"{this.name}\n{this.points}p";
-            if (this.tribe != Tribe.NoTribe) ret += $" - {this.tribe}";
+            if (this.tribe != Tribe.NoTribe) ret += $" - {BotHandler.tribeToEmoji[this.tribe]} {this.tribe}";
             return ret;
         }
         public virtual string GetDescriptionText(Game game, GameLocation gameLocation)

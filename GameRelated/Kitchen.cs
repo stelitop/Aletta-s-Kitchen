@@ -1,6 +1,7 @@
 ﻿using Aletta_s_Kitchen.BotRelated;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +59,7 @@ namespace Aletta_s_Kitchen.GameRelated
             _options[newSpot] = ret;
             this.FillNextOption(game);
 
-            EffectArgs args = new EffectArgs(EffectType.OnEnteringKitchen);
+            EffectArgs args = new EffectArgs.EnteringKitchenArgs(EffectType.OnEnteringKitchen, newSpot);
             await Effect.CallEffects(ret.effects, EffectType.OnEnteringKitchen, ret, game, args);                       
 
             return ret;
@@ -103,10 +104,23 @@ namespace Aletta_s_Kitchen.GameRelated
 
             for (int i=0; i<filledSpots.Count; i++)
             {
-                EffectArgs args = new EffectArgs(EffectType.OnEnteringKitchen);
+                EffectArgs args = new EffectArgs.EnteringKitchenArgs(EffectType.OnEnteringKitchen, filledSpots[i]);
                 await Effect.CallEffects(this._options[filledSpots[i]].effects, EffectType.OnEnteringKitchen, this._options[filledSpots[i]], game, args);
             }
         }
+
+        /*
+         * Pick Ingredient Order:
+         * 1) Clear Feedback
+         * 2) Check if it can be bought
+         * 3) Clear the kitchen spot
+         * 4) Add to hand
+         * 5) Trigger OnBeingPicked
+         * 6) Check and if possible trigger Outcast effects
+         * 7) Add to play history
+         * 8) Trigger After you pick an ingredient
+         * 9) Start next round         
+         */
         public async Task PickIngredient(Game game, int kitchenPos)
         {
             if (0 <= kitchenPos && kitchenPos < this._options.Count)
@@ -129,12 +143,37 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 this._options[kitchenPos] = null;
 
-                var newIngrInfo = game.player.hand.AddIngredient(ingr);
+                var newIngrInfo = game.player.hand.AddIngredient(ingr);                
 
-                EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.OnBeingPicked, kitchenPos, newIngrInfo.handPos);
-                await Effect.CallEffects(ingr.effects, EffectType.OnBeingPicked, newIngrInfo.ingredient, game, args);                
+                EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.WhenPicked, kitchenPos, newIngrInfo.handPos);
+                await Effect.CallEffects(ingr.effects, EffectType.WhenPicked, newIngrInfo.ingredient, game, args); 
+                
+                if (CommonConditions.OutcastCondition(kitchenPos))
+                {
+                    args = new EffectArgs.OnBeingPickedArgs(EffectType.Outcast, kitchenPos, newIngrInfo.handPos);
+                    await Effect.CallEffects(ingr.effects, EffectType.Outcast, newIngrInfo.ingredient, game, args);
+                }
 
                 game.player.pickHistory.Add(ingr.Copy());
+
+                //trigger when picked effects
+                foreach (var kitchenIngr in game.player.kitchen.GetAllNonNullIngredients())
+                {
+                    if (kitchenIngr == newIngrInfo.ingredient) continue;
+
+                    var ingredientPickArgs = new EffectArgs.IngredientPickArgs(EffectType.AfterYouPickAnIngerdientInKitchen, newIngrInfo.ingredient);
+
+                    await Effect.CallEffects(kitchenIngr.effects, EffectType.AfterYouPickAnIngerdientInKitchen, kitchenIngr, game, ingredientPickArgs);
+                }
+
+                foreach (var handIngr in game.player.hand.GetAllNonNullIngredients())
+                {
+                    if (handIngr == newIngrInfo.ingredient) continue;
+
+                    var ingredientPickArgs = new EffectArgs.IngredientPickArgs(EffectType.AfterYouPickAnIngerdientInHand, newIngrInfo.ingredient);
+
+                    await Effect.CallEffects(handIngr.effects, EffectType.AfterYouPickAnIngerdientInHand, handIngr, game, ingredientPickArgs);
+                }
 
                 await game.NextRound();
             }
@@ -149,6 +188,8 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, pos, GameLocation.Kitchen);
                 await Effect.CallEffects(ingr.effects, EffectType.Deathrattle, ingr, game, args);
+
+                await this.FillEmptySpots(game);
             }
         }
         public async Task DestroyMultipleIngredients(Game game, List<int> pos)
@@ -169,6 +210,8 @@ namespace Aletta_s_Kitchen.GameRelated
                 EffectArgs args = new EffectArgs.DeathrattleArgs(EffectType.Deathrattle, posFiltered[i], GameLocation.Kitchen);
                 await Effect.CallEffects(ingredients[i].effects, EffectType.Deathrattle, ingredients[i], game, args);
             }
+
+            await this.FillEmptySpots(game);
         }
         public void ReplaceIngredient(int pos, Ingredient newIngr)
         {
@@ -185,6 +228,22 @@ namespace Aletta_s_Kitchen.GameRelated
         public List<Ingredient> GetAllIngredients()
         {
             return _options;
+        }
+        public List<Ingredient> GetAllNonNullIngredients()
+        {
+            List<Ingredient> ret = new List<Ingredient>();
+
+            foreach (var ingr in _options) if (ingr != null) ret.Add(ingr);
+
+            return ret;
+        }
+        public List<int> GetAllIndexes()
+        {
+            List<int> ret = new List<int>();
+
+            for (int i = 0; i < this._options.Count; i++) if (this._options[i] != null) ret.Add(i);
+
+            return ret;
         }
         
     }

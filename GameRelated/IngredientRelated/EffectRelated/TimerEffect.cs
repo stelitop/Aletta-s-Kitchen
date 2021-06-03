@@ -28,6 +28,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
             }
         }
 
+        public override Effect Copy()
+        {
+            TimerEffect ret = (TimerEffect)base.Copy();
+
+            ret.tickInterval = this.tickInterval;
+            ret.currentTime = this.currentTime;
+
+            return ret;
+        }
+
         protected abstract Task Trigger(Ingredient caller, Game game, EffectArgs args);
     }
 }

@@ -26,6 +26,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         private List<Ingredient> _ingredients;
 
         public int OptionsCount { get { return _ingredients.Count; } }
+        public int NonNullOptions
+        {
+            get
+            {
+                int ret = 0;
+                foreach (var ingr in _ingredients) if (ingr != null) ret++;
+                return ret;
+            }
+        }
 
         public Hand()
         {
@@ -39,12 +48,20 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         }
         public Ingredient IngredientAt(int handPos)
         {
-            if (handPos >= this._ingredients.Count) return null;
-            return this._ingredients[handPos];
+            if (0 <= handPos && handPos < this._ingredients.Count) return this._ingredients[handPos];
+            else return null;
         }
         public List<Ingredient> GetAllIngredients()
         {
             return _ingredients;
+        }
+        public List<Ingredient> GetAllNonNullIngredients()
+        {
+            List<Ingredient> ret = new List<Ingredient>();
+
+            foreach (var ingr in _ingredients) if (ingr != null) ret.Add(ingr);
+
+            return ret;
         }
         public void ReplaceIngredient(int pos, Ingredient newIngr)
         {
@@ -96,6 +113,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
          * 2) Remove ingredients from Hand
          * 3) Call all OnBeingCookedAfter effects
          * 4) Add the Ingredients to the Cooked history
+         * 5) Trigger After You Cook effects
          */
         public async Task Cook(Game game)
         {
@@ -129,12 +147,21 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 await Effect.CallEffects(this._ingredients[i].effects, EffectType.OnBeingCookedBefore, this._ingredients[i], game, args);
             }
 
-            var handTemp = this._ingredients.ToList();
-            //2)
-            this.Clear();
+
+            dishPoints = 0;
+            for (int i = 0; i < this._ingredients.Count; i++)
+            {
+                if (this._ingredients[i] == null) continue;
+                dishPoints += this._ingredients[i].points;
+            }
 
             args.calledEffect = EffectType.OnBeingCookedAfter;
+            args.dishPoints = dishPoints;
 
+            //2)
+            var handTemp = this._ingredients.ToList();
+            this.Clear();
+                    
             //3)
             for (int i = 0; i < handTemp.Count; i++)
             {
@@ -155,6 +182,13 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
             feedbackMsg += $" worth {args.dishPoints} points!";
             game.feedback.Add(feedbackMsg);
+
+            //5)
+            foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
+            {
+                var afterCookArgs = new EffectArgs.AfterCookArgs(EffectType.AfterYouCook, handTemp);
+                await Effect.CallEffects(ingr.effects, EffectType.AfterYouCook, ingr, game, afterCookArgs);
+            }
         }
     }
 }
