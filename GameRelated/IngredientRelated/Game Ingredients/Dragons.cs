@@ -54,20 +54,13 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class StovebellyGriller : Ingredient
         {
-            public StovebellyGriller() : base("Stovebelly Griller", 2, Rarity.Rare, Tribe.Dragon, "Cook: If your kitchen has a Dragon, gain +3p.")
+            public StovebellyGriller() : base("Stovebelly Griller", 2, Rarity.Rare, Tribe.Dragon, "Cook: If your kitchen has a Dragon, gain +2p permanently.")
             {
                 this.glowLocation = GameLocation.Hand;
                 this.effects.Add(new EF());
             }
 
-            public override bool GlowCondition(Game game, int kitchenPos)
-            {
-                foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
-                {
-                    if (ingr.tribe == Tribe.Dragon) return true;
-                }
-                return false;
-            }
+            public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.DragonCondition(game);
 
             private class EF : Effect
             {
@@ -89,9 +82,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     if (hasDragon)
                     {
-                        cookArgs.dishPoints += 3;
-                        caller.points += 3;
-                        game.feedback.Add("Steamscale Soba gains +3p.");
+                        game.RestOfGameBuff(x => x.name == "Stovebelly Griller", x => { x.points += 2; });
+
+                        game.feedback.Add("Stovebelly Griller gains +2p permanently.");
                     }
 
                     return Task.CompletedTask;
@@ -138,7 +131,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 {
                     if (game.player.hand.NonNullOptions != game.player.hand.handLimit) return Task.CompletedTask;
                     int best = -1;
-                    foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients()) if (best < ingr.points) best = ingr.points;
+                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients()) if (best < ingr.points) best = ingr.points;
 
                     if (caller.points != best) return Task.CompletedTask;
 
@@ -153,7 +146,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 if (game.player.hand.NonNullOptions != game.player.hand.handLimit) return false;
                 int best = -1;
-                foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients()) if (best < ingr.points) best = ingr.points;
+                foreach (var ingr in game.player.hand.GetAllNonNullIngredients()) if (best < ingr.points) best = ingr.points;
 
                 if (this.points != best) return false;
 
@@ -203,7 +196,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     var pick = cands[BotHandler.globalRandom.Next(cands.Count)];
                     game.feedback.Add($"High Tea Lord Prestor makes {pick.name} return to your kitchen next turn.");
-                    game.player.kitchen.nextOption = pick.Copy();
+                    game.player.kitchen.nextOption = game.pool.GetVanillaIngredient(pick.name);
 
                     return Task.CompletedTask;
                 }

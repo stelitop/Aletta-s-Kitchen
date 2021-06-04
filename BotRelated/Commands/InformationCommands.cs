@@ -29,14 +29,15 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             embed.AddField("How To Play",
                 "```1) The game consists of the kitchen and your dish.\n" +
                 "2) You can select ingredients from the kitchen to add to your dish. Your dish can only hold a maximum of 3 ingredients.\n" +
-                "3) The kitchen holds a maximum of 5 ingredients. Whenever you select an ingredient, a new one takes its place. You can preview what the next ingredient will be.\n" +
-                "4) Once you cook your dish, the points will be tallied to your total score.\n" +
-                "5) You must meet an ever-increasing score quota every 5 turns or you will lose the game.```");
+                "3) The kitchen holds 5 ingredients. Whenever you select an ingredient, a new one takes its place. You can preview what the next ingredient will be.\n" +
+                "4) Once you've picked some ingredient, you can cook your dish. The points will be tallied to your total score. The dish doesn't need to be full to be cooked.\n" +
+                "5) You must meet an ever-increasing score quota every 5 turns or you will lose the game. After you pick an ingredient, the game goes to the next round.```");
 
             embed.AddField("How To Use The Bot",
                 "```1) To play, use the command a!play in a channel or in DMs.\n" +
                 "2) The bot would then create a message which would be used for the entire game.\n" +
-                "3) There would be reactions that act as buttons through which you interact with the game.```");
+                "3) There would be reactions that act as buttons through which you interact with the game." +
+                "4) You can use the emojis with number 1-5 to pick ingredients, or the fork & knife to cook your dish. Instructions would be provided.```");
 
             await ctx.RespondAsync(embed: embed.Build()).ConfigureAwait(false);
         }

@@ -32,12 +32,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.WhenPicked) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     //game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Murloc Tinyfin"));
-                    game.player.hand.AddIngredient(new MurlocScout());
-
-                    return Task.CompletedTask;
+                    await game.player.hand.AddIngredient(game, new MurlocScout());
                 }
             }
         }
@@ -221,14 +219,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             private class EF : Effect
             {
                 public EF() : base(new List<EffectType> { EffectType.WhenPicked, EffectType.OnBeingCookedAfter }) { }
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     //game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Murloc Tinyfin"));
-                    game.player.hand.AddIngredient(new MurlocScout());
+                    await game.player.hand.AddIngredient(game, new MurlocScout());
 
-                    if (args.calledEffect == EffectType.OnBeingCookedAfter) game.feedback.Add("Saltroc creates a 1p Murloc in your dish.");
-
-                    return Task.CompletedTask;
+                    if (args.calledEffect == EffectType.OnBeingCookedAfter) game.feedback.Add("Saltroc creates a 1p Murloc in your dish.");                    
                 }
             }
         }
@@ -250,6 +246,33 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                         Ingredient newIngr = new Ingredient();
 
                         game.player.kitchen.ReplaceIngredient(i, game.pool.GetRandomIngredient(x => x.tribe == Tribe.Murloc && x.name != "Ol' Salty"));
+                    }
+
+                    return Task.CompletedTask;
+                }
+            }
+        }
+
+        [GameIngredient]
+        public class Yummyfin : Ingredient
+        {
+            public Yummyfin() : base("Yummyfin", 2, Rarity.Rare, Tribe.Murloc, "Whenever you pick or create another Murloc, give it +1p.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.AfterYouAddIngredientToHand) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    var addArgs = args as EffectArgs.IngredientAddedToHand;
+
+                    if (addArgs.ingredient.tribe == Tribe.Murloc)
+                    {
+                        addArgs.ingredient.points++;
+
+                        game.feedback.Add($"Yummyfin gives {addArgs.ingredient.name} 1p.");
                     }
 
                     return Task.CompletedTask;

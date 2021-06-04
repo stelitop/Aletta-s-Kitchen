@@ -12,14 +12,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 		WhenPicked,
 		OnBeingCookedBefore, //called before the ingredients are removed from hand, should be used usually
 		OnBeingCookedAfter, //called after the ingredients are removed from hand
-		WheneverThisGainsPoints,
-		WheneverAddPointsToScore,
+		WheneverThisGainsPoints, //not done currently
+		WheneverAddPointsToScore, //not done currently
 		OnEnteringKitchen,
 		Deathrattle,
 		Timer,
 		Outcast,
 		AfterYouPickAnIngerdientInHand,
 		AfterYouPickAnIngerdientInKitchen,
-		AfterYouCook
+		AfterYouCook,
+		AfterYouAddIngredientToHand,
+		WheneverIngredientEntersKitchen,
 	}
 }

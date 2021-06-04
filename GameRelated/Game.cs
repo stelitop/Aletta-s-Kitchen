@@ -55,16 +55,15 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             this.curRound++;
 
-            await this.player.kitchen.FillEmptySpots(this);
-            int curIngrInShop = this.player.kitchen.OptionsCount;
-
-            for (int i=0; i<curIngrInShop; i++)
+            for (int i = 0; i < this.player.kitchen.OptionsCount; i++)
             {
                 if (this.player.kitchen.OptionAt(i) == null) continue;
 
                 EffectArgs args = new EffectArgs.TimerArgs(EffectType.Timer, i);
                 await Effect.CallEffects(this.player.kitchen.OptionAt(i).effects, EffectType.Timer, this.player.kitchen.OptionAt(i), this, args);
             }
+
+            await this.player.kitchen.FillEmptySpots(this);            
 
             this.gameState = GameState.PickFromKitchen;            
 
@@ -104,8 +103,8 @@ namespace Aletta_s_Kitchen.GameRelated
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = $"{this.player.name}'s Kitchen",
-                Color = DiscordColor.Azure
-            };            
+                Color = DiscordColor.Azure,
+            };
 
             if (this.gameState == GameState.Loading)
             {
@@ -129,11 +128,16 @@ namespace Aletta_s_Kitchen.GameRelated
                 return embed;
             }
 
-            string kitchentStatsString = $"Current Score: {this.player.curPoints}p\nCurrent Round: {this.curRound}";
+            embed.Footer = new DiscordEmbedBuilder.EmbedFooter
+            {
+                Text = "To end early, type a!endgame."
+            };
+
+            string kitchentStatsString = $"Current Score: {BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
             
             if (this.goalGenerator.CurrentGoal(this).round - this.curRound == 1)
             {
-                kitchentStatsString += "\n*(quota next turn!)*";
+                kitchentStatsString += "\n***(quota next turn!)***";
             }
 
 
@@ -173,8 +177,14 @@ namespace Aletta_s_Kitchen.GameRelated
                 }
 
                 string kitchenTitle = kitchen[i].GetTitleText();
-                if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
-                if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3) kitchenTitle += $" - {BotHandler.numToEmoji[i+1]}";
+
+                if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3)
+                {
+                    kitchenTitle = kitchen[i].GetTitleText(i + 1);
+                    //kitchenTitle += $" - {BotHandler.numToEmoji[i + 1]}";
+                }
+
+                if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";                
 
                 string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
                 if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
@@ -273,7 +283,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             for (int i=0; i<this.feedback.Count; i++)
             {
-                feedbackMsg += $"- {this.feedback[i]}\n";
+                feedbackMsg += $":asterisk: {this.feedback[i]}\n";
             }
 
             if (!(this.feedback.Count == 0 || feedbackMsg.Equals(string.Empty)))
@@ -359,7 +369,7 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
 
-            await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);
+            await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);            
 
             if (this.gameState == GameState.GameOver) this.EndGame();
         }

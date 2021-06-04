@@ -40,6 +40,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
             await game.UIMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
 
+            //await Analysis.DiscordEmbedAnalysis(game.GetUIEmbed(), ctx.Channel);
+
             while (true)
             {
                 if (game.gameState == GameState.GameOver) break;
@@ -52,7 +54,17 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
         [Command("report")]
         public async Task UserReport(CommandContext ctx, [RemainingText]string report)
         {
-            var channel = ctx.Guild.GetChannel(849630044288843786);
+            DiscordChannel channel = null;
+
+            try
+            {
+                channel = ctx.Guild.GetChannel(849630044288843786);
+            }
+            catch(Exception)
+            {
+                await ctx.Channel.SendMessageAsync("Your report couldn't be send. There was a problem with finding the reports channel.");
+                return;
+            }
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
@@ -66,6 +78,37 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             embed.Footer.Text = "\u200B";
 
             await channel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
+        }
+
+        [Command("feedback")]
+        public async Task UserFeedback(CommandContext ctx, [RemainingText] string feedback)
+        {
+            DiscordChannel channel = null;
+
+            try
+            {
+                channel = ctx.Guild.GetChannel(849961675255054346);
+            }
+            catch (Exception)
+            {
+                await ctx.Channel.SendMessageAsync("Your feedback couldn't be send. There was a problem with finding the feedback channel.");
+                return;
+            }
+
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+            {
+                Color = DiscordColor.Azure,
+                Title = $"{ctx.User.Username} Submitted Feedback",
+                Description = feedback,
+                Timestamp = ctx.Message.Timestamp,
+                Footer = new DiscordEmbedBuilder.EmbedFooter()
+            };
+            embed.Footer.IconUrl = ctx.User.AvatarUrl;
+            embed.Footer.Text = "\u200B";
+
+            await channel.SendMessageAsync(embed: embed.Build()).ConfigureAwait(false);
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
         }
     }
 }

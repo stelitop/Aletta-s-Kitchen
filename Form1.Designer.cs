@@ -40,6 +40,7 @@ namespace Aletta_s_Kitchen
             this.label2 = new System.Windows.Forms.Label();
             this.ButtonBotStop = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // ButtonBotStart
@@ -63,7 +64,6 @@ namespace Aletta_s_Kitchen
             this.TextBoxConsole.Size = new System.Drawing.Size(567, 448);
             this.TextBoxConsole.TabIndex = 1;
             this.TextBoxConsole.TabStop = false;
-            this.TextBoxConsole.Visible = false;
             // 
             // label1
             // 
@@ -153,11 +153,22 @@ namespace Aletta_s_Kitchen
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(292, 282);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(119, 28);
+            this.button5.TabIndex = 11;
+            this.button5.Text = "Running Games";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1142, 570);
+            this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.ButtonBotStop);
             this.Controls.Add(this.label2);
@@ -171,6 +182,7 @@ namespace Aletta_s_Kitchen
             this.Controls.Add(this.ButtonBotStart);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -190,6 +202,7 @@ namespace Aletta_s_Kitchen
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button ButtonBotStop;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
     }
 }
 

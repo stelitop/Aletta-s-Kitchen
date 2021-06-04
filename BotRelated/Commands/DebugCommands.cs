@@ -191,6 +191,13 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                 await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
             }
+
+            [Command("throw")]
+            public async Task ThrowException(CommandContext ctx)
+            {
+                List<int> l = new List<int>();
+                l[-1] = 1;
+            }
         }
     }
 }

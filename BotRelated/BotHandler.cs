@@ -20,12 +20,31 @@ namespace Aletta_s_Kitchen.BotRelated
         private static Dictionary<ulong, UserState> _userState = new Dictionary<ulong, UserState>();
 
         public static Dictionary<int, string> numToEmoji { get; } = new Dictionary<int, string>{
+            { 0, ":zero:"},
             { 1, ":one:"},
             { 2, ":two:"},
             { 3, ":three:"},
             { 4, ":four:"},
-            { 5, ":five:"}
+            { 5, ":five:"},
+            { 6, ":six:"},
+            { 7, ":seven:"},
+            { 8, ":eight:"},
+            { 9, ":nine:"},
         };
+        public static string IntToEmojis(int x)
+        {
+            if (x == 0) return numToEmoji[0];
+
+            string ret = string.Empty;
+
+            while (x > 0)
+            {
+                ret = numToEmoji[x%10] + ret;
+                x /= 10;
+            }
+
+            return ret;
+        }
 
         public static Dictionary<Tribe, string> tribeToEmoji { get; } = new Dictionary<Tribe, string>{
             { Tribe.NoTribe, ""},

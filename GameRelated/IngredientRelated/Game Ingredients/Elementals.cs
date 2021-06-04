@@ -84,7 +84,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class MountainDewdrop : Ingredient
         {
-            public MountainDewdrop() : base("Mountain Dewdrop", 2, Rarity.Common, Tribe.Elemental, "If you picked an Elemental last, gain +1p.")
+            public MountainDewdrop() : base("Mountain Dewdrop", 2, Rarity.Common, Tribe.Elemental, "If you picked an Elemental last, gain +2p.")
             {
                 this.glowLocation = GameLocation.Kitchen;
                 this.effects.Add(new EF());
@@ -99,8 +99,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
                     {
-                        caller.points++;
-                        game.feedback.Add("Your Mountain Dewdrop gains +1 point.");
+                        caller.points+=2;
+                        game.feedback.Add("Your Mountain Dewdrop gains +2p.");
                     }
 
                     return Task.CompletedTask;
@@ -198,9 +198,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     for (int i = 0; i < ingrs.Count; i++) if (ingrs[i] != null) indexes.Add(i);
 
-                    game.player.kitchen.ReplaceIngredient(indexes[BotHandler.globalRandom.Next(indexes.Count)], game.pool.GetVanillaIngredient("Gellato Gloop"));
+                    int index = indexes[BotHandler.globalRandom.Next(indexes.Count)];
 
-                    game.feedback.Add("Gellato Gloop replaces an ingredient in your kitchen with a Gellato Gloop.");
+                    game.feedback.Add($"Gellato Gloop transforms {game.player.kitchen.OptionAt(index).name} int a Gellato Gloop.");
+
+                    game.player.kitchen.ReplaceIngredient(index, game.pool.GetVanillaIngredient("Gellato Gloop"));                    
 
                     return Task.CompletedTask;
                 }

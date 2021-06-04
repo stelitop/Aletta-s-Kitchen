@@ -77,7 +77,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class ChestNut : Ingredient
         {
-            public ChestNut() : base("Chest Nut", 0, Rarity.Rare, Tribe.Vegetable, "Every 3 turns in your kitchen, add 15 points to your total score.")
+            public ChestNut() : base("Chest Nut", 0, Rarity.Rare, Tribe.Vegetable, "Every 3 turns in your kitchen, add 12 points to your total score.")
             {
                 this.effects.Add(new EF());
             }
@@ -87,9 +87,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 protected override Task Trigger(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.player.curPoints += 15;
+                    game.player.curPoints += 12;
 
-                    game.feedback.Add("Chest Nut adds 15p to your total score.");
+                    game.feedback.Add("Chest Nut adds 12p to your total score.");
 
                     return Task.CompletedTask;
                 }
@@ -117,20 +117,20 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HotPotato : Ingredient
         {
-            public HotPotato() : base("Hot Potato", 0, Rarity.Epic, Tribe.Vegetable, "After 10 turns in your kitchen, destroy this and give all ingredients +5 this game.")
+            public HotPotato() : base("Hot Potato", 0, Rarity.Epic, Tribe.Vegetable, "After 12 turns in your kitchen, destroy this and give all ingredients +2 this game.")
             {
                 this.effects.Add(new EF());
             }
 
             private class EF : TimerEffect
             {
-                public EF() : base(10) { }
+                public EF() : base(12) { }
 
                 protected override async Task Trigger(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.feedback.Add("Hot Potato gives all ingredients this game +5p.");
+                    game.feedback.Add("Hot Potato gives all ingredients this game +2p.");
 
-                    game.RestOfGameBuff(x => true, x => { x.points += 5; });
+                    game.RestOfGameBuff(x => true, x => { x.points += 2; });
 
                     var timerArgs = args as EffectArgs.TimerArgs;
                     await game.player.kitchen.DestroyIngredient(game, timerArgs.kitchenPos);

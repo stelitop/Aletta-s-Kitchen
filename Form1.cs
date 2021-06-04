@@ -49,6 +49,10 @@ namespace Aletta_s_Kitchen
             ButtonBotStart.Enabled = true;
             ButtonBotStop.Enabled = false;
         }
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            BotHandler.bot.StopBot();
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -88,7 +92,7 @@ namespace Aletta_s_Kitchen
             }
         }
 
-        private async void button3_Click(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
             ListBoxFeedback.Items.Clear();
 
@@ -113,10 +117,19 @@ namespace Aletta_s_Kitchen
 
             ListBoxFeedback.Items.Add($"Next Ingredient: {game.player.kitchen.nextOption.GetFullInfo()}");
         }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            ListBoxFeedback.Items.Clear();
+
+            ListBoxFeedback.Items.Add(BotHandler.playerGames.Count());
+        }
     }
 
     public class ControlWriter : TextWriter
     {
+        private const int ConsoleCharLimit = 1500;
+
         private readonly TextBox textBox;
         public ControlWriter(TextBox tb)
         {
@@ -134,7 +147,7 @@ namespace Aletta_s_Kitchen
                 this.textBox.Text += value + Environment.NewLine;
             }
 
-            this.textBox.Text = string.Empty;
+            if (this.textBox.Text.Length > ConsoleCharLimit) this.textBox.Text = this.textBox.Text.Remove(0, this.textBox.Text.Length - ConsoleCharLimit);
         }
         public override void WriteLine(string value)
         {
@@ -147,7 +160,7 @@ namespace Aletta_s_Kitchen
                 this.textBox.Text += value + Environment.NewLine;
             }
 
-            this.textBox.Text = string.Empty;
+            if (this.textBox.Text.Length > ConsoleCharLimit) this.textBox.Text = this.textBox.Text.Remove(0, this.textBox.Text.Length - ConsoleCharLimit);
         }
 
         public override Encoding Encoding

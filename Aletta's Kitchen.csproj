@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bot.cs" />
+    <Compile Include="BotRelated\Analysis.cs" />
     <Compile Include="BotRelated\BotHandler.cs" />
     <Compile Include="BotRelated\Commands\DebugCommands.cs" />
     <Compile Include="BotRelated\Commands\GameRelatedCommands.cs" />
@@ -174,6 +175,7 @@
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\DeathrattleArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\Effect.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\EffectArgs.cs" />
+    <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\IngredientAddedToHand.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectType.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\EnteringKitchenArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\IngredientPickArgs.cs" />

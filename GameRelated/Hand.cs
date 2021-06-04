@@ -70,13 +70,33 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 _ingredients[pos] = newIngr;
             }
         }
-        public NewIngredientAddedData AddIngredient(Ingredient newIngr)
+
+        private async Task TriggerIngredientAddedToHand(Game game, Ingredient newIngr)
+        {
+            foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
+            {
+                var args = new EffectArgs.IngredientAddedToHand(EffectType.AfterYouAddIngredientToHand, newIngr);
+                await Effect.CallEffects(ingr.effects, EffectType.AfterYouAddIngredientToHand, ingr, game, args);
+            }
+
+            foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
+            {
+                if (ingr == newIngr) continue;
+
+                var args = new EffectArgs.IngredientAddedToHand(EffectType.AfterYouAddIngredientToHand, newIngr);
+                await Effect.CallEffects(ingr.effects, EffectType.AfterYouAddIngredientToHand, ingr, game, args);
+            }
+        }
+        public async Task<NewIngredientAddedData> AddIngredient(Game game, Ingredient newIngr)
         {
             for (int i = 0; i < this._ingredients.Count; i++)
             {
                 if (this._ingredients[i] == null)
                 {
                     this._ingredients[i] = newIngr;
+
+                    await TriggerIngredientAddedToHand(game, newIngr);                    
+
                     return new NewIngredientAddedData(this._ingredients[i], i);
                 }
             }
@@ -84,6 +104,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             if (this._ingredients.Count < this.handLimit)
             {
                 this._ingredients.Add(newIngr);
+                await TriggerIngredientAddedToHand(game, newIngr);
                 return new NewIngredientAddedData(this._ingredients.Last(), this._ingredients.Count-1);
             }
 

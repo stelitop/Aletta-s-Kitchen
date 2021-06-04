@@ -184,13 +184,13 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class Squash : Ingredient
         {
-            public Squash() : base("Squash", 3, Rarity.Rare, Tribe.Fruit, "When this enters the kitchen, destroy all ingredients with less points. Gain +1 for each.")
+            public Squash() : base("Squash", 3, Rarity.Rare, Tribe.Fruit, "When picked, destroy all ingredients with less points. Gain +1 for each.")
             {
                 this.effects.Add(new EF());
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.OnEnteringKitchen) { }
+                public EF() : base(EffectType.WhenPicked) { }
 
                 public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
@@ -355,6 +355,31 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     await game.player.kitchen.DestroyMultipleIngredients(game, pos);
                     game.player.kitchen.ReplaceIngredient(reserved, game.pool.GetVanillaIngredient("Grapes of Wrath"));
+                }
+            }
+        }
+
+        [GameIngredient]
+        public class CherryOnTop : Ingredient
+        {
+            public CherryOnTop() : base("Cherry on Top", 1, Rarity.Common, Tribe.Fruit, "Whenever an ingredient enters your kitchen, give it +1p.")
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.WheneverIngredientEntersKitchen) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    var enterArgs = args as EffectArgs.EnteringKitchenArgs;
+
+                    if (game.player.kitchen.OptionAt(enterArgs.kitchenPos) == null) return Task.CompletedTask;
+
+                    game.player.kitchen.OptionAt(enterArgs.kitchenPos).points++;
+                    game.feedback.Add($"Cherry on Top gives {game.player.kitchen.OptionAt(enterArgs.kitchenPos).name} +1p.");
+
+                    return Task.CompletedTask;
                 }
             }
         }

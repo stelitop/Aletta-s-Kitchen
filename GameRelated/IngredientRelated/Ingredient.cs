@@ -43,9 +43,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             this.effects = new List<Effect>();
         }
 
-        public string GetTitleText()
+        public string GetTitleText(int emojiIndex = -1)
         {
-            string ret = $"{this.name}\n{this.points}p";
+            string ret = $"{this.name}\n";
+
+            if (emojiIndex != -1 && emojiIndex < 10)
+            {
+                ret += $"{BotHandler.numToEmoji[emojiIndex]} - ";
+            }
+
+            ret += $"{this.points}p";
             if (this.tribe != Tribe.NoTribe) ret += $" - {BotHandler.tribeToEmoji[this.tribe]} {this.tribe}";
             return ret;
         }

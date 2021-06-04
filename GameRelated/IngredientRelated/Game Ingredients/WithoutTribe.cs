@@ -13,7 +13,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class JadeLotus : Ingredient
         {
-            public JadeLotus() : base("Jade Lotus", 0, Rarity.Common, Tribe.NoTribe, "Cook: Gain 1p for each Jade Lotus you've cooked this game.")
+            public JadeLotus() : base("Jade Lotus", 1, Rarity.Common, Tribe.NoTribe, "Cook: Gain 1p for each Jade Lotus you've cooked this game.")
             {
                 this.effects.Add(new EF());
             }
@@ -79,11 +79,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.WhenPicked) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Jade Lotus"));
-
-                    return Task.CompletedTask;
+                    await game.player.hand.AddIngredient(game, game.pool.GetVanillaIngredient("Jade Lotus"));                    
                 }
             }
         }
@@ -99,11 +97,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(new List<EffectType> { EffectType.WhenPicked, EffectType.OnEnteringKitchen, EffectType.OnBeingCookedAfter }) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Jade Lotus"));
+                    await game.player.hand.AddIngredient(game, game.pool.GetVanillaIngredient("Jade Lotus"));
 
-                    return Task.CompletedTask;
+                    game.feedback.Add("Aya Blackpaw's Jade Buffet created a Jade Lotus in your dish.");
                 }
             }
         }
@@ -471,13 +469,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.WhenPicked) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     for (int i=0; i<2; i++)
                     {
-                        game.player.hand.AddIngredient(game.pool.GetRandomIngredient());
+                        await game.player.hand.AddIngredient(game, game.pool.GetRandomIngredient());
                     }
-                    return Task.CompletedTask;
                 }
             }
         }
@@ -516,6 +513,50 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     return Task.CompletedTask;
                 }
+            }
+        }
+
+
+
+        [GameIngredient]
+        public class CalamariOfNZoth : Ingredient
+        {
+            public CalamariOfNZoth() : base("Calamari of N'Zoth", 2, Rarity.Legendary, Tribe.NoTribe, "Cook: If your dish has exactly 8p, give +8p to all ingredients in your kitchen.")
+            {
+                this.effects.Add(new EF());
+                this.glowLocation = GameLocation.Hand;
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingCookedAfter) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
+
+                    if (cookArgs.dishPoints == 8)
+                    {
+                        foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
+                        {
+                            ingr.points += 8;
+                        }
+
+                        game.feedback.Add("Your Calamari of N'Zoth gives +8p to all ingredients in your kitchen.");
+                    }
+
+                    return Task.CompletedTask;
+                }
+            }
+
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                int points = 0;
+                foreach (var ingr in game.player.hand.GetAllIngredients())
+                {
+                    if (ingr == null) continue;
+                    points += ingr.points;
+                }
+                return (points == 8);
             }
         }
     }

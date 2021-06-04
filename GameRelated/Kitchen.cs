@@ -57,10 +57,27 @@ namespace Aletta_s_Kitchen.GameRelated
             Ingredient ret = this.nextOption;
             ret.roundEntered = game.curRound;
             _options[newSpot] = ret;
+
+            //trigger WheneverIngredientEnterKitchen
+            foreach (var kitchenIngr in game.player.kitchen.GetAllNonNullIngredients())
+            {
+                if (kitchenIngr == ret) continue;
+                var effArgs = new EffectArgs.EnteringKitchenArgs(EffectType.WheneverIngredientEntersKitchen, newSpot);
+                await Effect.CallEffects(kitchenIngr.effects, EffectType.WheneverIngredientEntersKitchen, kitchenIngr, game, effArgs);
+            }
+            foreach (var handIngr in game.player.hand.GetAllNonNullIngredients())
+            {
+                var effArgs = new EffectArgs.EnteringKitchenArgs(EffectType.WheneverIngredientEntersKitchen, newSpot);
+                await Effect.CallEffects(handIngr.effects, EffectType.WheneverIngredientEntersKitchen, handIngr, game, effArgs);
+            }
+            //trigger WheneverIngredientEnterKitchen
+
             this.FillNextOption(game);
 
+            //trigger OnEnteringKitchen
             EffectArgs args = new EffectArgs.EnteringKitchenArgs(EffectType.OnEnteringKitchen, newSpot);
             await Effect.CallEffects(ret.effects, EffectType.OnEnteringKitchen, ret, game, args);                       
+            //trigger OnEnteringKitchen
 
             return ret;
         }        
@@ -104,6 +121,20 @@ namespace Aletta_s_Kitchen.GameRelated
 
             for (int i=0; i<filledSpots.Count; i++)
             {
+                //trigger WheneverIngredientEnterKitchen
+                foreach (var kitchenIngr in game.player.kitchen.GetAllNonNullIngredients())
+                {
+                    if (kitchenIngr == this._options[filledSpots[i]]) continue;
+                    var effArgs = new EffectArgs.EnteringKitchenArgs(EffectType.WheneverIngredientEntersKitchen, filledSpots[i]);
+                    await Effect.CallEffects(kitchenIngr.effects, EffectType.WheneverIngredientEntersKitchen, kitchenIngr, game, effArgs);
+                }
+                foreach (var handIngr in game.player.hand.GetAllNonNullIngredients())
+                {
+                    var effArgs = new EffectArgs.EnteringKitchenArgs(EffectType.WheneverIngredientEntersKitchen, filledSpots[i]);
+                    await Effect.CallEffects(handIngr.effects, EffectType.WheneverIngredientEntersKitchen, handIngr, game, effArgs);
+                }
+                //trigger WheneverIngredientEnterKitchen
+
                 EffectArgs args = new EffectArgs.EnteringKitchenArgs(EffectType.OnEnteringKitchen, filledSpots[i]);
                 await Effect.CallEffects(this._options[filledSpots[i]].effects, EffectType.OnEnteringKitchen, this._options[filledSpots[i]], game, args);
             }
@@ -143,7 +174,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 this._options[kitchenPos] = null;
 
-                var newIngrInfo = game.player.hand.AddIngredient(ingr);                
+                var newIngrInfo = await game.player.hand.AddIngredient(game, ingr);                
 
                 EffectArgs args = new EffectArgs.OnBeingPickedArgs(EffectType.WhenPicked, kitchenPos, newIngrInfo.handPos);
                 await Effect.CallEffects(ingr.effects, EffectType.WhenPicked, newIngrInfo.ingredient, game, args); 

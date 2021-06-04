@@ -244,7 +244,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class CornDog : Ingredient
         {
-            public CornDog() : base("Corn Dog", 4, Rarity.Rare, Tribe.Beast, "Cook: Set adjacent ingredients' points to this one.")
+            public CornDog() : base("Corn Dog", 3, Rarity.Rare, Tribe.Beast, "Cook: Set a random neighbor's points to this one.")
             {
                 this.effects.Add(new EF());
             }
@@ -259,10 +259,23 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     Ingredient prev = game.player.hand.IngredientAt(cookArgs.handPos - 1);
                     Ingredient next = game.player.hand.IngredientAt(cookArgs.handPos + 1);
 
-                    if (prev != null) prev.points = caller.points;
-                    if (next != null) next.points = caller.points;
-
-                    game.feedback.Add($"Corn Dog sets adjacent ingredients' points to {caller.points}.");
+                    if (prev != null && next != null)
+                    {
+                        Ingredient pick;
+                        if (BotHandler.globalRandom.Next(2) == 0) pick = prev;
+                        else pick = next;
+                        pick.points = caller.points;
+                        game.feedback.Add($"Corn Dog sets the points of {pick.name} to {caller.points}.");
+                    }
+                    else if (prev == null && next == null) return Task.CompletedTask;
+                    else
+                    {
+                        Ingredient pick;
+                        if (prev != null) pick = prev;
+                        else pick = next;
+                        pick.points = caller.points;
+                        game.feedback.Add($"Corn Dog sets the points of {pick.name} to {caller.points}.");
+                    }
 
                     return Task.CompletedTask;
                 }
@@ -314,12 +327,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.WhenPicked) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.player.hand.AddIngredient(caller.Copy());
-                    game.player.hand.AddIngredient(caller.Copy());
-
-                    return Task.CompletedTask;
+                    await game.player.hand.AddIngredient(game, caller.Copy());
+                    await game.player.hand.AddIngredient(game, caller.Copy());                    
                 }
             }
         }
@@ -327,7 +338,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HotpotHydra : Ingredient
         {
-            public HotpotHydra() : base("Hotpot Hydra", 2, Rarity.Epic, Tribe.Beast, "When picked, double the points of Beasts in your kitchen and dish.")
+            public HotpotHydra() : base("Hotpot Hydra", 2, Rarity.Epic, Tribe.Beast, "When picked, double the points of other Beasts in your kitchen and dish.")
             {
                 this.effects.Add(new EF());
             }
@@ -339,58 +350,18 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 {
                     foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                     {
+                        if (ingr == caller) continue;
                         if (ingr.tribe == Tribe.Beast) ingr.points *= 2;
                     }
                     foreach (var ingr in game.player.hand.GetAllIngredients())
                     {
                         if (ingr == null) continue;
+                        if (ingr == caller) continue;
                         if (ingr.tribe == Tribe.Beast) ingr.points *= 2;
                     }
 
                     return Task.CompletedTask;
                 }
-            }
-        }
-
-        [GameIngredient]
-        public class CalamariOfNZoth : Ingredient
-        {
-            public CalamariOfNZoth() : base("Calamari of N'Zoth", 2, Rarity.Legendary, Tribe.Beast, "Cook: If your dish has exactly 8p, give +8p to all ingredients in your kitchen.")
-            {
-                this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Hand;
-            }
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.OnBeingCookedAfter) { }
-
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
-
-                    if (cookArgs.dishPoints == 8)
-                    {
-                        foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
-                        {
-                            ingr.points += 8;
-                        }
-
-                        game.feedback.Add("Your Calamari of N'Zoth gives +8p to all ingredients in your kitchen.");
-                    }
-
-                    return Task.CompletedTask;
-                }
-            }
-
-            public override bool GlowCondition(Game game, int kitchenPos)
-            {
-                int points = 0;
-                foreach (var ingr in game.player.hand.GetAllIngredients())
-                {
-                    if (ingr == null) continue;
-                    points += ingr.points;
-                }
-                return (points == 8);
             }
         }
     }

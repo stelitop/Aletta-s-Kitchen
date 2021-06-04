@@ -219,7 +219,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class TiramisuTerror : Ingredient
         {
-            public TiramisuTerror() : base("Tiramisu Terror", 3, Rarity.Epic, Tribe.Demon, "When this enters your kitchen, destroy the 2 highest-point ingredients in it and gain their points.")
+            public TiramisuTerror() : base("Tiramisu Terror", 0, Rarity.Epic, Tribe.Demon, "When this enters your kitchen, destroy the 2 highest-point ingredients in it and gain their points.")
             {
                 this.effects.Add(new EF());
             }
@@ -229,7 +229,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    List<Ingredient> sortedIngr = game.player.kitchen.GetAllIngredients().FindAll(x => x != null && x != caller).OrderByDescending(x => x.points).ToList();
+                    List<Ingredient> sortedIngr = game.player.kitchen.GetAllNonNullIngredients().FindAll(x => x != caller).OrderByDescending(x => x.points).ToList();
 
                     if (sortedIngr.Count >= 2)
                     {
@@ -240,6 +240,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                         game.feedback.Add($"Tiramisu Terror destroys and steals the points of {sortedIngr[0].name} and {sortedIngr[1].name}.");
 
                         await game.player.kitchen.DestroyMultipleIngredients(game, new List<int>() { index1, index2 });
+                    }
+                    else if (sortedIngr.Count == 1)
+                    {
+                        int index1 = game.player.kitchen.GetAllNonNullIngredients().FindIndex(x => x == sortedIngr[0]);
+
+                        caller.points += sortedIngr[0].points;
+                        game.feedback.Add($"Tiramisu Terror destroys and steals the points of {sortedIngr[0].name}");
+
+                        await game.player.kitchen.DestroyIngredient(game, index1);
                     }
                 }
             }
