@@ -112,7 +112,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class YserasDragonfruit : Ingredient
         {
-            public YserasDragonfruit() : base("Ysera's Dragonfruit", 3, Rarity.Common, Tribe.Fruit, "When picked, destroy all non-Dragon ingredients in your kitchen.")
+            public YserasDragonfruit() : base("Ysera's Dragonfruit", 3, Rarity.Common, Tribe.Fruit, "When picked, destroy all ingredients in your kitchen except Dragons.")
             {
                 this.effects.Add(new EF());
             }
@@ -141,6 +141,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             public FaerieStarfruit() : base("Faerie Starfruit", 0, Rarity.Rare, Tribe.Fruit, "When this enters your kitchen, give a random ingredient in it +2p and destroy this.")
             {
                 this.effects.Add(new EF());
+                this.glowLocation = GameLocation.NextIngredient;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return true;
             }
             private class EF : Effect
             {
@@ -219,7 +224,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class Pear : Ingredient
         {
-            public Pear() : base("Pear", 2, Rarity.Epic, Tribe.Fruit, "Cook: If your kitchen has a pair, double their points.")
+            public Pear() : base("Pear", 2, Rarity.Epic, Tribe.Fruit, "Cook: If your kitchen or dish has a pair, double their points.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Hand;
@@ -230,6 +235,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                 {
+                    if (ingr == this) continue;
+
+                    if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
+                    else pairs.Add(ingr.name, 1);
+                }
+
+                foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
+                {
+                    if (ingr == this) continue;
+
                     if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                     else pairs.Add(ingr.name, 1);
                 }
@@ -249,6 +264,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                     {
+                        if (ingr == caller) continue;
+                             
+                        if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
+                        else pairs.Add(ingr.name, 1);
+                    }
+
+                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
+                    {
+                        if (ingr == caller) continue;
+
                         if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                         else pairs.Add(ingr.name, 1);
                     }
@@ -260,7 +285,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     if (cands.Count == 0) return Task.CompletedTask;
 
                     string pick = cands[BotHandler.globalRandom.Next(cands.Count)];
-                    List<Ingredient> matches = game.player.kitchen.GetAllNonNullIngredients().FindAll(x => x.name == pick);
+                    List<Ingredient> matches = game.player.kitchen.GetAllNonNullIngredients().FindAll(x => x.name == pick).Concat(game.player.hand.GetAllNonNullIngredients().FindAll(x => x.name == pick && x != caller)).ToList();
                     var randomList = matches.OrderBy(x => BotHandler.globalRandom.Next()).ToList();
                     if (randomList.Count < 2) return Task.CompletedTask;
 

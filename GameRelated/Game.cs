@@ -23,6 +23,7 @@ namespace Aletta_s_Kitchen.GameRelated
         public GoalGenerator goalGenerator;
 
         public DiscordMessage UIMessage;
+        public ulong playerId;
 
         public Game()
         {
@@ -36,6 +37,7 @@ namespace Aletta_s_Kitchen.GameRelated
             this.goalGenerator = null;
 
             this.UIMessage = null;
+            this.playerId = 0;
         }
 
         public async Task Start() => await this.Start(BotHandler.genericPool, new SquareIncrGoalGenerator());
@@ -73,18 +75,18 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 if (this.goalGenerator.CurrentGoal(this).IsGoalFulfilled(this))
                 {
-                    this.CheckQuota();
+                    await this.CheckQuota();
                 }
             }
         }
 
-        public void CheckQuota()
+        public async Task CheckQuota()
         {
             var curGoal = this.goalGenerator.CurrentGoal(this);
 
             if (!curGoal.IsGoalFulfilled(this))
             {
-                this.EndGame();
+                await this.EndGame();
             }
             else
             {
@@ -93,9 +95,71 @@ namespace Aletta_s_Kitchen.GameRelated
             }
         }
 
-        public void EndGame()
+        public async Task EndGame()
         {
             this.gameState = GameState.GameOver;
+
+            await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);
+
+            BotHandler.SetUserState(this.playerId, UserState.Idle);
+            if (BotHandler.playerGames.ContainsKey(this.playerId)) BotHandler.playerGames.Remove(this.playerId);
+        }
+
+        private void FormatCardTexts(List<string> cardTexts)
+        {
+            const int lineLength = 18;
+
+            //Item1 = number of lines, Item2 = chars on last line
+            List<int> totalLines = new List<int>();
+            List<int> lastLineLen = new List<int>();
+
+            int maxLines = 0;
+
+            for (int i=0; i<cardTexts.Count; i++)
+            {
+                string[] words = cardTexts[i].Split(' ');
+
+                totalLines.Add(1);
+                lastLineLen.Add(0);
+
+                foreach (var word in words)
+                {
+                    if (lastLineLen.Last() + word.Length > lineLength)
+                    {
+                        totalLines[totalLines.Count-1]++;
+                        lastLineLen[lastLineLen.Count - 1] = 0;
+                    }
+
+                    lastLineLen[lastLineLen.Count - 1] += word.Length;
+                    if (lastLineLen.Last() < lineLength && word != words.Last()) lastLineLen[lastLineLen.Count - 1]++;
+                }
+
+                if (maxLines < totalLines.Last()) maxLines = totalLines.Last();
+            }
+
+            for (int i=0; i<cardTexts.Count; i++)
+            {
+                if (totalLines[i] < maxLines)
+                {
+                    for (int j = 0; j < lineLength - lastLineLen[i]; j++) cardTexts[i] += " ";
+
+                    cardTexts[i] += "\u200B";
+
+                    while (maxLines - totalLines[i] > 1)
+                    {
+                        totalLines[i]++;
+                        cardTexts[i] += "\u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B";
+                    }
+                    cardTexts[i] += "\u200B ";
+
+                    //while (maxLines - totalLines[i] > 0)
+                    //{
+                    //    totalLines[i]++;
+                    //    cardTexts[i] += "\n";
+                    //}
+                }
+                cardTexts[i] += "\u200B";
+            }
         }
 
         public DiscordEmbedBuilder GetUIEmbed()
@@ -134,7 +198,8 @@ namespace Aletta_s_Kitchen.GameRelated
             };
 
             string kitchentStatsString = $"Current Score: {BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
-            
+            if (this.player.curPoints >= 1000) kitchentStatsString = $"Current Score:\n{BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
+
             if (this.goalGenerator.CurrentGoal(this).round - this.curRound == 1)
             {
                 kitchentStatsString += "\n***(quota next turn!)***";
@@ -163,8 +228,36 @@ namespace Aletta_s_Kitchen.GameRelated
                 embed.AddField("There's no next quota.", "\u200B", true);
             }            
 
-
+            //Prepare all card text to be the same size
             var kitchen = this.player.kitchen.GetAllIngredients();
+            
+            List<string> cardTexts = new List<string>();
+
+            for (int i=0; i<kitchen.Count && i<5; i++)
+            {
+                if (kitchen[i] == null)
+                {
+                    cardTexts.Add("");
+                    continue;
+                }                
+                cardTexts.Add(kitchen[i].GetDescriptionText(this, GameLocation.Kitchen));
+            }
+
+            Ingredient nextIngr = this.player.kitchen.nextOption;
+            cardTexts.Add(nextIngr.GetDescriptionText(this, GameLocation.NextIngredient));
+
+            for (int i=0; i<3; i++)
+            {
+                if (this.player.hand.IngredientAt(i) == null)
+                {
+                    cardTexts.Add("");
+                    continue;
+                }
+                cardTexts.Add(this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand));
+            }
+
+            this.FormatCardTexts(cardTexts);
+            //Prepare all card text to be the same size
 
             // The kitchen field
             for (int i=0; i<kitchen.Count && i<5; i++)
@@ -184,10 +277,11 @@ namespace Aletta_s_Kitchen.GameRelated
                     //kitchenTitle += $" - {BotHandler.numToEmoji[i + 1]}";
                 }
 
-                if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";                
+                if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
 
-                string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
-                if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
+                //string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
+                //if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
+                string kitchenDesc = cardTexts[i];
 
                 if (kitchen[i].glowLocation == GameLocation.Kitchen || kitchen[i].glowLocation == GameLocation.Any)
                 {
@@ -206,29 +300,39 @@ namespace Aletta_s_Kitchen.GameRelated
             {
                 embed.AddField($"\u200B\n\nKitchen Slot {i+1}", "(empty)", true);
             }
-
+            // The kitchen field
 
             // The field about the next ingredient coming
             string nextTitle = "__Next in the Kitchen__\n\n";
 
-            Ingredient nextIngr = this.player.kitchen.nextOption;
-
             nextTitle += nextIngr.GetTitleText();
-            
-            string nextDesc = nextIngr.GetDescriptionText(this, GameLocation.NextIngredient);
-            if (nextDesc.Equals(string.Empty)) nextDesc = "\u200B";
+
+            string nextDesc = cardTexts[5];
+
+            if (nextIngr.glowLocation == GameLocation.NextIngredient || nextIngr.glowLocation == GameLocation.Any)
+            {
+                try
+                {
+                    if (nextIngr.GlowCondition(this, -1))
+                    {
+                        nextDesc = $"fix\n{nextDesc}";
+                    }
+                }
+                catch (Exception) { }
+            }
 
             nextDesc = "```" + nextDesc + " ```";
             embed.AddField(nextTitle, nextDesc, true);
-
+            // The field about the next ingredient coming
 
             // The Dish title
             embed.AddField("\u200B", "\u200B", true);
             embed.AddField("\u200B", "**The Dish**", true);
             embed.AddField("\u200B", "\u200B", true);
+            // The Dish title
 
             // The hand field
-            for (int i=0; i<this.player.hand.OptionsCount && i<3; i++)
+            for (int i = 0; i < this.player.hand.OptionsCount && i < 3; i++)
             {
                 string handTitle = string.Empty;
                 string handDesc = string.Empty;
@@ -245,23 +349,18 @@ namespace Aletta_s_Kitchen.GameRelated
                 handTitle = this.player.hand.IngredientAt(i).GetTitleText();
 
                 //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
-                
-                if (this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand).Equals(string.Empty))
-                {
-                    handDesc = "\u200B";
-                }
-                else
-                {
-                    handDesc = this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand);
 
-                    if (this.player.hand.IngredientAt(i).glowLocation == GameLocation.Hand || this.player.hand.IngredientAt(i).glowLocation == GameLocation.Any)
+
+                handDesc = cardTexts[i + 6];
+
+                if (this.player.hand.IngredientAt(i).glowLocation == GameLocation.Hand || this.player.hand.IngredientAt(i).glowLocation == GameLocation.Any)
+                {
+                    if (this.player.hand.IngredientAt(i).GlowCondition(this, i))
                     {
-                        if (this.player.hand.IngredientAt(i).GlowCondition(this, i))
-                        {
-                            handDesc = $"fix\n{handDesc}";
-                        }
+                        handDesc = $"fix\n{handDesc}";
                     }
                 }
+                
 
                 handDesc = $"```{handDesc} ```";
                 embed.AddField(handTitle, handDesc, true);
@@ -274,9 +373,9 @@ namespace Aletta_s_Kitchen.GameRelated
                 
                 handTitle = $"Empty Dish Slot #{i + 1}";
                 embed.AddField(handTitle, "\u200B", true);
-                continue;
-                
+                continue;                
             }
+            // The hand field
 
             // Feedback messages from Ingredients
             string feedbackMsg = string.Empty;
@@ -290,7 +389,7 @@ namespace Aletta_s_Kitchen.GameRelated
             {
                 embed.AddField("Game Events", feedbackMsg);
             }
-
+            // Feedback messages from Ingredients
 
             // Instructions on what buttons to click
             string instrTitle = string.Empty, instrDescription = string.Empty;
@@ -317,6 +416,7 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
             embed.AddField(instrTitle, instrDescription);
+            // Instructions on what buttons to click
 
             return embed;
         }
@@ -359,7 +459,7 @@ namespace Aletta_s_Kitchen.GameRelated
                         }
                         else if (emojiIndex == 6) ;
 
-                        this.CheckQuota();
+                        await this.CheckQuota();
                     }
 
                     break;
@@ -371,7 +471,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);            
 
-            if (this.gameState == GameState.GameOver) this.EndGame();
+            if (this.gameState == GameState.GameOver) await this.EndGame();
         }
 
         public void RestOfGameBuff(RoGCondition condition, RoGBuff buff, bool includeHand = true)

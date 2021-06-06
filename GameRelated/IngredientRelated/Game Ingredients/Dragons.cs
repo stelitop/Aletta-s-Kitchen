@@ -118,7 +118,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class PlumpKing : Ingredient
         {
-            public PlumpKing() : base("Plump King", 3, Rarity.Epic, Tribe.Dragon, "Cook: If your dish is full and this is the highest-point ingredient, gain +4p.")
+            public PlumpKing() : base("Plump King", 4, Rarity.Epic, Tribe.Dragon, "Cook: If this is the highest-point ingredient in a full dish, gain +4p.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Hand;
@@ -215,6 +215,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             public Applestrasza() : base("Applestrasza", 7, Rarity.Legendary, Tribe.Dragon, "If this enters a kitchen without a full dish, it leaves immediately.")
             {
                 this.effects.Add(new EF());
+                this.glowLocation = GameLocation.NextIngredient;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return true;
             }
             private class EF : Effect
             {

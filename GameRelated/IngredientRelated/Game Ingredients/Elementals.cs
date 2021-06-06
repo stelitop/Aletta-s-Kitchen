@@ -35,7 +35,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class VanillaIceCream : Ingredient
         {
-            public VanillaIceCream() : base("Vanilla Ice Cream", 1, Rarity.Common, Tribe.Elemental) { }
+            public VanillaIceCream() : base("Vanilla Ice Cream", 3, Rarity.Common, Tribe.Elemental) { }
         }
 
         [GameIngredient]
@@ -44,6 +44,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             public SushiRager() : base("Sushi Rager", 3, Rarity.Common, Tribe.Elemental, "When this enters your kitchen, is picked and Cook: Destroy the lowest-point ingredient in your kitchen.") 
             {
                 this.effects.Add(new EF());
+                this.glowLocation = GameLocation.NextIngredient;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return true;
             }
             private class EF : Effect
             {
@@ -181,9 +186,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class GellatoGloop : Ingredient
+        public class GelatoGloop : Ingredient
         {
-            public GellatoGloop() : base("Gellato Gloop", 4, Rarity.Epic, Tribe.Elemental, "When picked, transform a random ingredient in your kitchen into a Gellato Gloop.")
+            public GelatoGloop() : base("Gelato Gloop", 4, Rarity.Epic, Tribe.Elemental, "When picked, transform a random non-Elemental in your kitchen into a Gelato Gloop.")
             {
                 this.effects.Add(new EF());
             }
@@ -196,13 +201,19 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     var ingrs = game.player.kitchen.GetAllIngredients();
                     List<int> indexes = new List<int>();
 
-                    for (int i = 0; i < ingrs.Count; i++) if (ingrs[i] != null) indexes.Add(i);
+                    for (int i = 0; i < ingrs.Count; i++)
+                    {
+                        if (ingrs[i] != null)
+                        {
+                            if (ingrs[i].tribe != Tribe.Elemental) indexes.Add(i);
+                        }
+                    }
 
                     int index = indexes[BotHandler.globalRandom.Next(indexes.Count)];
 
-                    game.feedback.Add($"Gellato Gloop transforms {game.player.kitchen.OptionAt(index).name} int a Gellato Gloop.");
+                    game.feedback.Add($"Gelato Gloop transforms {game.player.kitchen.OptionAt(index).name} into a Gelato Gloop.");
 
-                    game.player.kitchen.ReplaceIngredient(index, game.pool.GetVanillaIngredient("Gellato Gloop"));                    
+                    game.player.kitchen.ReplaceIngredient(index, game.pool.GetVanillaIngredient("Gelato Gloop"));                    
 
                     return Task.CompletedTask;
                 }

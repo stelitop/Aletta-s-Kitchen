@@ -85,43 +85,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class Sandwitch : Ingredient
-        {
-            public Sandwitch() : base("Sandwitch", 2, Rarity.Rare, Tribe.Demon, "Outcast: If your dish is full, give the centremost ingredient +3p.")
-            {
-                this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Kitchen;
-            }
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.Outcast) { }
-
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    if (game.player.hand.OptionsCount == game.player.hand.handLimit)
-                    {
-                        var ingr = game.player.hand.IngredientAt(1);
-                        if (ingr != null)
-                        {
-                            ingr.points += 3;
-                            game.feedback.Add("Sandwitch gives the centremost ingredient in your dish +3p.");
-                        }
-                    }
-
-                    return Task.CompletedTask;
-                }
-            }
-
-            public override bool GlowCondition(Game game, int kitchenPos)
-            {
-                return CommonConditions.OutcastCondition(kitchenPos) && (game.player.hand.handLimit - game.player.hand.OptionsCount == 1);
-            }
-        }
-
-        [GameIngredient]
         public class Demonade : Ingredient
         {
-            public Demonade() : base("Demonade", 1, Rarity.Common, Tribe.NoTribe, "Cook: Give all Demons this game +3p. Give all non-Demons this game -1p.")
+            public Demonade() : base("Demonade", 1, Rarity.Common, Tribe.NoTribe, "Cook: Give all Demons this game +6p. Give all other ingredients -1p (but not less than 1)")
             {
                 this.effects.Add(new EF());
             }
@@ -131,24 +97,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
-                    {
-                        if (ingr.tribe == Tribe.Demon) ingr.points += 3;
-                        else ingr.points = Math.Max(0, ingr.points - 1);
-                    }
-                    if (game.player.kitchen.nextOption != null)
-                    {
-                        if (game.player.kitchen.nextOption.tribe == Tribe.Demon) game.player.kitchen.nextOption.points += 3;
-                        else game.player.kitchen.nextOption.points = Math.Max(0, game.player.kitchen.nextOption.points - 1);
-                    }
-                    foreach (var ingr in game.pool.ingredients)
-                    {
-                        if (ingr == null) continue;
-                        if (ingr.tribe == Tribe.Demon) ingr.points += 3;
-                        else ingr.points = Math.Max(0, ingr.points - 1);
-                    }
+                    game.RestOfGameBuff(x => x.tribe == Tribe.Demon, x => { x.points += 6; });
+                    game.RestOfGameBuff(x => x.tribe != Tribe.Demon, x => { x.points -= 1; if (x.points < 1) x.points = 1; }); 
 
-                    game.feedback.Add("Demonade gives your Demons this game +3p and your other ingredients -1p.");
+                    game.feedback.Add("Demonade gives your Demons this game +6p and your other ingredients -1p.");
 
                     return Task.CompletedTask;
                 }
@@ -222,6 +174,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             public TiramisuTerror() : base("Tiramisu Terror", 0, Rarity.Epic, Tribe.Demon, "When this enters your kitchen, destroy the 2 highest-point ingredients in it and gain their points.")
             {
                 this.effects.Add(new EF());
+                this.glowLocation = GameLocation.NextIngredient;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return true;
             }
             private class EF : Effect
             {
@@ -289,9 +246,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class TorenaiTheOneOutOfThyme : Ingredient
+        public class TorenaiOutOfThyme : Ingredient
         {
-            public TorenaiTheOneOutOfThyme() : base("Torenai, the One Out of Thyme", 7, Rarity.Legendary, Tribe.Demon, "Cook: Replace all ingredients in the kitchen with a copy of the lowest-point one.")
+            public TorenaiOutOfThyme() : base("Torenai, Out of Thyme", 7, Rarity.Legendary, Tribe.Demon, "Cook: Replace all ingredients in the kitchen with a copy of the lowest-point one.")
             {
                 this.effects.Add(new EF());
             }

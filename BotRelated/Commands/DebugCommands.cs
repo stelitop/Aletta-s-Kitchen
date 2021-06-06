@@ -192,11 +192,16 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
             }
 
-            [Command("throw")]
-            public async Task ThrowException(CommandContext ctx)
+            [Command("bindfeedback")]
+            public async Task BindFeedbackChannel(CommandContext ctx, DiscordChannel channel)
             {
-                List<int> l = new List<int>();
-                l[-1] = 1;
+                BotHandler.feedbackChannel = channel;
+            }
+
+            [Command("bindreport")]
+            public async Task BindReportChannel(CommandContext ctx, DiscordChannel channel)
+            {
+                BotHandler.reportsChannel = channel;
             }
         }
     }

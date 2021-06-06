@@ -87,11 +87,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class AyaBlackpawsJadeBuffet : Ingredient
+        public class AyasJadeBuffet : Ingredient
         {
-            public AyaBlackpawsJadeBuffet() : base("Aya Blackpaw's Jade Buffet", 4, Rarity.Legendary, Tribe.NoTribe, "When this enters your kitchen, is picked, and Cook: Create a Jade Lotus in an empty dish slot.")
+            public AyasJadeBuffet() : base("Aya's Jade Buffet", 4, Rarity.Legendary, Tribe.NoTribe, "When this enters your kitchen, is picked, and Cook: Create a Jade Lotus in an empty dish slot.")
             {
                 this.effects.Add(new EF());
+                this.glowLocation = GameLocation.NextIngredient;
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return true;
             }
             private class EF : Effect
             {
@@ -107,9 +112,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class BoxOfChocolate : Ingredient
+        public class BoxOfChocolates : Ingredient
         {
-            public BoxOfChocolate() : base("Box of Chocolate", 0, Rarity.Common, Tribe.NoTribe, "Each turn in your kitchen, change between 0-4p.")
+            public BoxOfChocolates() : base("Box of Chocolates", 0, Rarity.Common, Tribe.NoTribe, "Each turn in your kitchen, change between 0-4p.")
             {
                 this.effects.Add(new EF());
             }
@@ -128,7 +133,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class BakusMooncake : Ingredient
         {
-            public BakusMooncake() : base("Baku's Mooncake", 9, Rarity.Legendary, Tribe.NoTribe, "Can only be played if every ingredient in your kitchen is odd-point.")
+            public BakusMooncake() : base("Baku's Mooncake", 9, Rarity.Legendary, Tribe.NoTribe, "Can only be picked if all ingredients in your kitchen are odd-point.")
             {
                 this.glowLocation = GameLocation.Kitchen;
             }
@@ -319,29 +324,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     return Task.CompletedTask;
                 }
             }
-        }
-
-        [GameIngredient]
-        public class PinchOfDeathCap : Ingredient
-        {
-            public PinchOfDeathCap() : base("Pinch of Death Cap", 1, Rarity.Common, Tribe.NoTribe, "Outcast: Gain +2p.")
-            {
-                this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Kitchen;
-            }
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.Outcast) { }
-
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    caller.points += 2;
-                    game.feedback.Add("Pinch of Death Cap gains +2p.");
-                    return Task.CompletedTask;
-                }
-            }
-            public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.OutcastCondition(kitchenPos);            
-        }
+        }        
 
         [GameIngredient]
         public class ManatovCocktail : Ingredient
@@ -359,31 +342,6 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients()) ingr.points++;
 
                     game.feedback.Add("Malatov Cocktail gives ingredients in your kitchen +1p.");
-
-                    return Task.CompletedTask;
-                }
-            }
-        }
-
-        [GameIngredient]
-        public class FinishingTouch : Ingredient
-        {
-            public FinishingTouch() : base("Finishing Touch", 3, Rarity.Rare, Tribe.NoTribe, "Outcast: Give other ingredients in your dish +2p.")
-            {
-                this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Kitchen;
-            }
-            public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.OutcastCondition(kitchenPos);            
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.Outcast) { }
-
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
-                        if (ingr != caller) ingr.points += 2;
-
-                    game.feedback.Add("Finishing Touch gives other ingredients in your dish +2p.");
 
                     return Task.CompletedTask;
                 }
@@ -478,45 +436,6 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 }
             }
         }
-
-        [GameIngredient]
-        public class KelesethKream : Ingredient
-        {
-            public KelesethKream() : base("Keleseth Kream", 2, Rarity.Legendary, Tribe.NoTribe, "If you pick this while your kitchen has no other 2p ingredient, give all future ingredients +1 this game.")
-            {
-                this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Kitchen;
-            }
-            public override bool GlowCondition(Game game, int kitchenPos)
-            {
-                foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
-                {
-                    if (ingr == this) continue;
-                    if (ingr.points == 2) return false;
-                }
-                return true;
-            }
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.WhenPicked) { }
-
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
-                    {
-                        if (ingr.points == 2) return Task.CompletedTask;
-                    }
-
-                    game.feedback.Add("Keleseth Kream gives your future ingredients +1p.");
-
-                    game.RestOfGameBuff(x => true, x => { x.points++; }, false);
-
-                    return Task.CompletedTask;
-                }
-            }
-        }
-
-
 
         [GameIngredient]
         public class CalamariOfNZoth : Ingredient

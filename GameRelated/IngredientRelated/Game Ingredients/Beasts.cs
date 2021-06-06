@@ -69,7 +69,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HorseRadish : Ingredient
         {
-            public HorseRadish() : base("Horse Radish", 2, Rarity.Common, Tribe.Beast, "When picked, give a random Beast in your kitchen +1p.")
+            public HorseRadish() : base("Horse Radish", 2, Rarity.Common, Tribe.Beast, "When picked, give a random Beast in your kitchen +3p.")
             {
                 this.glowLocation = GameLocation.Kitchen;
 
@@ -86,9 +86,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     if (candidates.Count == 0) return Task.CompletedTask;
 
                     Ingredient pick = candidates[BotHandler.globalRandom.Next(candidates.Count)];
-                    pick.points++;
+                    pick.points+=3;
 
-                    game.feedback.Add($"Horse Radish gives {pick.name} +1p.");
+                    game.feedback.Add($"Horse Radish gives {pick.name} +3p.");
 
                     return Task.CompletedTask;
                 }
@@ -98,7 +98,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class ShrimpshellBento : Ingredient
         {
-            public ShrimpshellBento() : base("Shrimpshell Bento", 1, Rarity.Common, Tribe.Beast, "When picked, give another random Beast in your kitchen and dish +2p.")
+            public ShrimpshellBento() : base("Shrimpshell Bento", 2, Rarity.Common, Tribe.Beast, "When picked, give another random Beast in your kitchen and dish +2p.")
             {
                 this.effects.Add(new EF());
             }
@@ -338,7 +338,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HotpotHydra : Ingredient
         {
-            public HotpotHydra() : base("Hotpot Hydra", 2, Rarity.Epic, Tribe.Beast, "When picked, double the points of other Beasts in your kitchen and dish.")
+            public HotpotHydra() : base("Hotpot Hydra", 2, Rarity.Epic, Tribe.Beast, "When picked, double the points of Beasts in your kitchen and dish.")
             {
                 this.effects.Add(new EF());
             }
@@ -350,13 +350,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 {
                     foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                     {
-                        if (ingr == caller) continue;
                         if (ingr.tribe == Tribe.Beast) ingr.points *= 2;
                     }
-                    foreach (var ingr in game.player.hand.GetAllIngredients())
+                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
                     {
                         if (ingr == null) continue;
-                        if (ingr == caller) continue;
                         if (ingr.tribe == Tribe.Beast) ingr.points *= 2;
                     }
 

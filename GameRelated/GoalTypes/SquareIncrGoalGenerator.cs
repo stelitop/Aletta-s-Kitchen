@@ -12,7 +12,9 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
         {
             int quotaNumber = (game.curRound-1)/5 + 1;
 
-            return new PointsGoal( 4*quotaNumber*quotaNumber, quotaNumber*5 );       
+            int num = 3 * quotaNumber * quotaNumber;
+
+            return new PointsGoal( num, quotaNumber*5 );       
         }
     }
 }

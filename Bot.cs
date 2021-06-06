@@ -109,6 +109,27 @@ namespace Aletta_s_Kitchen
             this.Client.MessageReactionAdded += InGameButtonClickReactionAdded;
             this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;            
 
+            try
+            {
+                DiscordGuild guild;
+                if (client.Guilds.TryGetValue(846070541604749322, out guild))
+                {
+                    Console.WriteLine("FrogChamp");
+                    Console.WriteLine(guild.Name);
+                    Console.WriteLine("FrogChamp");
+                    //feedback channel
+
+                    BotHandler.feedbackChannel = guild.GetChannel(849961675255054346);
+
+                    //reports channel
+                    BotHandler.reportsChannel = guild.GetChannel(849630044288843786);
+                }
+            }
+            catch(Exception)
+            {
+
+            }
+
             return Task.CompletedTask;
         }
 

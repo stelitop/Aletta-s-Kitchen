@@ -77,7 +77,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class ChestNut : Ingredient
         {
-            public ChestNut() : base("Chest Nut", 0, Rarity.Rare, Tribe.Vegetable, "Every 3 turns in your kitchen, add 12 points to your total score.")
+            public ChestNut() : base("Chest Nut", 0, Rarity.Rare, Tribe.Vegetable, "Every 3 turns in your kitchen, add 9 points to your total score.")
             {
                 this.effects.Add(new EF());
             }
@@ -87,9 +87,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 protected override Task Trigger(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.player.curPoints += 12;
+                    game.player.curPoints += 9;
 
-                    game.feedback.Add("Chest Nut adds 12p to your total score.");
+                    game.feedback.Add("Chest Nut adds 9p to your total score.");
 
                     return Task.CompletedTask;
                 }
@@ -117,7 +117,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HotPotato : Ingredient
         {
-            public HotPotato() : base("Hot Potato", 0, Rarity.Epic, Tribe.Vegetable, "After 12 turns in your kitchen, destroy this and give all ingredients +2 this game.")
+            public HotPotato() : base("Hot Potato", 0, Rarity.Epic, Tribe.Vegetable, "After 12 turns in your kitchen, destroy this and give all ingredients +2p this game.")
             {
                 this.effects.Add(new EF());
             }

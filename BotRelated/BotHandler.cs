@@ -19,6 +19,9 @@ namespace Aletta_s_Kitchen.BotRelated
 
         private static Dictionary<ulong, UserState> _userState = new Dictionary<ulong, UserState>();
 
+        public static DiscordChannel feedbackChannel = null;
+        public static DiscordChannel reportsChannel = null;
+
         public static Dictionary<int, string> numToEmoji { get; } = new Dictionary<int, string>{
             { 0, ":zero:"},
             { 1, ":one:"},

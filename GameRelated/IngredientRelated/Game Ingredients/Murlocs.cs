@@ -16,12 +16,6 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class MurlocTinyfin : Ingredient
-        {
-            public MurlocTinyfin() : base("Murloc Tinyfin", 1, Rarity.Common, Tribe.Murloc) { }
-        }
-
-        [GameIngredient]
         public class MurlocTidehunter : Ingredient
         {
             public MurlocTidehunter() : base("Murloc Tidehunter", 2, Rarity.Common, Tribe.Murloc, "When picked, create a 1p Murloc in an empty dish slot.")
@@ -138,7 +132,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         //    }
         //    private class EF : Effect
         //    {
-        //        public EF() : base(EffectType.OnBeingPicked) { }
+        //        public EF() : base(EffectType.WhenPicked) { }
 
         //        public override async Task Call(Ingredient caller, Game game, EffectArgs args)
         //        {

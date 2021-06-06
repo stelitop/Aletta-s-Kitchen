@@ -96,10 +96,7 @@ namespace Aletta_s_Kitchen
         {
             ListBoxFeedback.Items.Clear();
 
-            foreach (var ingr in BotHandler.genericPool.ingredients)
-            {
-                ListBoxFeedback.Items.Add(ingr.effects.Count);
-            }            
+            ListBoxFeedback.Items.Add("\u200B".Length);
         }
 
         private async void button4_Click(object sender, EventArgs e)
@@ -122,7 +119,11 @@ namespace Aletta_s_Kitchen
         {
             ListBoxFeedback.Items.Clear();
 
-            ListBoxFeedback.Items.Add(BotHandler.playerGames.Count());
+            ListBoxFeedback.Items.Add("Running Games:");
+            foreach (var game in BotHandler.playerGames)
+            {
+                ListBoxFeedback.Items.Add($"{game.Value.player.name}");
+            }
         }
     }
 
