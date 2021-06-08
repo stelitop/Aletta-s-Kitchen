@@ -51,6 +51,7 @@ namespace Aletta_s_Kitchen
 
             //listens to events
             Client.Ready += OnClientReady;
+            Client.GuildAvailable += OnGuildAvailable;
 
             Client.UseInteractivity(new InteractivityConfiguration
             {
@@ -109,26 +110,26 @@ namespace Aletta_s_Kitchen
 
             //load the events for clicking buttons
             this.Client.MessageReactionAdded += InGameButtonClickReactionAdded;
-            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;            
+            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;                        
 
-            try
+            return Task.CompletedTask;
+        }
+
+        private Task OnGuildAvailable(DiscordClient client, GuildCreateEventArgs args)
+        {
+            if (args.Guild.Id == 846070541604749322)
             {
-                DiscordGuild guild;
-                if (client.Guilds.TryGetValue(846070541604749322, out guild))
+                try
                 {
-                    Console.WriteLine("FrogChamp");
-                    Console.WriteLine(guild.Name);
-                    Console.WriteLine("FrogChamp");
-                    //feedback channel
-
-                    BotHandler.feedbackChannel = guild.GetChannel(849961675255054346);
+                    BotHandler.feedbackChannel = args.Guild.GetChannel(849961675255054346);
 
                     //reports channel
-                    BotHandler.reportsChannel = guild.GetChannel(849630044288843786);
+                    BotHandler.reportsChannel = args.Guild.GetChannel(849630044288843786);
                 }
-            }
-            catch(Exception)
-            {
+                catch (Exception)
+                {
+
+                }
 
             }
 

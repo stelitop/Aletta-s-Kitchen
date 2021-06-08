@@ -1,5 +1,7 @@
-﻿using DSharpPlus.CommandsNext;
+﻿using Aletta_s_Kitchen.GameRelated;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,17 +10,40 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.BotRelated.Commands
 {
-    [RequiredUserState(UserState.InGame)]
+    [RequiredUserState(new UserState[] { UserState.InGame, UserState.Tutorial})]
     public class InGameCommands : BaseCommandModule
     {
         [Command("endgame")]
         public async Task EndGame(CommandContext ctx)
         {
+            BotHandler.SetUserState(ctx.User.Id, UserState.Idle);
+
             await BotHandler.playerGames[ctx.User.Id].EndGame();
 
             await BotHandler.playerGames[ctx.User.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
 
             BotHandler.playerGames.Remove(ctx.User.Id);
+        }
+
+        [Command("newui")]
+        public async Task NewUI(CommandContext ctx)
+        {
+            Game game;
+            if (!BotHandler.playerGames.TryGetValue(ctx.User.Id, out game)) return;
+
+            var gameState = game.gameState;
+            game.gameState = GameState.Loading;
+
+            DiscordMessage gameMessage = await ctx.RespondAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);
+            game.UIMessage = gameMessage;
+
+            for (int i = 0; i < BotHandler.emojiButtons.Count; i++)
+            {
+                if (i >= 6 && BotHandler.GetUserState(ctx.User.Id) != UserState.Tutorial) break;
+                await gameMessage.CreateReactionAsync(BotHandler.emojiButtons[i]).ConfigureAwait(false);
+            }
+
+            game.gameState = gameState;
         }
     }
 }

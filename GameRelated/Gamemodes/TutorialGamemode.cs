@@ -1,5 +1,6 @@
 ﻿using Aletta_s_Kitchen.BotRelated;
 using Aletta_s_Kitchen.GameRelated.GoalTypes;
+using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace Aletta_s_Kitchen.GameRelated.Gamemodes
                 game.gameState = GameState.Tutorial;
                 
                 game.winCondition = new WinCondition(x => x.player.curPoints >= 75);
+
+                game.pool.ingredients.RemoveAll(x => x.effects.FindAll(y => y.Type.Contains(EffectType.OnEnteringKitchen)).Count > 0);
 
                 await game.player.kitchen.Restart(game);
 

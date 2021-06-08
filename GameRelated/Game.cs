@@ -175,8 +175,6 @@ namespace Aletta_s_Kitchen.GameRelated
        
         public async Task<DiscordEmbedBuilder> GetUIEmbed()
         {
-            Console.WriteLine("UI Update");
-
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = $"{this.player.name}'s Kitchen",
@@ -268,8 +266,6 @@ namespace Aletta_s_Kitchen.GameRelated
         public DiscordEmbedBuilder GetPlayerUI() => this.GetPlayerUI(new PlayerUIElements(true));        
         public DiscordEmbedBuilder GetPlayerUI(PlayerUIElements shownElements)
         {
-            Console.WriteLine("GameState: " + this.gameState);
-
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = $"{this.player.name}'s Kitchen",
@@ -278,7 +274,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
             {
-                Text = "To end early, type a!endgame."
+                Text = "To end early, type a!endgame. For a new game interace, type a!newui."
             };
 
             //Kitchen Stats
@@ -388,13 +384,13 @@ namespace Aletta_s_Kitchen.GameRelated
 
                     string kitchenTitle = kitchen[i].GetTitleText();
 
-                    if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3)
+                    if ((this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3) || this.gameState == GameState.Tutorial)
                     {
                         kitchenTitle = kitchen[i].GetTitleText(i + 1);
                         //kitchenTitle += $" - {BotHandler.numToEmoji[i + 1]}";
                     }
 
-                    if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
+                    //if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
 
                     //string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
                     //if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
@@ -430,9 +426,8 @@ namespace Aletta_s_Kitchen.GameRelated
             // The field about the next ingredient coming
             if (shownElements.nextIngredient)
             {
-                string nextTitle = "__Next in the Kitchen__\n\n";
-
-                nextTitle += nextIngr.GetTitleText();
+                //string nextTitle = "__Next in the Kitchen__\n\n";
+                string nextTitle = nextIngr.GetTitleText();
 
                 string nextDesc = cardTexts[5];
 
@@ -449,6 +444,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 }
 
                 nextDesc = "```" + nextDesc + " ```";
+                nextDesc += "\n**\u200B \u200B \u200B \u200B \u200B<Next in the Kitchen>**";
                 embed.AddField(nextTitle, nextDesc, true);
             }
             else
@@ -725,10 +721,10 @@ namespace Aletta_s_Kitchen.GameRelated
         {
             new TutorialPage(new List<string>{ "Welcome to the tutorial! Let’s teach you the way around the kitchen.", "In this field you will receive info on the elements of the interface and how to use them.", "You can navigate through the tutorial with the :arrow_left: and :arrow_right: buttons." }, new PlayerUIElements{ gameEvents = true}),
             new TutorialPage(new List<string>{ "This is your current total score and round."}, new PlayerUIElements{ gameEvents = true, kitchenStats = true}),
-            new TutorialPage(new List<string>{ "This is the score quota. If you fail it, you're out of the game!", "Once you complete a quota, the difference between the next one is larger than the last. It’ll get harder to meet them as the game goes on!"}, new PlayerUIElements{ gameEvents = true, quota = true}),
+            new TutorialPage(new List<string>{ "This is the score quota. If you fail it, you're out of the game!", "The quota increases each time you complete it."}, new PlayerUIElements{ gameEvents = true, quota = true}),
             new TutorialPage(new List<string>{ "This is your kitchen!", "Your kitchen can only fit 5 ingredients at a time.", "On the bottom right of your kitchen is the next ingredient to enter your kitchen.", "Each ingredient comes with points, signified as 1p, or 2p, etc.", "The blue number is the number of their slot in the kitchen. More on that later."}, new PlayerUIElements{ gameEvents = true, kitchenIngredients = true, nextIngredient = true}),
             new TutorialPage(new List<string>{ "This is where you prepare your dish.", "Your dish can only fit 3 ingredients at a time.", "You’ll need to pick ingredients from the kitchen to create your dish."}, new PlayerUIElements{ gameEvents = true, dish = true}),
-            new TutorialPage(new List<string>{ "This is how you’ll pick ingredients from the kitchen.", "The numbers on your buttons correspond to the number of the ingredient in the kitchen. Eg. When you click 5, the 5th ingredient in the kitchen is picked.", "Whenever you pick an ingredient, you advance a round and become closer to the quota."}, new PlayerUIElements{ gameEvents = true, instructions = true}),
+            new TutorialPage(new List<string>{ "This is how you’ll pick ingredients from the kitchen.", "The numbers on your buttons correspond to the number of the ingredient in the kitchen. Eg. When you click 5, the 5th ingredient in the kitchen is picked.", "Whenever you pick an ingredient, you advance a round and become closer to the quota.", "If you're not sure what to do, you can always check the Instructions below."}, new PlayerUIElements{ gameEvents = true, instructions = true}),
             new TutorialPage(new List<string>{ "Finally, the field you've been reading all this info from.", "This is where things happening in the game will be communicated to you.", "You can expect everything random or not obvious what's happening to be informed here.", "When you next click :arrow_right:, you can try playing the game! It will go on until you reach 75 points.", "You can always go back with the arrows if you want to reread something."}, new PlayerUIElements{ gameEvents = true}),
         };
     }
