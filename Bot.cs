@@ -133,23 +133,23 @@ namespace Aletta_s_Kitchen
             return Task.CompletedTask;
         }
 
-        private async Task InGameButtonClick(DiscordClient client, ulong id, DiscordMessage msg, DiscordEmoji emoji)
+        private async Task InGameButtonClick(DiscordClient client, DiscordUser user, DiscordMessage msg, DiscordEmoji emoji)
         {
-            if (BotHandler.GetUserState(id) != UserState.InGame) return;
-            if (!BotHandler.playerGames.ContainsKey(id)) return;
-            if (BotHandler.playerGames[id].UIMessage != msg) return;
+            if (BotHandler.GetUserState(user.Id) != UserState.InGame) return;
+            if (!BotHandler.playerGames.ContainsKey(user.Id)) return;
+            if (BotHandler.playerGames[user.Id].UIMessage != msg) return;
 
             int emojiIndex = BotHandler.emojiButtons.IndexOf(emoji);
             if (emojiIndex == -1) return;
 
-            await BotHandler.playerGames[id].ProceedButtonPress(emojiIndex);
+            await BotHandler.playerGames[user.Id].ProcessButtonPress(user, emojiIndex);
         }
 
         private async Task InGameButtonClickReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
-            => await InGameButtonClick(client, args.User.Id, args.Message, args.Emoji);
+            => await InGameButtonClick(client, args.User, args.Message, args.Emoji);
 
         private async Task InGameButtonClickReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
-            => await InGameButtonClick(client, args.User.Id, args.Message, args.Emoji);
+            => await InGameButtonClick(client, args.User, args.Message, args.Emoji);
         
     }
 }

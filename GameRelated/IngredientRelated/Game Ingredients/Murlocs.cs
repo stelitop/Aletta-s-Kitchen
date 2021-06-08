@@ -10,6 +10,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 {
     public partial class Ingredients
     {
+        [TokenIngredient]
         public class MurlocScout : Ingredient
         {
             public MurlocScout() : base("Murloc Scout", 1, Rarity.Common, Tribe.Murloc) { }
@@ -29,7 +30,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     //game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Murloc Tinyfin"));
-                    await game.player.hand.AddIngredient(game, new MurlocScout());
+                    await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Murloc Scout"));
                 }
             }
         }
@@ -37,7 +38,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class PuddleJumper : Ingredient
         {
-            public PuddleJumper() : base("Puddle Jumper", 2, Rarity.Common, Tribe.Murloc, "When picked, give all other Murlocs in your dish +1p.")
+            public PuddleJumper() : base("Puddle Jumper", 2, Rarity.Common, Tribe.Murloc, "When picked, give all other Murlocs in your dish +2p.")
             {
                 this.effects.Add(new EF());
             }
@@ -52,10 +53,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                         if (game.player.hand.IngredientAt(i) == caller) continue;
 
                         if (game.player.hand.IngredientAt(i).tribe == Tribe.Murloc)
-                            game.player.hand.IngredientAt(i).points++;
+                            game.player.hand.IngredientAt(i).points+=2;
                     }
 
-                    game.feedback.Add("Puddle Jumper gave all Murlocs in your dish +1 point.");
+                    game.feedback.Add("Puddle Jumper gave all Murlocs in your dish +2p.");
 
                     return Task.CompletedTask;
                 }
@@ -168,35 +169,27 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class BloatedPufferfin : Ingredient
         {
-            public BloatedPufferfin() : base("Bloated Pufferfin", 2, Rarity.Epic, Tribe.Murloc, "Cook: Gain +2p for each other Murloc in your dish.")
+            public BloatedPufferfin() : base("Bloated Pufferfin", 0, Rarity.Epic, Tribe.Murloc, "When picked, gain +2p for each full Murloc dish you've cooked this game.")
             {
                 this.effects.Add(new EF());
             }
+
+            public override string GetDescriptionText(Game game, GameLocation gameLocation)
+            {
+                int matches = game.player.dishHistory.FindAll(x => x.Count == 3).FindAll(x => x.FindAll(y => y.tribe == Tribe.Murloc).Count == 3).Count;
+                return base.GetDescriptionText(game, gameLocation) + $" ({2*matches})";
+            }
             private class EF : Effect
             {
-                public EF() : base(EffectType.OnBeingCookedBefore) { }
+                public EF() : base(EffectType.WhenPicked) { }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    var cookArgs = args as EffectArgs.OnBeingCookedArgs;
+                    int matches = game.player.dishHistory.FindAll(x => x.Count == 3).FindAll(x => x.FindAll(y => y.tribe == Tribe.Murloc).Count == 3).Count;
 
-                    int buff = 0;
+                    caller.points += 2 * matches;
 
-                    foreach (var ingr in game.player.hand.GetAllIngredients())
-                    {
-                        if (ingr == null) continue;
-                        if (ingr == caller) continue;
-
-                        if (ingr.tribe == Tribe.Murloc)
-                        {
-                            buff += 2;
-                        }
-                    }
-
-                    caller.points += buff;
-                    cookArgs.dishPoints += buff;
-
-                    game.feedback.Add($"Bloated Pufferfin gains +{buff}p.");
+                    game.feedback.Add($"Bloated Pufferfin gains +{2*matches}p.");
 
                     return Task.CompletedTask;
                 }
@@ -216,7 +209,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     //game.player.hand.AddIngredient(game.pool.GetVanillaIngredient("Murloc Tinyfin"));
-                    await game.player.hand.AddIngredient(game, new MurlocScout());
+                    await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Murloc Scout"));
 
                     if (args.calledEffect == EffectType.OnBeingCookedAfter) game.feedback.Add("Saltroc creates a 1p Murloc in your dish.");                    
                 }

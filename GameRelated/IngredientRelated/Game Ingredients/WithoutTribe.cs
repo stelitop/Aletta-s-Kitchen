@@ -133,9 +133,22 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class BakusMooncake : Ingredient
         {
-            public BakusMooncake() : base("Baku's Mooncake", 9, Rarity.Legendary, Tribe.NoTribe, "Can only be picked if all ingredients in your kitchen are odd-point.")
+            public BakusMooncake() : base("Baku's Mooncake", 9, Rarity.Legendary, Tribe.NoTribe, "Can only be picked if your kitchen is all odd-point. Cook: Give future copies of this +10p.")
             {
                 this.glowLocation = GameLocation.Kitchen;
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    game.RestOfGameBuff(x => x.name == "Baku's Mooncake", x => { x.points += 10; }, false);
+
+                    game.feedback.Add("Baku's Mooncake gives its future copies +10p.");
+                    return Task.CompletedTask;
+                }
             }
             public override bool GlowCondition(Game game, int kitchenPos)
             {

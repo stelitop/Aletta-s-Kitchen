@@ -19,6 +19,8 @@ namespace Aletta_s_Kitchen.GameRelated
         public List<Ingredient> pickHistory;
         public List<Ingredient> cookHistory;
 
+        public List<List<Ingredient>> dishHistory;
+
         public Player()
         {
             this.name = "Player";
@@ -29,6 +31,7 @@ namespace Aletta_s_Kitchen.GameRelated
             this.curPoints = 0;
             this.pickHistory = new List<Ingredient>();
             this.cookHistory = new List<Ingredient>();
+            this.dishHistory = new List<List<Ingredient>>();
         }        
     }
 }

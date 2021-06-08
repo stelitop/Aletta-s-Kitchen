@@ -10,6 +10,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
     public class IngredientPool
     {
         public List<Ingredient> ingredients;
+        public List<Ingredient> tokens;
 
         public IngredientPool()
         {
@@ -24,11 +25,19 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             {
                 this.ingredients.Add(ingr.Copy());
             }
+
+            this.tokens = new List<Ingredient>();
+
+            foreach (var ingr in copy.tokens)
+            {
+                this.tokens.Add(ingr.Copy());
+            }
         }
 
         public void LoadDefaultPool()
         {
             ingredients = new List<Ingredient>();
+            tokens = new List<Ingredient>();
 
             var allIngredientClasses =                
                 from a in AppDomain.CurrentDomain.GetAssemblies().AsParallel()
@@ -42,7 +51,20 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
                 this.ingredients.Add((Ingredient)(Activator.CreateInstance(x.Type)));
             }
 
+            var allTokensClasses =
+                from a in AppDomain.CurrentDomain.GetAssemblies().AsParallel()
+                from t in a.GetTypes()
+                let attributes = t.GetCustomAttributes(typeof(TokenIngredientAttribute), true)
+                where attributes != null && attributes.Length > 0
+                select new { Type = t, Attributes = attributes.Cast<TokenIngredientAttribute>() };
+
+            foreach (var x in allTokensClasses)
+            {
+                this.tokens.Add((Ingredient)(Activator.CreateInstance(x.Type)));
+            }
+
             this.ingredients.Sort();
+            this.tokens.Sort();
         }
 
         public Ingredient GetVanillaIngredient(string name)
@@ -56,6 +78,18 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             }
             return null;
         }
+        public Ingredient GetTokenIngredient(string name)
+        {
+            for (int i = 0; i < this.tokens.Count; i++)
+            {
+                if (this.tokens[i].name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return this.tokens[i].Copy();
+                }
+            }
+            return null;
+        }
+
 
         public Ingredient GetRandomIngredient()
         {

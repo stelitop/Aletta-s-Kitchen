@@ -160,7 +160,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                 await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
 
-                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
+                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[player.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
             }
         
             [Command("info")]
@@ -189,7 +189,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
                 BotHandler.playerGames[player.Id].player.curPoints = points;
 
-                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[player.Id].GetUIEmbed().Build()).ConfigureAwait(false);
+                await BotHandler.playerGames[player.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[player.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
             }
 
             [Command("bindfeedback")]

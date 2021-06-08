@@ -288,7 +288,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HighFibreIrontail : Ingredient
         {
-            public HighFibreIrontail() : base("High-Fibre Irontail", 3, Rarity.Epic, Tribe.Dragon, "Whenever you pick a higher-point ingredient, gain +3p.")
+            public HighFibreIrontail() : base("High-Fibre Irontail", 3, Rarity.Epic, Tribe.Dragon, "Whenever you pick a higher-point ingredient, gain +3p. permanently.")
             {
                 this.effects.Add(new EF());
             }
@@ -302,8 +302,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     if (pickArgs.pickedIngr.points > caller.points)
                     {
-                        caller.points += 3;
-                        game.feedback.Add("High-Fibre Irontail gains +3p.");
+                        game.RestOfGameBuff(x => x.name == "High-Fibre Irontail", x => { x.points += 3; });                        
+                        game.feedback.Add("High-Fibre Irontail gains +3p permanently.");
                     }
 
                     return Task.CompletedTask;

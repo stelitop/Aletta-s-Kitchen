@@ -1,7 +1,9 @@
 ﻿using Aletta_s_Kitchen.BotRelated;
+using Aletta_s_Kitchen.GameRelated.Gamemodes;
 using Aletta_s_Kitchen.GameRelated.GoalTypes;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated;
 using Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
@@ -11,8 +13,8 @@ using System.Threading.Tasks;
 
 namespace Aletta_s_Kitchen.GameRelated
 {
-    public class Game
-    {
+    public partial class Game
+    {        
         public int curRound;
         public IngredientPool pool;
         public Player player;        
@@ -21,9 +23,13 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public List<string> feedback;
         public GoalGenerator goalGenerator;
+        public WinCondition winCondition;
 
         public DiscordMessage UIMessage;
         public ulong playerId;
+
+        private int gamemodeChoicePage;
+        private int tutorialPage;
 
         public Game()
         {
@@ -34,21 +40,24 @@ namespace Aletta_s_Kitchen.GameRelated
 
             this.feedback = new List<string>();
 
-            this.goalGenerator = null;
+            this.goalGenerator = new SquareIncrGoalGenerator();
+            this.winCondition = new WinCondition(x => false);
 
             this.UIMessage = null;
             this.playerId = 0;
+
+            this.gamemodeChoicePage = 1;
+            this.tutorialPage = 0;
         }
 
-        public async Task Start() => await this.Start(BotHandler.genericPool, new SquareIncrGoalGenerator());
-        public async Task Start(IngredientPool pool, GoalGenerator goalGenerator)
+        public async Task Start(Gamemode gamemode) => await this.Start(BotHandler.genericPool, gamemode);
+        public async Task Start(IngredientPool pool, Gamemode gamemode)
         { 
-            this.gameState = GameState.Loading;
             this.curRound = 1;            
             this.pool = new IngredientPool(pool);
             this.player = new Player();
 
-            this.goalGenerator = goalGenerator;
+            gamemode.ApplyGamemodeSettings(this);
 
             await this.player.kitchen.Restart(this);
         }
@@ -97,11 +106,13 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public async Task EndGame()
         {
-            this.gameState = GameState.GameOver;
-
-            await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);
-
             BotHandler.SetUserState(this.playerId, UserState.Idle);
+
+            this.gameState = GameState.GameOverLoss;
+            if (this.winCondition.Check(this)) this.gameState = GameState.GameOverWin;
+
+            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+
             if (BotHandler.playerGames.ContainsKey(this.playerId)) BotHandler.playerGames.Remove(this.playerId);
         }
 
@@ -161,21 +172,25 @@ namespace Aletta_s_Kitchen.GameRelated
                 cardTexts[i] += "\u200B";
             }
         }
-
-        public DiscordEmbedBuilder GetUIEmbed()
+       
+        public async Task<DiscordEmbedBuilder> GetUIEmbed()
         {
+            Console.WriteLine("UI Update");
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = $"{this.player.name}'s Kitchen",
                 Color = DiscordColor.Azure,
             };
 
+            if (this.winCondition.Check(this) && this.gameState != GameState.GameOverLoss && this.gameState != GameState.GameOverWin) await this.EndGame();
+
             if (this.gameState == GameState.Loading)
             {
                 embed.Description = $"Preparing your Kitchen. This may take a while... :hourglass_flowing_sand:";
                 return embed;
             }
-            if (this.gameState == GameState.GameOver)
+            if (this.gameState == GameState.GameOverLoss || this.gameState == GameState.GameOverWin)
             {
                 embed.Color = DiscordColor.Gray;
 
@@ -184,69 +199,142 @@ namespace Aletta_s_Kitchen.GameRelated
                 for (int i = 0; i < 50; i++) emptyDesc += " \u200B";
 
                 embed.AddField("\u200B", emptyDesc, true);
-                embed.AddField("\u200B", "```\u200B    Game Over!```", true);
+                if (this.gameState == GameState.GameOverLoss) embed.AddField("\u200B", "```\u200B    Game Over!```", true);
+                else embed.AddField("\u200B", "```\u200B     You Win!```", true);
                 embed.AddField("\u200B", emptyDesc, true);
 
                 embed.AddField("\u200B", $"```fix\n\u200BYou've finished the game with a score of {this.player.curPoints}p and lasted {this.curRound} rounds! To play again, use a!play.```");
 
                 return embed;
             }
+            if (this.gameState == GameState.ChooseGamemode)
+            {
+                embed.AddField("\u200B", "\u200B", true);
+                embed.AddField("Choose a Gamemode", "\u200B", true);
+                embed.AddField("\u200B", "\u200B", true);
+
+                List<string> formatDescriptions = new List<string>();
+                Game.gamemodes.ForEach(x => formatDescriptions.Add(x.description));                
+                this.FormatCardTexts(formatDescriptions);
+
+                List<KeyValuePair<string, string>> gamemodeCards = new List<KeyValuePair<string, string>>();
+
+                for (int i=0; i<formatDescriptions.Count && i < Game.gamemodes.Count; i++)
+                {                    
+                    gamemodeCards.Add(new KeyValuePair<string, string>(Game.gamemodes[i].title, formatDescriptions[i]));
+                }
+
+                for (int i=0; i<gamemodeCards.Count; i++)
+                {
+                    embed.AddField($"{BotHandler.IntToEmojis(i+1)} {gamemodeCards[i].Key}", $"```{gamemodeCards[i].Value} ```", true);
+                }
+
+                embed.AddField("\u200B", "\u200B", true);
+
+                return embed;
+            }                        
+
+            if (BotHandler.GetUserState(this.playerId) == UserState.Tutorial && this.tutorialPage >= Game.tutorialPages.Count)
+            {
+                this.feedback.Clear();
+                this.feedback.Add(Game.tutorialPages[this.tutorialPage].feedback);
+
+                var embedRet = this.GetPlayerUI(Game.tutorialPages[this.tutorialPage].shownElements);
+
+                return embedRet;
+            }
+
+            return this.GetPlayerUI();
+        }
+
+
+        public class PlayerUIElements
+        {
+            public bool kitchenStats = false, quota = false, kitchenIngredients = false, nextIngredient = false, dish = false, gameEvents = false, instructions = false;
+
+            public PlayerUIElements()
+            {
+                kitchenStats = quota = kitchenIngredients = nextIngredient = dish = gameEvents = instructions = true;
+            }
+
+            public PlayerUIElements(bool mode)
+            {
+                kitchenStats = quota = kitchenIngredients = nextIngredient = dish = gameEvents = instructions = mode;
+            }
+        }
+
+        public DiscordEmbedBuilder GetPlayerUI() => this.GetPlayerUI(new PlayerUIElements(true));        
+        public DiscordEmbedBuilder GetPlayerUI(PlayerUIElements shownElements)
+        {
+            DiscordEmbedBuilder embed = new DiscordEmbedBuilder
+            {
+                Title = $"{this.player.name}'s Kitchen",
+                Color = DiscordColor.Azure,
+            };
 
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
             {
                 Text = "To end early, type a!endgame."
             };
 
-            string kitchentStatsString = $"Current Score: {BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
-            if (this.player.curPoints >= 1000) kitchentStatsString = $"Current Score:\n{BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
-
-            if (this.goalGenerator.CurrentGoal(this).round - this.curRound == 1)
+            //Kitchen Stats
+            if (shownElements.kitchenStats)
             {
-                kitchentStatsString += "\n***(quota next turn!)***";
-            }
+                string kitchentStatsString = $"Current Score: {BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
+                if (this.player.curPoints >= 1000) kitchentStatsString = $"Current Score:\n{BotHandler.IntToEmojis(this.player.curPoints)}p\nCurrent Round: {this.curRound}";
 
-
-            embed.AddField("Kitchen Stats", kitchentStatsString, true);
-            embed.AddField("\u200B", "\u200B\n\n\n**The Kitchen**\n\u200B", true);
-            //haven't been done yet
-
-            try
-            {
-                Goal goal = this.goalGenerator.CurrentGoal(this);
-
-                if (goal.round == this.curRound && this.gameState != GameState.BeforeQuota)
+                if (this.goalGenerator.CurrentGoal(this).round - this.curRound == 1)
                 {
-                    this.curRound++;
-                    goal = this.goalGenerator.CurrentGoal(this);
-                    this.curRound--;
+                    kitchentStatsString += "\n***(quota next turn!)***";
                 }
 
-                embed.AddField($"Next Quota: Round {goal.round}", goal.GetDescription(this), true);
+
+                embed.AddField("Kitchen Stats", kitchentStatsString, true);
             }
-            catch (Exception)
+
+            embed.AddField("\u200B", "\u200B\n\n\n**The Kitchen**\n\u200B", true);
+
+            //Quota
+            if (shownElements.quota)
             {
-                embed.AddField("There's no next quota.", "\u200B", true);
-            }            
+                try
+                {
+                    Goal goal = this.goalGenerator.CurrentGoal(this);
+
+                    if (goal.round == this.curRound && this.gameState != GameState.BeforeQuota)
+                    {
+                        this.curRound++;
+                        goal = this.goalGenerator.CurrentGoal(this);
+                        this.curRound--;
+                    }
+
+                    embed.AddField($"Next Quota: Round {goal.round}", goal.GetDescription(this), true);
+                }
+                catch (Exception)
+                {
+                    embed.AddField("There's no next quota.", "\u200B", true);
+                }
+            }
 
             //Prepare all card text to be the same size
             var kitchen = this.player.kitchen.GetAllIngredients();
-            
+
             List<string> cardTexts = new List<string>();
 
-            for (int i=0; i<kitchen.Count && i<5; i++)
+            for (int i = 0; i < kitchen.Count && i < 5; i++)
             {
                 if (kitchen[i] == null)
                 {
                     cardTexts.Add("");
                     continue;
-                }                
+                }
                 cardTexts.Add(kitchen[i].GetDescriptionText(this, GameLocation.Kitchen));
             }
 
             Ingredient nextIngr = this.player.kitchen.nextOption;
             cardTexts.Add(nextIngr.GetDescriptionText(this, GameLocation.NextIngredient));
 
-            for (int i=0; i<3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (this.player.hand.IngredientAt(i) == null)
                 {
@@ -260,162 +348,178 @@ namespace Aletta_s_Kitchen.GameRelated
             //Prepare all card text to be the same size
 
             // The kitchen field
-            for (int i=0; i<kitchen.Count && i<5; i++)
-            {                
-                if (kitchen[i] == null)
-                {
-                    embed.AddField($"Empty Kitchen Slot #{i+1}", "\u200B", true);
-
-                    continue;
-                }
-
-                string kitchenTitle = kitchen[i].GetTitleText();
-
-                if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3)
-                {
-                    kitchenTitle = kitchen[i].GetTitleText(i + 1);
-                    //kitchenTitle += $" - {BotHandler.numToEmoji[i + 1]}";
-                }
-
-                if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
-
-                //string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
-                //if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
-                string kitchenDesc = cardTexts[i];
-
-                if (kitchen[i].glowLocation == GameLocation.Kitchen || kitchen[i].glowLocation == GameLocation.Any)
-                {
-                    if (kitchen[i].GlowCondition(this, i))
-                    {
-                        kitchenDesc = $"fix\n{kitchenDesc}";
-                    }
-                }
-
-                kitchenDesc = $"```{kitchenDesc} ```";
-
-                embed.AddField(kitchenTitle, kitchenDesc, true);
-            }
-
-            for (int i=kitchen.Count; i<5; i++)
+            if (shownElements.kitchenStats)
             {
-                embed.AddField($"\u200B\n\nKitchen Slot {i+1}", "(empty)", true);
+                for (int i = 0; i < kitchen.Count && i < 5; i++)
+                {
+                    if (kitchen[i] == null)
+                    {
+                        embed.AddField($"Empty Kitchen Slot #{i + 1}", "\u200B", true);
+
+                        continue;
+                    }
+
+                    string kitchenTitle = kitchen[i].GetTitleText();
+
+                    if (this.gameState == GameState.PickFromKitchen && this.player.hand.OptionsCount < 3)
+                    {
+                        kitchenTitle = kitchen[i].GetTitleText(i + 1);
+                        //kitchenTitle += $" - {BotHandler.numToEmoji[i + 1]}";
+                    }
+
+                    if (i >= 3) kitchenTitle = $"\u200B\n\n{kitchenTitle}";
+
+                    //string kitchenDesc = kitchen[i].GetDescriptionText(this, GameLocation.Kitchen);
+                    //if (kitchenDesc.Equals(string.Empty)) kitchenDesc = "\u200B";
+                    string kitchenDesc = cardTexts[i];
+
+                    if (kitchen[i].glowLocation == GameLocation.Kitchen || kitchen[i].glowLocation == GameLocation.Any)
+                    {
+                        if (kitchen[i].GlowCondition(this, i))
+                        {
+                            kitchenDesc = $"fix\n{kitchenDesc}";
+                        }
+                    }
+
+                    kitchenDesc = $"```{kitchenDesc} ```";
+
+                    embed.AddField(kitchenTitle, kitchenDesc, true);
+                }
+
+                for (int i = kitchen.Count; i < 5; i++)
+                {
+                    embed.AddField($"\u200B\n\nKitchen Slot {i + 1}", "(empty)", true);
+                }
             }
             // The kitchen field
 
             // The field about the next ingredient coming
-            string nextTitle = "__Next in the Kitchen__\n\n";
-
-            nextTitle += nextIngr.GetTitleText();
-
-            string nextDesc = cardTexts[5];
-
-            if (nextIngr.glowLocation == GameLocation.NextIngredient || nextIngr.glowLocation == GameLocation.Any)
+            if (shownElements.nextIngredient)
             {
-                try
-                {
-                    if (nextIngr.GlowCondition(this, -1))
-                    {
-                        nextDesc = $"fix\n{nextDesc}";
-                    }
-                }
-                catch (Exception) { }
-            }
+                string nextTitle = "__Next in the Kitchen__\n\n";
 
-            nextDesc = "```" + nextDesc + " ```";
-            embed.AddField(nextTitle, nextDesc, true);
+                nextTitle += nextIngr.GetTitleText();
+
+                string nextDesc = cardTexts[5];
+
+                if (nextIngr.glowLocation == GameLocation.NextIngredient || nextIngr.glowLocation == GameLocation.Any)
+                {
+                    try
+                    {
+                        if (nextIngr.GlowCondition(this, -1))
+                        {
+                            nextDesc = $"fix\n{nextDesc}";
+                        }
+                    }
+                    catch (Exception) { }
+                }
+
+                nextDesc = "```" + nextDesc + " ```";
+                embed.AddField(nextTitle, nextDesc, true);
+            }
             // The field about the next ingredient coming
 
-            // The Dish title
-            embed.AddField("\u200B", "\u200B", true);
-            embed.AddField("\u200B", "**The Dish**", true);
-            embed.AddField("\u200B", "\u200B", true);
-            // The Dish title
-
-            // The hand field
-            for (int i = 0; i < this.player.hand.OptionsCount && i < 3; i++)
+            //The Dish
+            if (shownElements.dish)
             {
-                string handTitle = string.Empty;
-                string handDesc = string.Empty;
+                // The Dish title
+                embed.AddField("\u200B", "\u200B", true);
+                embed.AddField("\u200B", "**The Dish**", true);
+                embed.AddField("\u200B", "\u200B", true);
+                // The Dish title
 
-                if (this.player.hand.IngredientAt(i) == null)
+                // The hand field
+                for (int i = 0; i < this.player.hand.OptionsCount && i < 3; i++)
                 {
-                    //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle = $"Empty Dish Slot {BotHandler.numToEmoji[i+1]}";
-                    //else
+                    string handTitle = string.Empty;
+                    string handDesc = string.Empty;
+
+                    if (this.player.hand.IngredientAt(i) == null)
+                    {
+                        //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle = $"Empty Dish Slot {BotHandler.numToEmoji[i+1]}";
+                        //else
+                        handTitle = $"Empty Dish Slot #{i + 1}";
+                        embed.AddField(handTitle, "\u200B", true);
+                        continue;
+                    }
+
+                    handTitle = this.player.hand.IngredientAt(i).GetTitleText();
+
+                    //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
+
+
+                    handDesc = cardTexts[i + 6];
+
+                    if (this.player.hand.IngredientAt(i).glowLocation == GameLocation.Hand || this.player.hand.IngredientAt(i).glowLocation == GameLocation.Any)
+                    {
+                        if (this.player.hand.IngredientAt(i).GlowCondition(this, i))
+                        {
+                            handDesc = $"fix\n{handDesc}";
+                        }
+                    }
+
+
+                    handDesc = $"```{handDesc} ```";
+                    embed.AddField(handTitle, handDesc, true);
+                }
+
+                for (int i = this.player.hand.OptionsCount; i < 3; i++)
+                {
+                    string handTitle = string.Empty;
+                    string handDesc = string.Empty;
+
                     handTitle = $"Empty Dish Slot #{i + 1}";
                     embed.AddField(handTitle, "\u200B", true);
                     continue;
                 }
-
-                handTitle = this.player.hand.IngredientAt(i).GetTitleText();
-
-                //if (this.gameState == GameState.ChooseInHandForIngredient) handTitle += $" - {BotHandler.numToEmoji[i + 1]}";
-
-
-                handDesc = cardTexts[i + 6];
-
-                if (this.player.hand.IngredientAt(i).glowLocation == GameLocation.Hand || this.player.hand.IngredientAt(i).glowLocation == GameLocation.Any)
-                {
-                    if (this.player.hand.IngredientAt(i).GlowCondition(this, i))
-                    {
-                        handDesc = $"fix\n{handDesc}";
-                    }
-                }
-                
-
-                handDesc = $"```{handDesc} ```";
-                embed.AddField(handTitle, handDesc, true);
-            }
-
-            for (int i=this.player.hand.OptionsCount; i<3; i++)
-            {
-                string handTitle = string.Empty;
-                string handDesc = string.Empty;
-                
-                handTitle = $"Empty Dish Slot #{i + 1}";
-                embed.AddField(handTitle, "\u200B", true);
-                continue;                
             }
             // The hand field
 
             // Feedback messages from Ingredients
-            string feedbackMsg = string.Empty;
-
-            for (int i=0; i<this.feedback.Count; i++)
+            if (shownElements.gameEvents)
             {
-                feedbackMsg += $":asterisk: {this.feedback[i]}\n";
-            }
+                string feedbackMsg = string.Empty;
 
-            if (!(this.feedback.Count == 0 || feedbackMsg.Equals(string.Empty)))
-            {
-                embed.AddField("Game Events", feedbackMsg);
+                for (int i = 0; i < this.feedback.Count; i++)
+                {
+                    feedbackMsg += $":asterisk: {this.feedback[i]}\n";
+                }
+
+                if (!(this.feedback.Count == 0 || feedbackMsg.Equals(string.Empty)))
+                {
+                    embed.AddField("Game Events", feedbackMsg);
+                }
             }
             // Feedback messages from Ingredients
 
             // Instructions on what buttons to click
-            string instrTitle = string.Empty, instrDescription = string.Empty;
-            switch (this.gameState)
+            if (shownElements.instructions)
             {
-                case GameState.PickFromKitchen:
-                    instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
-                    if (this.player.hand.OptionsCount < 3 && this.player.hand.OptionsCount < this.player.hand.handLimit) instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
-                    else instrDescription = ":fork_knife_plate: - Cook your dish.";
-                    break;
-                //case GameState.ChooseInHandForIngredient:
-                //    instrTitle = "Choose where to put your ingredient.";
-                //    instrDescription = ":one::two::three: - Place on this spot.\n:no_entry_sign: - Cancel picking an ingredient.";
-                //    break;
-                case GameState.BeforeQuota:
-                    instrTitle = "Quota this round! Do you want to cook your dish before the quota?";
-                    //instrDescription = ":fork_knife_plate: - Cook your dish.\n:no_entry_sign: - Proceed without cooking.";
-                    instrDescription = ":fork_knife_plate: - Cook your dish.";
-                    break;
-                default:
-                    instrTitle = "Instructions";
-                    instrDescription = "Instructions Description";
-                    break;
-            }
+                string instrTitle = string.Empty, instrDescription = string.Empty;
+                switch (this.gameState)
+                {
+                    case GameState.PickFromKitchen:
+                        instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
+                        if (this.player.hand.OptionsCount < 3 && this.player.hand.OptionsCount < this.player.hand.handLimit) instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
+                        else instrDescription = ":fork_knife_plate: - Cook your dish.";
+                        break;
+                    //case GameState.ChooseInHandForIngredient:
+                    //    instrTitle = "Choose where to put your ingredient.";
+                    //    instrDescription = ":one::two::three: - Place on this spot.\n:no_entry_sign: - Cancel picking an ingredient.";
+                    //    break;
+                    case GameState.BeforeQuota:
+                        instrTitle = "Quota this round! Do you want to cook your dish before the quota?";
+                        //instrDescription = ":fork_knife_plate: - Cook your dish.\n:no_entry_sign: - Proceed without cooking.";
+                        instrDescription = ":fork_knife_plate: - Cook your dish.";
+                        break;
+                    default:
+                        instrTitle = "Instructions";
+                        instrDescription = "Instructions Description";
+                        break;
+                }
 
-            embed.AddField(instrTitle, instrDescription);
+                embed.AddField(instrTitle, instrDescription);
+            }
             // Instructions on what buttons to click
 
             return embed;
@@ -426,7 +530,7 @@ namespace Aletta_s_Kitchen.GameRelated
          * 5 - cook
          * 6 - cancel
          */
-        public async Task ProceedButtonPress(int emojiIndex)
+        public async Task ProcessButtonPress(DiscordUser user, int emojiIndex)
         {
             switch (this.gameState)
             {
@@ -464,14 +568,30 @@ namespace Aletta_s_Kitchen.GameRelated
 
                     break;
 
+                case GameState.ChooseGamemode:
+
+                    if (emojiIndex < 5)
+                    {
+                        int choice = (this.gamemodeChoicePage-1)*5 + emojiIndex;
+                        if (choice >= Game.gamemodes.Count) break;
+
+                        this.gameState = GameState.PickFromKitchen;
+                        this.feedback.Add($"You've picked {Game.gamemodes[choice].title} as the gamemode!");
+
+                        await this.Start(Game.gamemodes[choice]);
+                        this.player.name = user.Username;
+                        this.playerId = user.Id;
+                    }
+                    break;
+
                 default:
                     break;
             }
 
 
-            await this.UIMessage.ModifyAsync(this.GetUIEmbed().Build()).ConfigureAwait(false);            
+            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);            
 
-            if (this.gameState == GameState.GameOver) await this.EndGame();
+            if (this.gameState == GameState.GameOverLoss) await this.EndGame();
         }
 
         public void RestOfGameBuff(RoGCondition condition, RoGBuff buff, bool includeHand = true)
@@ -498,9 +618,42 @@ namespace Aletta_s_Kitchen.GameRelated
                 if (ingr == null) continue;
                 if (condition(ingr)) buff(ingr);
             }
+
+            foreach (var ingr in this.pool.tokens)
+            {
+                if (ingr == null) continue;
+                if (condition(ingr)) buff(ingr);
+            }
         }
 
         public delegate bool RoGCondition(Ingredient ingr);
         public delegate void RoGBuff(Ingredient ingr);
+
+
+        public static readonly List<Gamemode> gamemodes = new List<Gamemode>
+        {
+            new Gamemode.TutorialGamemode(),
+            new Gamemode.AnonymousMethodGamemode("Easy", "Reach 100 points. For those new to deckbuilders.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 100); }),
+            new Gamemode.AnonymousMethodGamemode("Medium", "Reach 300 points. For those new to Aletta's Kitchen.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 300); }),
+            new Gamemode.AnonymousMethodGamemode("Hard", "Reach 500 points. For those looking for a challenge.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 500); }),
+            new Gamemode.AnonymousMethodGamemode("Endless", "No cap. For those looking to break the game.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => false); }),
+        };
+
+        private struct TutorialPage
+        {
+            public string feedback;
+            public PlayerUIElements shownElements;
+
+            public TutorialPage(string feedback, PlayerUIElements shownElements)
+            {
+                this.feedback = feedback;
+                this.shownElements = shownElements;
+            }
+        }
+
+        private static readonly List<TutorialPage> tutorialPages = new List<TutorialPage>
+        {
+            new TutorialPage("Welcome to the tutorial! Let’s teach you the way around the kitchen. In this field you will receive info on the elements of the interface and how to use them.", new PlayerUIElements{ gameEvents = true}),
+        };
     }
 }

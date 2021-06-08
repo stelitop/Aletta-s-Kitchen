@@ -302,7 +302,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class MalygooseBerry : Ingredient
         {
-            public MalygooseBerry() : base("Malygoose Berry", 2, Rarity.Epic, Tribe.Fruit, "Cook: If your dish has a Dragon and Beast, give both +5p.")
+            public MalygooseBerry() : base("Malygoose Berry", 2, Rarity.Epic, Tribe.Fruit, "Cook: If your dish has a Dragon and Beast, give both tribes +2p this game.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Any;
@@ -335,24 +335,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     if (!beast || !dragon) return Task.CompletedTask;
 
-                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
-                    {
-                        if (ingr.tribe == Tribe.Beast)
-                        {
-                            ingr.points += 5;
-                            break;
-                        }
-                    }
-                    foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
-                    {
-                        if (ingr.tribe == Tribe.Dragon)
-                        {
-                            ingr.points += 5;
-                            break;
-                        }
-                    }
+                    game.RestOfGameBuff(x => x.tribe == Tribe.Beast || x.tribe == Tribe.Dragon, x => { x.points += 2; });
 
-                    game.feedback.Add("Malygoose Berry gives a Beast and a Dragon in your dish +5p.");
+                    game.feedback.Add("Malygoose Berry gives a yours Beasts and Dragons this game +2p.");
 
                     return Task.CompletedTask;
                 }

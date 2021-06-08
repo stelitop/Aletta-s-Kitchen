@@ -10,8 +10,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
     {
         public static bool ElementalCondition(Game game)
         {
-            if (game.player.pickHistory.Count == 0) return false;
-            if (game.player.pickHistory.Last().tribe == Tribe.Elemental) return true;
+            if (game.player.dishHistory.Count == 0) return false;
+            if (game.player.dishHistory.Last().FindAll(x => x.tribe == Tribe.Elemental).Count > 0) return true;
             return false;
         }
 

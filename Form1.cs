@@ -64,6 +64,7 @@ namespace Aletta_s_Kitchen
             IngredientPool pool = BotHandler.genericPool;            
 
             ListBoxFeedback.Items.Add($"Total Ingredients: {pool.ingredients.Count}");
+            ListBoxFeedback.Items.Add($"Tokens: {pool.tokens.Count}");
 
             ListBoxFeedback.Items.Add($"Common: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Common).Count()}");
             ListBoxFeedback.Items.Add($"Rare: {pool.ingredients.FindAll(x => x.rarity == GameRelated.Rarity.Rare).Count()}");

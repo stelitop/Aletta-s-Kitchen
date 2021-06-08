@@ -35,7 +35,26 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class VanillaIceCream : Ingredient
         {
-            public VanillaIceCream() : base("Vanilla Ice Cream", 3, Rarity.Common, Tribe.Elemental) { }
+            public VanillaIceCream() : base("Vanilla Ice Cream", 3, Rarity.Common, Tribe.Elemental, "Cook: Give tribeless ingredients in your kitchen +1p.") 
+            {
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
+
+                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
+                    {
+                        if (ingr.tribe == Tribe.NoTribe) ingr.points++;
+                    }
+
+                    game.feedback.Add("Vanilla Ice Cream gives tribeless ingredients in your kitchen +1p.");
+
+                    return Task.CompletedTask;
+                }
+            }
         }
 
         [GameIngredient]
@@ -89,24 +108,21 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class MountainDewdrop : Ingredient
         {
-            public MountainDewdrop() : base("Mountain Dewdrop", 2, Rarity.Common, Tribe.Elemental, "If you picked an Elemental last, gain +2p.")
+            public MountainDewdrop() : base("Mountain Dewdrop", 2, Rarity.Common, Tribe.Elemental, "Cook: If you cooked an Elemental last, gain +2p.")
             {
-                this.glowLocation = GameLocation.Kitchen;
+                this.glowLocation = GameLocation.Any;
                 this.effects.Add(new EF());
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.WhenPicked) { }
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (game.player.pickHistory.Count == 0) return Task.CompletedTask;
+                    if (!CommonConditions.ElementalCondition(game)) return Task.CompletedTask;
 
-                    if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
-                    {
-                        caller.points+=2;
-                        game.feedback.Add("Your Mountain Dewdrop gains +2p.");
-                    }
+                    caller.points+=2;
+                    game.feedback.Add("Your Mountain Dewdrop gains +2p.");                    
 
                     return Task.CompletedTask;
                 }
@@ -118,32 +134,26 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class RisingDough : Ingredient
         {
-            public RisingDough() : base("Rising Dough", 2, Rarity.Rare, Tribe.Elemental, "If you picked an Elemental last, give all ingredients in your kitchen +1p.")
+            public RisingDough() : base("Rising Dough", 2, Rarity.Rare, Tribe.Elemental, "Cook: If you cooked an Elemental last, give all ingredients in your kitchen +3p.")
             {
-                this.glowLocation = GameLocation.Kitchen;
+                this.glowLocation = GameLocation.Any;
                 this.effects.Add(new EF());
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.WhenPicked) { }
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (game.player.pickHistory.Count == 0)
+                    if (!CommonConditions.ElementalCondition(game)) return Task.CompletedTask;
+                    
+                    var kitchen = game.player.kitchen.GetAllNonNullIngredients();
+                    foreach (var ingr in kitchen)
                     {
-                        return Task.CompletedTask;
+                        ingr.points+=3;
                     }
 
-                    if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
-                    {
-                        var kitchen = game.player.kitchen.GetAllNonNullIngredients();
-                        foreach (var ingr in kitchen)
-                        {
-                            ingr.points++;
-                        }
-
-                        game.feedback.Add("Your Rising Dough gives all ingredients in the Kitchen +1p.");
-                    }
+                    game.feedback.Add("Your Rising Dough gives all ingredients in the Kitchen +3p.");                    
 
                     return Task.CompletedTask;
                 }
@@ -155,30 +165,24 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class Creampooch : Ingredient
         {
-            public Creampooch() : base("Creampooch", 3, Rarity.Rare, Tribe.Elemental, "If you picked an Elemental last, replace the next ingredient in your kitchen with an Elemental. Give it +3p.")
+            public Creampooch() : base("Creampooch", 3, Rarity.Rare, Tribe.Elemental, "Cook: If you cooked an Elemental last, replace the next ingredient in your kitchen with an Elemental. Give it +5p.")
             {
                 this.effects.Add(new EF());
-                this.glowLocation = GameLocation.Kitchen;
+                this.glowLocation = GameLocation.Any;
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.WhenPicked) { }
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (game.player.pickHistory.Count == 0)
-                    {
-                        return Task.CompletedTask;
-                    }
+                    if (!CommonConditions.ElementalCondition(game)) return Task.CompletedTask;
 
-                    if (game.player.pickHistory.Last().tribe == Tribe.Elemental)
-                    {
-                        game.player.kitchen.nextOption = game.pool.GetRandomIngredient(x => x.tribe == Tribe.Elemental && x.name != "Creampooch");
-                        game.player.kitchen.nextOption.points += 3;
+                    game.player.kitchen.nextOption = game.pool.GetRandomIngredient(x => x.tribe == Tribe.Elemental && x.name != "Creampooch");
+                    game.player.kitchen.nextOption.points += 5;
 
-                        game.feedback.Add("Your Creampooch replaces the next ingredient in the kitchen with an Elemental with +3p.");
-                    }
-
+                    game.feedback.Add("Your Creampooch replaces the next ingredient in the kitchen with an Elemental with +5p.");
+                    
                     return Task.CompletedTask;
                 }
             }
@@ -223,7 +227,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class IcecreamConenberg : Ingredient
         {
-            public IcecreamConenberg() : base("Icecream Conenberg", 5, Rarity.Legendary, Tribe.Elemental, "When picked, gain +5p for each Elemental you picked in a row before this.")
+            public IcecreamConenberg() : base("Icecream Conenberg", 5, Rarity.Legendary, Tribe.Elemental, "When picked, gain +10 for each Elemental you cooked in a row before this.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Kitchen;
@@ -236,9 +240,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 {
                     int depth = 1;
 
-                    while (game.player.pickHistory.Count >= depth)
+                    while (game.player.dishHistory.Count >= depth)
                     {
-                        if (game.player.pickHistory[game.player.pickHistory.Count - depth].tribe == Tribe.Elemental)
+                        if (game.player.dishHistory[game.player.pickHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
                         {
                             depth++;
                         }
@@ -259,9 +263,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 int depth = 1;
 
-                while (game.player.pickHistory.Count >= depth)
+                while (game.player.dishHistory.Count >= depth)
                 {
-                    if (game.player.pickHistory[game.player.pickHistory.Count - depth].tribe == Tribe.Elemental)
+                    if (game.player.dishHistory[game.player.pickHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
                     {
                         depth++;
                     }
@@ -277,7 +281,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class RagnarOs : Ingredient
         {
-            public RagnarOs() : base("Ragnar-Os", 4, Rarity.Legendary, Tribe.Elemental, "After you pick an ingredient while this is in your dish, give a random one in your kitchen +8.")
+            public RagnarOs() : base("Ragnar-Os", 4, Rarity.Legendary, Tribe.Elemental, "After you pick an ingredient while this is in your dish, give a random one in your kitchen +8p.")
             {
                 this.effects.Add(new EF());
             }
@@ -293,6 +297,37 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     game.feedback.Add($"Ragnar-Os gives {pick.name} +8p.");
                     return Task.CompletedTask;
                 }
+            }
+        }
+
+        [GameIngredient]
+        public class FastfoodChainer : Ingredient
+        {
+            public FastfoodChainer() : base("Fastfood Chainer", 3, Rarity.Rare, Tribe.Elemental, "Cook: If you cooked an Elemental last, create a 5p one and put another to enter your kitchen next.")
+            {
+                this.glowLocation = GameLocation.Any;
+                this.effects.Add(new EF());
+            }
+            private class EF : Effect
+            {
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
+
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
+                {
+                    if (!CommonConditions.ElementalCondition(game)) return;
+
+                    await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Appetiser Elemental"));
+
+                    game.player.kitchen.nextOption = game.pool.GetTokenIngredient("Appetiser Elemental");
+                }
+            }
+
+            public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.ElementalCondition(game);            
+
+            [TokenIngredient]
+            public class AppetiserElemental : Ingredient
+            {
+                public AppetiserElemental() : base("Appetiser Elemental", 5, Rarity.Common, Tribe.Elemental) { }
             }
         }
 

@@ -165,11 +165,15 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GameRelated\Game.cs" />
+    <Compile Include="GameRelated\Gamemodes\AnonymousMethodGamemode.cs" />
+    <Compile Include="GameRelated\Gamemodes\Gamemode.cs" />
+    <Compile Include="GameRelated\Gamemodes\TutorialGamemode.cs" />
     <Compile Include="GameRelated\GameState.cs" />
     <Compile Include="GameRelated\GoalTypes\SquareIncrGoalGenerator.cs" />
     <Compile Include="GameRelated\GoalTypes\Goal.cs" />
     <Compile Include="GameRelated\GoalTypes\GoalGenerator.cs" />
     <Compile Include="GameRelated\GoalTypes\PointsGoal.cs" />
+    <Compile Include="GameRelated\GoalTypes\WinCondition.cs" />
     <Compile Include="GameRelated\Hand.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\AfterCookArgs.cs" />
     <Compile Include="GameRelated\IngredientRelated\EffectRelated\EffectArgsClasses\DeathrattleArgs.cs" />
@@ -197,6 +201,7 @@
     <Compile Include="GameRelated\IngredientRelated\GameLocation.cs" />
     <Compile Include="GameRelated\IngredientRelated\Ingredient.cs" />
     <Compile Include="GameRelated\IngredientRelated\IngredientPool.cs" />
+    <Compile Include="GameRelated\IngredientRelated\TokenIngredientAttribute.cs" />
     <Compile Include="GameRelated\Kitchen.cs" />
     <Compile Include="GameRelated\Player.cs" />
     <Compile Include="GameRelated\Rarity.cs" />

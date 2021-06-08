@@ -16,7 +16,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
         {
             await BotHandler.playerGames[ctx.User.Id].EndGame();
 
-            await BotHandler.playerGames[ctx.User.Id].UIMessage.ModifyAsync(embed: BotHandler.playerGames[ctx.User.Id].GetUIEmbed().Build()).ConfigureAwait(false);
+            await BotHandler.playerGames[ctx.User.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
 
             BotHandler.playerGames.Remove(ctx.User.Id);
         }

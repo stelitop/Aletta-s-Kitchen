@@ -34,12 +34,11 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
             Game game = new Game();
             BotHandler.playerGames.Add(ctx.User.Id, game);
-
-            await game.Start();
+            game.gameState = GameState.Loading;
             game.player.name = ctx.User.Username;
             game.playerId = ctx.User.Id;
 
-            DiscordMessage gameMessage = await ctx.RespondAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
+            DiscordMessage gameMessage = await ctx.RespondAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);
             game.UIMessage = gameMessage;
 
             for (int i=0; i<BotHandler.emojiButtons.Count; i++)
@@ -47,9 +46,10 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 await gameMessage.CreateReactionAsync(BotHandler.emojiButtons[i]).ConfigureAwait(false);
             }
 
-            game.gameState = GameState.PickFromKitchen;
+            //game.gameState = GameState.PickFromKitchen;
+            game.gameState = GameState.ChooseGamemode;
 
-            await game.UIMessage.ModifyAsync(game.GetUIEmbed().Build()).ConfigureAwait(false);
+            await game.UIMessage.ModifyAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);
 
             //await Analysis.DiscordEmbedAnalysis(game.GetUIEmbed(), ctx.Channel);            
         }

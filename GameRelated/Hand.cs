@@ -143,11 +143,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             int dishPoints = 0;
             List<Ingredient> allIngr = new List<Ingredient>();
 
-            for (int i = 0; i < this._ingredients.Count; i++)
+            foreach (var ingr in this.GetAllNonNullIngredients())
             {
-                if (this._ingredients[i] == null) continue;
-                dishPoints += this._ingredients[i].points;
-                allIngr.Add(this._ingredients[i]);
+                dishPoints += ingr.points;
+                allIngr.Add(ingr);
             }
 
             if (allIngr.Count == 0) return;
@@ -180,7 +179,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
             args.dishPoints = dishPoints;
 
             //2)
-            var handTemp = this._ingredients.ToList();
+            var handTemp = this.GetAllNonNullIngredients();
+            game.player.dishHistory.Add(handTemp);
+            
             this.Clear();
                     
             //3)
