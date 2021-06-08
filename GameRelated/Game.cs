@@ -57,9 +57,9 @@ namespace Aletta_s_Kitchen.GameRelated
             this.pool = new IngredientPool(pool);
             this.player = new Player();
 
-            gamemode.ApplyGamemodeSettings(this);
+            await gamemode.ApplyGamemodeSettings(this);
 
-            await this.player.kitchen.Restart(this);
+            if (!(gamemode is Gamemode.TutorialGamemode)) await this.player.kitchen.Restart(this);
         }
 
         public async Task NextRound()
@@ -234,12 +234,14 @@ namespace Aletta_s_Kitchen.GameRelated
                 return embed;
             }                        
 
-            if (BotHandler.GetUserState(this.playerId) == UserState.Tutorial && this.tutorialPage >= Game.tutorialPages.Count)
+            if (BotHandler.GetUserState(this.playerId) == UserState.Tutorial && this.tutorialPage < Game.tutorialPages.Count)
             {
-                this.feedback.Clear();
-                this.feedback.Add(Game.tutorialPages[this.tutorialPage].feedback);
+                var mem = this.feedback;
 
+                this.feedback = Game.tutorialPages[this.tutorialPage].feedback;
                 var embedRet = this.GetPlayerUI(Game.tutorialPages[this.tutorialPage].shownElements);
+
+                this.feedback = mem;
 
                 return embedRet;
             }
@@ -250,11 +252,11 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public class PlayerUIElements
         {
-            public bool kitchenStats = false, quota = false, kitchenIngredients = false, nextIngredient = false, dish = false, gameEvents = false, instructions = false;
+            public bool kitchenStats, quota, kitchenIngredients, nextIngredient, dish, gameEvents, instructions;
 
             public PlayerUIElements()
             {
-                kitchenStats = quota = kitchenIngredients = nextIngredient = dish = gameEvents = instructions = true;
+                kitchenStats = quota = kitchenIngredients = nextIngredient = dish = gameEvents = instructions = false;
             }
 
             public PlayerUIElements(bool mode)
@@ -266,6 +268,8 @@ namespace Aletta_s_Kitchen.GameRelated
         public DiscordEmbedBuilder GetPlayerUI() => this.GetPlayerUI(new PlayerUIElements(true));        
         public DiscordEmbedBuilder GetPlayerUI(PlayerUIElements shownElements)
         {
+            Console.WriteLine("GameState: " + this.gameState);
+
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
             {
                 Title = $"{this.player.name}'s Kitchen",
@@ -291,8 +295,19 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 embed.AddField("Kitchen Stats", kitchentStatsString, true);
             }
+            else
+            {
+                embed.AddField("\u200B\n\n\u200B", "\u200B", true);
+            }
 
-            embed.AddField("\u200B", "\u200B\n\n\n**The Kitchen**\n\u200B", true);
+            if (shownElements.kitchenIngredients)
+            {
+                embed.AddField("\u200B", "\u200B\n\n\n**The Kitchen**\n\u200B", true);
+            }
+            else
+            {
+                embed.AddField("\u200B", "\u200B\n\n\n\n\u200B", true);
+            }
 
             //Quota
             if (shownElements.quota)
@@ -314,6 +329,10 @@ namespace Aletta_s_Kitchen.GameRelated
                 {
                     embed.AddField("There's no next quota.", "\u200B", true);
                 }
+            }
+            else
+            {
+                embed.AddField("\u200B", "\u200B", true);
             }
 
             //Prepare all card text to be the same size
@@ -344,11 +363,19 @@ namespace Aletta_s_Kitchen.GameRelated
                 cardTexts.Add(this.player.hand.IngredientAt(i).GetDescriptionText(this, GameLocation.Hand));
             }
 
+            //cardTexts.Add("");
+
             this.FormatCardTexts(cardTexts);
+
+            //string emptyText = cardTexts.Last();
+            //cardTexts.RemoveAt(cardTexts.Count - 1);
+
+            string emptyText = "\u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B \u200B";
+
             //Prepare all card text to be the same size
 
             // The kitchen field
-            if (shownElements.kitchenStats)
+            if (shownElements.kitchenIngredients)
             {
                 for (int i = 0; i < kitchen.Count && i < 5; i++)
                 {
@@ -391,6 +418,13 @@ namespace Aletta_s_Kitchen.GameRelated
                     embed.AddField($"\u200B\n\nKitchen Slot {i + 1}", "(empty)", true);
                 }
             }
+            else
+            {
+                for (int i=0; i<5; i++)
+                {
+                    embed.AddField("\u200B\n\u200B", emptyText, true);
+                }
+            }
             // The kitchen field
 
             // The field about the next ingredient coming
@@ -416,6 +450,10 @@ namespace Aletta_s_Kitchen.GameRelated
 
                 nextDesc = "```" + nextDesc + " ```";
                 embed.AddField(nextTitle, nextDesc, true);
+            }
+            else
+            {
+                embed.AddField("\u200B\n\u200B", emptyText, true);
             }
             // The field about the next ingredient coming
 
@@ -473,6 +511,13 @@ namespace Aletta_s_Kitchen.GameRelated
                     continue;
                 }
             }
+            else
+            {
+                for (int i=0; i<3; i++)
+                {
+                    embed.AddField("\u200B\n\u200B", emptyText, true);
+                }
+            }
             // The hand field
 
             // Feedback messages from Ingredients
@@ -499,6 +544,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 switch (this.gameState)
                 {
                     case GameState.PickFromKitchen:
+                    case GameState.Tutorial:
                         instrTitle = "Pick an ingredient to add to your dish or cook your dish.";
                         if (this.player.hand.OptionsCount < 3 && this.player.hand.OptionsCount < this.player.hand.handLimit) instrDescription = ":one::two::three::four::five: - Pick an ingredient.\n:fork_knife_plate: - Cook your dish.";
                         else instrDescription = ":fork_knife_plate: - Cook your dish.";
@@ -535,55 +581,79 @@ namespace Aletta_s_Kitchen.GameRelated
             switch (this.gameState)
             {
                 case GameState.PickFromKitchen:
-
-                    if (emojiIndex < 5)
                     {
-                        if (!this.player.kitchen.OptionAt(emojiIndex).CanBeBought(this, emojiIndex))
+                        if (emojiIndex < 5)
                         {
-                            this.feedback.Clear();
-                            this.feedback.Add($"{this.player.kitchen.OptionAt(emojiIndex).name} can't be picked currently!");
-                            break;
+                            if (!this.player.kitchen.OptionAt(emojiIndex).CanBeBought(this, emojiIndex))
+                            {
+                                this.feedback.Clear();
+                                this.feedback.Add($"{this.player.kitchen.OptionAt(emojiIndex).name} can't be picked currently!");
+                                break;
+                            }
+
+                            await this.player.kitchen.PickIngredient(this, emojiIndex);
                         }
-
-                        await this.player.kitchen.PickIngredient(this, emojiIndex);
-                    }
-                    else if (emojiIndex == 5)
-                    {
-                        await this.player.hand.Cook(this);
-                    }
-                    break;
-
-                case GameState.BeforeQuota:
-
-                    if (emojiIndex >= 5)
-                    {
-                        if (emojiIndex == 5)
+                        else if (emojiIndex == 5)
                         {
                             await this.player.hand.Cook(this);
                         }
-                        else if (emojiIndex == 6) ;
-
-                        await this.CheckQuota();
+                        else if (emojiIndex == 6 && this.tutorialPage == Game.tutorialPages.Count)
+                        {
+                            this.tutorialPage--;
+                            this.gameState = GameState.Tutorial;
+                        }
+                        break;
                     }
-
-                    break;
-
-                case GameState.ChooseGamemode:
-
-                    if (emojiIndex < 5)
+                case GameState.BeforeQuota:
                     {
-                        int choice = (this.gamemodeChoicePage-1)*5 + emojiIndex;
-                        if (choice >= Game.gamemodes.Count) break;
+                        if (emojiIndex >= 5)
+                        {
+                            if (emojiIndex == 5)
+                            {
+                                await this.player.hand.Cook(this);
+                            }
+                            else if (emojiIndex == 6) { }
 
-                        this.gameState = GameState.PickFromKitchen;
-                        this.feedback.Add($"You've picked {Game.gamemodes[choice].title} as the gamemode!");
+                            await this.CheckQuota();
+                        }
 
-                        await this.Start(Game.gamemodes[choice]);
-                        this.player.name = user.Username;
-                        this.playerId = user.Id;
+                        break;
                     }
-                    break;
+                case GameState.ChooseGamemode:
+                    {
+                        if (emojiIndex < 5)
+                        {
+                            int choice = (this.gamemodeChoicePage - 1) * 5 + emojiIndex;
+                            if (choice >= Game.gamemodes.Count) break;
 
+                            this.gameState = GameState.PickFromKitchen;
+                            this.feedback.Add($"You've picked {Game.gamemodes[choice].title} as the gamemode!");
+
+                            await this.Start(Game.gamemodes[choice]);
+                            this.player.name = user.Username;
+                            this.playerId = user.Id;
+                        }
+                        break;
+                    }
+                case GameState.Tutorial:
+                    {
+                        if (emojiIndex == 6)
+                        {
+                            this.tutorialPage--;
+                            if (this.tutorialPage < 0) this.tutorialPage = 0;
+                        }
+                        else if (emojiIndex == 7)
+                        {
+                            this.tutorialPage++;
+                            if (this.tutorialPage >= Game.tutorialPages.Count)
+                            {
+                                this.tutorialPage = Game.tutorialPages.Count;
+                                this.gameState = GameState.PickFromKitchen;
+                            }
+                        }
+
+                        break;
+                    }
                 default:
                     break;
             }
@@ -641,10 +711,10 @@ namespace Aletta_s_Kitchen.GameRelated
 
         private struct TutorialPage
         {
-            public string feedback;
+            public List<string> feedback;
             public PlayerUIElements shownElements;
 
-            public TutorialPage(string feedback, PlayerUIElements shownElements)
+            public TutorialPage(List<string> feedback, PlayerUIElements shownElements)
             {
                 this.feedback = feedback;
                 this.shownElements = shownElements;
@@ -653,7 +723,13 @@ namespace Aletta_s_Kitchen.GameRelated
 
         private static readonly List<TutorialPage> tutorialPages = new List<TutorialPage>
         {
-            new TutorialPage("Welcome to the tutorial! Let’s teach you the way around the kitchen. In this field you will receive info on the elements of the interface and how to use them.", new PlayerUIElements{ gameEvents = true}),
+            new TutorialPage(new List<string>{ "Welcome to the tutorial! Let’s teach you the way around the kitchen.", "In this field you will receive info on the elements of the interface and how to use them.", "You can navigate through the tutorial with the :arrow_left: and :arrow_right: buttons." }, new PlayerUIElements{ gameEvents = true}),
+            new TutorialPage(new List<string>{ "This is your current total score and round."}, new PlayerUIElements{ gameEvents = true, kitchenStats = true}),
+            new TutorialPage(new List<string>{ "This is the score quota. If you fail it, you're out of the game!", "Once you complete a quota, the difference between the next one is larger than the last. It’ll get harder to meet them as the game goes on!"}, new PlayerUIElements{ gameEvents = true, quota = true}),
+            new TutorialPage(new List<string>{ "This is your kitchen!", "Your kitchen can only fit 5 ingredients at a time.", "On the bottom right of your kitchen is the next ingredient to enter your kitchen.", "Each ingredient comes with points, signified as 1p, or 2p, etc.", "The blue number is the number of their slot in the kitchen. More on that later."}, new PlayerUIElements{ gameEvents = true, kitchenIngredients = true, nextIngredient = true}),
+            new TutorialPage(new List<string>{ "This is where you prepare your dish.", "Your dish can only fit 3 ingredients at a time.", "You’ll need to pick ingredients from the kitchen to create your dish."}, new PlayerUIElements{ gameEvents = true, dish = true}),
+            new TutorialPage(new List<string>{ "This is how you’ll pick ingredients from the kitchen.", "The numbers on your buttons correspond to the number of the ingredient in the kitchen. Eg. When you click 5, the 5th ingredient in the kitchen is picked.", "Whenever you pick an ingredient, you advance a round and become closer to the quota."}, new PlayerUIElements{ gameEvents = true, instructions = true}),
+            new TutorialPage(new List<string>{ "Finally, the field you've been reading all this info from.", "This is where things happening in the game will be communicated to you.", "You can expect everything random or not obvious what's happening to be informed here.", "When you next click :arrow_right:, you can try playing the game! It will go on until you reach 75 points.", "You can always go back with the arrows if you want to reread something."}, new PlayerUIElements{ gameEvents = true}),
         };
     }
 }

@@ -20,6 +20,6 @@ namespace Aletta_s_Kitchen.GameRelated.Gamemodes
             this.title = title;
             this.description = description;
         }
-        public abstract void ApplyGamemodeSettings(Game game);
+        public abstract Task ApplyGamemodeSettings(Game game);
     }
 }

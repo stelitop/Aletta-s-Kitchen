@@ -103,6 +103,8 @@ namespace Aletta_s_Kitchen
             BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":four:"));
             BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":five:"));
             BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":fork_knife_plate:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":arrow_left:"));
+            BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":arrow_right:"));
             //BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":no_entry_sign:"));            
 
             //load the events for clicking buttons
@@ -135,7 +137,7 @@ namespace Aletta_s_Kitchen
 
         private async Task InGameButtonClick(DiscordClient client, DiscordUser user, DiscordMessage msg, DiscordEmoji emoji)
         {
-            if (BotHandler.GetUserState(user.Id) != UserState.InGame) return;
+            if (BotHandler.GetUserState(user.Id) == UserState.Idle) return;
             if (!BotHandler.playerGames.ContainsKey(user.Id)) return;
             if (BotHandler.playerGames[user.Id].UIMessage != msg) return;
 

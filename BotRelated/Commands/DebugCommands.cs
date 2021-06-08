@@ -193,15 +193,19 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             }
 
             [Command("bindfeedback")]
-            public async Task BindFeedbackChannel(CommandContext ctx, DiscordChannel channel)
+            public Task BindFeedbackChannel(CommandContext ctx, DiscordChannel channel)
             {
                 BotHandler.feedbackChannel = channel;
+
+                return Task.CompletedTask;
             }
 
             [Command("bindreport")]
-            public async Task BindReportChannel(CommandContext ctx, DiscordChannel channel)
+            public Task BindReportChannel(CommandContext ctx, DiscordChannel channel)
             {
                 BotHandler.reportsChannel = channel;
+
+                return Task.CompletedTask;
             }
         }
     }

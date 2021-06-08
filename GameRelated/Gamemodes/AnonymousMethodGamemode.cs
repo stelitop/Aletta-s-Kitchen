@@ -16,9 +16,11 @@ namespace Aletta_s_Kitchen.GameRelated.Gamemodes
                 this.settings = gs;
             }
 
-            public override void ApplyGamemodeSettings(Game game)
+            public override Task ApplyGamemodeSettings(Game game)
             {
                 this.settings(game);
+
+                return Task.CompletedTask;
             }
         }
 

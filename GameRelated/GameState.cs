@@ -16,6 +16,7 @@ namespace Aletta_s_Kitchen.GameRelated
         GameOverLoss,
         GameOverWin,
         TimedOut,
-        ChooseGamemode
+        Tutorial,
+        ChooseGamemode,
     }
 }

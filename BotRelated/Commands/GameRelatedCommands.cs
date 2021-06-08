@@ -43,6 +43,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
             for (int i=0; i<BotHandler.emojiButtons.Count; i++)
             {
+                if (i >= 6) break;
                 await gameMessage.CreateReactionAsync(BotHandler.emojiButtons[i]).ConfigureAwait(false);
             }
 
