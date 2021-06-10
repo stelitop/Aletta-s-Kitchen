@@ -36,9 +36,20 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class Saladmander : Ingredient
         {
-            public Saladmander() : base("Saladmander", 1, Rarity.Common, Tribe.Beast, "When picked, destroy a random Fruit in your kitchen to gain +3p.") 
+            public Saladmander() : base("Saladmander", 1, Rarity.Common, Tribe.Beast, "When picked, destroy a random Fruit in your kitchen to gain +3p this game.") 
             {
+                this.glowLocation = GameLocation.Kitchen;
                 this.effects.Add(new EF());
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                for (int i = 0; i < game.player.kitchen.OptionsCount; i++)
+                {
+                    if (game.player.kitchen.OptionAt(i) == null) continue;
+                    if (game.player.kitchen.OptionAt(i).tribe == Tribe.Fruit) return true;
+                }
+
+                return false;
             }
             private class EF : Effect
             {
@@ -58,8 +69,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     int index = candidates[BotHandler.globalRandom.Next(candidates.Count)];
 
-                    game.feedback.Add($"Saladmander destroys {game.player.kitchen.OptionAt(index).name} and gains +3p.");
-                    caller.points += 3;
+                    game.feedback.Add($"Saladmander destroys {game.player.kitchen.OptionAt(index).name} and gains +3p this gmae.");
+                    game.RestOfGameBuff(x => x.name == "Saladmander", x => { x.points += 3; });                    
 
                     await game.player.kitchen.DestroyIngredient(game, index);
                 }

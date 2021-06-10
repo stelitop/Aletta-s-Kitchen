@@ -111,7 +111,8 @@ namespace Aletta_s_Kitchen.GameRelated
             this.gameState = GameState.GameOverLoss;
             if (this.winCondition.Check(this)) this.gameState = GameState.GameOverWin;
 
-            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+            //await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+            await this.UpdateUI();
 
             if (BotHandler.playerGames.ContainsKey(this.playerId)) BotHandler.playerGames.Remove(this.playerId);
         }
@@ -173,6 +174,12 @@ namespace Aletta_s_Kitchen.GameRelated
             }
         }
        
+
+        public async Task UpdateUI()
+        {
+            await this.UIMessage.ModifyAsync(embed: (await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+        }
+
         public async Task<DiscordEmbedBuilder> GetUIEmbed()
         {
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder
@@ -180,6 +187,23 @@ namespace Aletta_s_Kitchen.GameRelated
                 Title = $"{this.player.name}'s Kitchen",
                 Color = DiscordColor.Azure,
             };
+
+            if (BotHandler.GetUserState(this.playerId) == UserState.Tutorial && this.player.curPoints >= 75)
+            {
+                string emptyDesc = "\u200B";
+
+                for (int i = 0; i < 50; i++) emptyDesc += " \u200B";
+
+                embed.AddField("\u200B", emptyDesc, true);
+                embed.AddField("\u200B", "```\u200B     You Win!```", true);
+                embed.AddField("\u200B", emptyDesc, true);
+
+                embed.AddField("\u200B", $"```fix\n\u200BYou've finished the Tutorial with a score of {this.player.curPoints}p and lasted {this.curRound} rounds! To play again, use a!play.```");
+
+                embed.AddField("If you want to continue playing, press :fork_knife_plate:.", "\u200B");
+
+                return embed;
+            }
 
             if (this.winCondition.Check(this) && this.gameState != GameState.GameOverLoss && this.gameState != GameState.GameOverWin) await this.EndGame();
 
@@ -246,7 +270,6 @@ namespace Aletta_s_Kitchen.GameRelated
 
             return this.GetPlayerUI();
         }
-
 
         public class PlayerUIElements
         {
@@ -319,7 +342,9 @@ namespace Aletta_s_Kitchen.GameRelated
                         this.curRound--;
                     }
 
-                    embed.AddField($"Next Quota: Round {goal.round}", goal.GetDescription(this), true);
+                    if (goal.round - this.curRound > 1) embed.AddField($"Next Quota in {goal.round - this.curRound} Rounds", goal.GetDescription(this), true);
+                    else if (goal.round - this.curRound == 1) embed.AddField($"Next Quota in {goal.round - this.curRound} Round!", goal.GetDescription(this), true);
+                    else if (goal.round - this.curRound == 0) embed.AddField($"Quota Right Now!", goal.GetDescription(this), true);
                 }
                 catch (Exception)
                 {
@@ -574,6 +599,21 @@ namespace Aletta_s_Kitchen.GameRelated
          */
         public async Task ProcessButtonPress(DiscordUser user, int emojiIndex)
         {
+            if (BotHandler.GetUserState(user.Id) == UserState.Tutorial && this.player.curPoints >= 75)
+            {
+                if (emojiIndex == 5)
+                {
+                    BotHandler.SetUserState(user.Id, UserState.InGame);
+
+                    await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_left:")).ConfigureAwait(false);
+                    await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_right:")).ConfigureAwait(false);
+
+                    await this.UpdateUI();
+                }
+
+                return;
+            }
+
             switch (this.gameState)
             {
                 case GameState.PickFromKitchen:
@@ -655,7 +695,8 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
 
-            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);            
+            //await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);            
+            await this.UpdateUI();
 
             if (this.gameState == GameState.GameOverLoss) await this.EndGame();
         }
@@ -702,7 +743,7 @@ namespace Aletta_s_Kitchen.GameRelated
             //new Gamemode.AnonymousMethodGamemode("Easy", "Reach 100 points. For those new to deckbuilders.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 100); }),
             //new Gamemode.AnonymousMethodGamemode("Medium", "Reach 300 points. For those new to Aletta's Kitchen.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 300); }),
             //new Gamemode.AnonymousMethodGamemode("Hard", "Reach 500 points. For those looking for a challenge.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 500); }),
-            new Gamemode.AnonymousMethodGamemode("Play the game", "Let's get cooking!", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => false); }),
+            new Gamemode.AnonymousMethodGamemode("Endless", "Let's get cooking!", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => false); }),
         };
 
         private struct TutorialPage

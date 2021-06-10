@@ -177,9 +177,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         }
 
         [GameIngredient]
-        public class HighTeaLordPrestor : Ingredient
+        public class HighTeaLadyPrestor : Ingredient
         {
-            public HighTeaLordPrestor() : base("High Tea Lord Prestor", 4, Rarity.Legendary, Tribe.Dragon, "Cook: If your dish has an ingredient with 10 or more points, it will return to your kitchen next turn.")
+            public HighTeaLadyPrestor() : base("High Tea Lady Prestor", 4, Rarity.Legendary, Tribe.Dragon, "Cook: If your dish has another ingredient with 10 or more points, it will return to your kitchen next turn.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Hand;
@@ -190,12 +190,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    var cands = game.player.hand.GetAllNonNullIngredients().FindAll(x => x.points >= 10);
+                    var cands = game.player.hand.GetAllNonNullIngredients().FindAll(x => x.points >= 10 && x != caller);
 
                     if (cands.Count == 0) return Task.CompletedTask;
 
                     var pick = cands[BotHandler.globalRandom.Next(cands.Count)];
-                    game.feedback.Add($"High Tea Lord Prestor makes {pick.name} return to your kitchen next turn.");
+                    game.feedback.Add($"High Tea Lady Prestor makes {pick.name} return to your kitchen next turn.");
                     game.player.kitchen.nextOption = game.pool.GetVanillaIngredient(pick.name);
 
                     return Task.CompletedTask;

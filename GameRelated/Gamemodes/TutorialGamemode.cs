@@ -27,9 +27,9 @@ namespace Aletta_s_Kitchen.GameRelated.Gamemodes
 
                 game.gameState = GameState.Tutorial;
                 
-                game.winCondition = new WinCondition(x => x.player.curPoints >= 75);
+                //game.winCondition = new WinCondition(x => x.player.curPoints >= 75);
 
-                game.pool.ingredients.RemoveAll(x => x.effects.FindAll(y => y.Type.Contains(EffectType.OnEnteringKitchen)).Count > 0);
+                //game.pool.ingredients.RemoveAll(x => x.effects.FindAll(y => y.Type.Contains(EffectType.OnEnteringKitchen)).Count > 0);
 
                 await game.player.kitchen.Restart(game);
 

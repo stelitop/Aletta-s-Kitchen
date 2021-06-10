@@ -19,7 +19,7 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
         {
             if (BotHandler.resetExpected)
             {
-                await ctx.RespondAsync("Currently a reset is planned to take place soon, so the play function has been disabled. We sorry for your inconvenience.");
+                await ctx.RespondAsync("Currently a reset is planned to take place soon, so the play function has been disabled. We are sorry for the inconvenience.");
 
                 return;
             }
@@ -27,13 +27,15 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
             if (BotHandler.GetUserState(ctx.User.Id) != UserState.Idle)
             {
-                await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 
-                    Title = "You're Already In A Game",
-                    Description = "To end your current game, type a!endgame.",
-                    Color = DiscordColor.Red                  
-                }).ConfigureAwait(false);
+                //await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 
+                //    Title = "You're Already In A Game",
+                //    Description = "To end your current game, type a!endgame.",
+                //    Color = DiscordColor.Red                  
+                //}).ConfigureAwait(false);
 
-                return;
+                //return;
+
+                await InGameCommands.EndGameStatic(ctx);
             }
 
             BotHandler.SetUserState(ctx.User.Id, UserState.InGame);
@@ -58,7 +60,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             //game.gameState = GameState.PickFromKitchen;
             game.gameState = GameState.ChooseGamemode;
 
-            await game.UIMessage.ModifyAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);
+            //await game.UIMessage.ModifyAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);
+            await game.UpdateUI();
 
             //await Analysis.DiscordEmbedAnalysis(game.GetUIEmbed(), ctx.Channel);            
         }
