@@ -136,6 +136,11 @@ namespace Aletta_s_Kitchen
         {
             BotHandler.resetExpected = !BotHandler.resetExpected;
         }
+
+        private void ButtonToggleConsole_Click(object sender, EventArgs e)
+        {
+            TextBoxConsole.Enabled = !TextBoxConsole.Enabled;
+        }
     }
 
     public class ControlWriter : TextWriter
