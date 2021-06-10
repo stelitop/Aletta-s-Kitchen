@@ -144,7 +144,7 @@ namespace Aletta_s_Kitchen
             int emojiIndex = BotHandler.emojiButtons.IndexOf(emoji);
             if (emojiIndex == -1) return;
 
-            await BotHandler.playerGames[user.Id].ProcessButtonPress(user, emojiIndex);
+            await BotHandler.playerGames[user.Id].ProcessButtonPress(emojiIndex);
         }
 
         private async Task InGameButtonClickReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)

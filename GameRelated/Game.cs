@@ -576,7 +576,7 @@ namespace Aletta_s_Kitchen.GameRelated
          * 5 - cook
          * 6 - cancel
          */
-        public async Task ProcessButtonPress(DiscordUser user, int emojiIndex)
+        public async Task ProcessButtonPress(int emojiIndex)
         {
             switch (this.gameState)
             {
@@ -630,8 +630,8 @@ namespace Aletta_s_Kitchen.GameRelated
                             this.feedback.Add($"You've picked {Game.gamemodes[choice].title} as the gamemode!");
 
                             await this.Start(Game.gamemodes[choice]);
-                            this.player.name = user.Username;
-                            this.playerId = user.Id;
+                            // this.player.name = user.Username;
+                            // this.playerId = user.Id;
                         }
                         break;
                     }
@@ -659,7 +659,7 @@ namespace Aletta_s_Kitchen.GameRelated
             }
 
 
-            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);            
+            //await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);            
 
             if (this.gameState == GameState.GameOverLoss) await this.EndGame();
         }

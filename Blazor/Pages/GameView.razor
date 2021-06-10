@@ -1,0 +1,126 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Web
+@using Aletta_s_Kitchen.GameRelated
+@using Aletta_s_Kitchen.GameRelated.GoalTypes
+@using Aletta_s_Kitchen.GameRelated.IngredientRelated
+@using AlettasWasm.Components
+<h2>Aletta's Kitchen</h2>
+
+@if (game.gameState == GameState.None) {
+    <button class="btn btn-primary" @onclick="StartGame">Start</button>
+} else if (game.gameState == GameState.Loading) {
+    <p>Preparing your Kitchen. This may take a while...</p>
+} else if (game.gameState == GameState.GameOverLoss || game.gameState == GameState.GameOverWin) {
+    <h3>Game Over!</h3>
+    <p>You finished the game with a score of @game.player.curPoints p and lasted @game.curRound rounds.</p>
+} else {
+    <div class="d-flex w-100">
+        <div class="kitchen-col">
+            @{var kitchen = game.player.kitchen.GetAllIngredients();}
+
+            <h4>Kitchen</h4>
+
+            <div class="d-flex flex-wrap kitchen-flex">
+            @for (int i = 0; i < kitchen.Count && i < 5; i++)
+            {
+                <IngredientView ingredient="kitchen[i]" onClick="@GetPickAction(i)"></IngredientView>
+            }
+            
+            <IngredientView ingredient="@game.player.kitchen.nextOption" onDeck="true"></IngredientView>
+            </div>
+
+            
+            
+            <h4>Dish</h4>
+
+            <div class="d-flex flex-wrap kitchen-flex">
+            @for (int i = 0; i < game.player.hand.OptionsCount && i < 3; i++) {
+                @if (game.player.hand.IngredientAt(i) == null) {
+                    @* <li>Empty Dish Slot</li> *@
+                } else {
+                    <IngredientView ingredient="@game.player.hand.IngredientAt(i)"></IngredientView>
+                }
+            }
+            </div>
+
+            @if (game.player.hand.OptionsCount > 0) {
+                <button class="btn btn-success cook-btn" @onclick="@(async () => await OnClickCook())">Cook! 🍽️</button>
+            } else {
+                <button class="btn btn-secondary cook-btn" disabled>Hand Empty!</button>
+            }
+        </div>
+        
+        <div class="events-col">
+            <h5>Current Score: @game.player.curPoints</h5>
+            <h5>Round: @game.curRound</h5>
+            
+            @if (game.goalGenerator.CurrentGoal(game).round - game.curRound == 1) {
+                <b>(quota next turn!)</b>
+            }
+
+            @{var goal = GetQuota();}
+            @if (goal == null) {
+                <h5>There is no goal.</h5>
+            } else {
+                <h5>Next Quota: Round @goal.round</h5>
+                <i>@goal.GetDescription(game)</i>
+            }
+            <h4>Game Events</h4>
+            <ul>
+                @for(int i = 0; i < game.feedback.Count; i++) {
+                    <li>@game.feedback[i]</li>
+                }
+            </ul>    
+        </div>
+    </div>
+    
+    
+}
+
+
+@code {
+    Game game = new Game();
+
+    private async void StartGame()
+    {
+        await game.Start(Game.gamemodes[4]);
+        game.player.name = "Player";
+        game.playerId = 0;
+
+        game.gameState = GameState.PickFromKitchen;
+
+        //return game.GetUIEmbed().ToString();
+        //Console.WriteLine(await GameRelatedCommands.StartGame());
+    }
+
+    private Goal GetQuota() {
+        try
+        {
+            Goal goal = game.goalGenerator.CurrentGoal(game);
+
+            if (goal.round == game.curRound && game.gameState != GameState.BeforeQuota)
+            {
+                game.curRound++;
+                goal = game.goalGenerator.CurrentGoal(game);
+                game.curRound--;
+            }
+
+            return goal;
+        }
+        catch (Exception)
+        {
+            return null;
+        }      
+    }
+
+    public Action GetPickAction(int i) {
+        return async () => { await game.ProcessButtonPress(i); StateHasChanged();  };
+    }
+
+    private async Task OnClickCook() {
+        await game.ProcessButtonPress(5);
+        StateHasChanged();
+    }
+
+}
+

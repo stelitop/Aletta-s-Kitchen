@@ -1,0 +1,53 @@
+@using Aletta_s_Kitchen.GameRelated
+@using Aletta_s_Kitchen.GameRelated.IngredientRelated
+<div class="card ingredient-card @(onDeck ? "paper" : "")" style="width: 15rem;">
+  <div class="card-body d-flex flex-column">
+    <h5 class="card-title">@ingredient.name</h5>
+    <h6 class="card-subtitle mb-2 text-muted">
+        <span class="badge badge-pill badge-info">
+            @($"{ingredient.points}p")
+        </span>
+        @GetTribeString()
+    </h6>
+    <p class="card-text">@ingredient.text</p>
+    @if (onClick != null) {
+        <button class="btn btn-primary pick-button mt-auto" @onclick="@InvokeOnClick">Pick</button>
+    } else if (onDeck) {
+        <button class="btn btn-secondary pick-button mt-auto" disabled>On Deck</button>
+    }
+    
+  </div>
+</div>
+
+@code
+{
+    [Parameter]
+    public Ingredient ingredient { get; set; }
+
+    [Parameter]
+    public Action onClick { get; set;}
+
+    [Parameter]
+    public bool onDeck { get; set; }
+
+    public static Dictionary<Tribe, string> tribeToEmoji { get; } = new Dictionary<Tribe, string>{
+            { Tribe.NoTribe, ""},
+            { Tribe.Beast, "🦁"},
+            { Tribe.Demon, "👿"},
+            { Tribe.Dragon, "🐉"},
+            { Tribe.Elemental, "🌪️"},
+            { Tribe.Fruit, "🍎"},
+            { Tribe.Murloc, "🐟"},
+            { Tribe.Vegetable, "🥕"},
+    };
+
+    public string GetTribeString() {
+        string ret = "";
+        if (ingredient.tribe != Tribe.NoTribe) ret += $"{tribeToEmoji[ingredient.tribe]} {ingredient.tribe}";
+        return ret;
+    }
+
+    private void InvokeOnClick() {
+        onClick?.Invoke();
+    }
+}
