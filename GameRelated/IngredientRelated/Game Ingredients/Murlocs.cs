@@ -169,7 +169,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class BloatedPufferfin : Ingredient
         {
-            public BloatedPufferfin() : base("Bloated Pufferfin", 0, Rarity.Epic, Tribe.Murloc, "When picked, gain +2p for each full Murloc dish you've cooked this game.")
+            public BloatedPufferfin() : base("Bloated Pufferfin", 3, Rarity.Epic, Tribe.Murloc, "When picked, gain +2p for each full Murloc dish you've cooked this game.")
             {
                 this.effects.Add(new EF());
             }

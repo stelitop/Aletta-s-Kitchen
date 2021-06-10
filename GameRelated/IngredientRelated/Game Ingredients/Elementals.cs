@@ -242,14 +242,14 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     while (game.player.dishHistory.Count >= depth)
                     {
-                        if (game.player.dishHistory[game.player.pickHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
+                        if (game.player.dishHistory[game.player.dishHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
                         {
                             depth++;
                         }
                         else break;
                     }
 
-                    caller.points += 5 * (depth - 1);
+                    caller.points += 10 * (depth - 1);
 
                     return Task.CompletedTask;
                 }
@@ -310,7 +310,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.OnBeingCookedBefore) { }
+                public EF() : base(EffectType.OnBeingCookedAfter) { }
 
                 public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
@@ -319,6 +319,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Appetiser Elemental"));
 
                     game.player.kitchen.nextOption = game.pool.GetTokenIngredient("Appetiser Elemental");
+
+                    game.feedback.Add("Fastfood Chainer adds a 5p Appetiser Elemental to your dish and next in the kitchen.");
                 }
             }
 
