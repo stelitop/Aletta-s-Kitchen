@@ -1,6 +1,6 @@
 @using Aletta_s_Kitchen.GameRelated
 @using Aletta_s_Kitchen.GameRelated.IngredientRelated
-<div class="card ingredient-card @(onDeck ? "paper" : "")" style="width: 15rem;">
+<div class="card ingredient-card @(onDeck ? "paper" : "") @(Glowing() ? "glowing" : "")" style="width: 15rem;">
   <div class="card-body d-flex flex-column">
     <h5 class="card-title">@ingredient.name</h5>
     <h6 class="card-subtitle mb-2 text-muted">
@@ -9,7 +9,7 @@
         </span>
         @GetTribeString()
     </h6>
-    <p class="card-text">@ingredient.text</p>
+    <p class="card-text">@ingredient.GetDescriptionText(game, GetGameLocation())</p>
     @if (onClick != null) {
         <button class="btn btn-primary pick-button mt-auto" @onclick="@InvokeOnClick">Pick</button>
     } else if (onDeck) {
@@ -30,6 +30,15 @@
     [Parameter]
     public bool onDeck { get; set; }
 
+    [Parameter]
+    public Game game { get; set; }
+
+    [Parameter]
+    public int index { get; set; }
+
+    [Parameter]
+    public bool inKitchen { get; set; }
+
     public static Dictionary<Tribe, string> tribeToEmoji { get; } = new Dictionary<Tribe, string>{
             { Tribe.NoTribe, ""},
             { Tribe.Beast, "🦁"},
@@ -49,5 +58,38 @@
 
     private void InvokeOnClick() {
         onClick?.Invoke();
+    }
+
+    GameLocation GetGameLocation() {
+        if (inKitchen && !onDeck) return GameLocation.Kitchen;
+        if (onDeck) return GameLocation.NextIngredient;
+        return GameLocation.Hand; 
+    }
+
+    private bool Glowing() {
+        if (inKitchen && !onDeck) {
+            if (ingredient.glowLocation == GameLocation.Kitchen || ingredient.glowLocation == GameLocation.Any) {
+                if (ingredient.GlowCondition(game, index)) {
+                    return true;
+                }
+            }
+        } else if (onDeck) {
+            if (ingredient.glowLocation == GameLocation.NextIngredient || ingredient.glowLocation == GameLocation.Any) {
+                try {
+                    if (ingredient.GlowCondition(game, -1)) {
+                        return true;
+                    }
+                } catch (Exception) {
+                    return false;
+                }
+            }
+        } else {
+            if (ingredient.glowLocation == GameLocation.Hand || ingredient.glowLocation == GameLocation.Any) {
+                if (ingredient.GlowCondition(game, index)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

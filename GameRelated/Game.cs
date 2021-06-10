@@ -111,9 +111,9 @@ namespace Aletta_s_Kitchen.GameRelated
             this.gameState = GameState.GameOverLoss;
             if (this.winCondition.Check(this)) this.gameState = GameState.GameOverWin;
 
-            await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+            //await this.UIMessage.ModifyAsync((await this.GetUIEmbed()).Build()).ConfigureAwait(false);
 
-            if (BotHandler.playerGames.ContainsKey(this.playerId)) BotHandler.playerGames.Remove(this.playerId);
+            //if (BotHandler.playerGames.ContainsKey(this.playerId)) BotHandler.playerGames.Remove(this.playerId);
         }
 
         private void FormatCardTexts(List<string> cardTexts)

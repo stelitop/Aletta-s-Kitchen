@@ -265,7 +265,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 while (game.player.dishHistory.Count >= depth)
                 {
-                    if (game.player.dishHistory[game.player.pickHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
+                    if (game.player.dishHistory[game.player.dishHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
                     {
                         depth++;
                     }

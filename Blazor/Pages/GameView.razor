@@ -7,7 +7,11 @@
 <h2>Aletta's Kitchen</h2>
 
 @if (game.gameState == GameState.None) {
-    <button class="btn btn-primary" @onclick="StartGame">Start</button>
+    @* <button class="btn btn-primary" @onclick="@(() => StartGame(0))">Tutorial</button> *@
+    <button class="btn btn-primary" @onclick="@(() => StartGame(1))">Easy</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(2))">Medium</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(3))">Hard</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(4))">Endless</button>
 } else if (game.gameState == GameState.Loading) {
     <p>Preparing your Kitchen. This may take a while...</p>
 } else if (game.gameState == GameState.GameOverLoss || game.gameState == GameState.GameOverWin) {
@@ -23,10 +27,10 @@
             <div class="d-flex flex-wrap kitchen-flex">
             @for (int i = 0; i < kitchen.Count && i < 5; i++)
             {
-                <IngredientView ingredient="kitchen[i]" onClick="@GetPickAction(i)"></IngredientView>
+                <IngredientView ingredient="kitchen[i]" game="game" index="i" inKitchen="true" onClick="@GetPickAction(i)" onDeck="false"></IngredientView>
             }
             
-            <IngredientView ingredient="@game.player.kitchen.nextOption" onDeck="true"></IngredientView>
+            <IngredientView ingredient="@game.player.kitchen.nextOption" game="game" index="5" inKitchen="true" onDeck="true"></IngredientView>
             </div>
 
             
@@ -38,7 +42,7 @@
                 @if (game.player.hand.IngredientAt(i) == null) {
                     @* <li>Empty Dish Slot</li> *@
                 } else {
-                    <IngredientView ingredient="@game.player.hand.IngredientAt(i)"></IngredientView>
+                    <IngredientView ingredient="@game.player.hand.IngredientAt(i)" game="game" index="i" inKitchen="false" onDeck="false"></IngredientView>
                 }
             }
             </div>
@@ -70,7 +74,11 @@
                 @for(int i = 0; i < game.feedback.Count; i++) {
                     <li>@game.feedback[i]</li>
                 }
-            </ul>    
+            </ul> 
+            @* <button class="btn btn-warning" @onclick="@(() => {
+                Ingredient ingr = game.pool.GetVanillaIngredient("Icecream Conenberg");
+                game.player.kitchen.nextOption = ingr;
+                })">Debug</button>    *@
         </div>
     </div>
     
@@ -81,9 +89,9 @@
 @code {
     Game game = new Game();
 
-    private async void StartGame()
+    private async void StartGame(int gameModeIndex)
     {
-        await game.Start(Game.gamemodes[4]);
+        await game.Start(Game.gamemodes[gameModeIndex]);
         game.player.name = "Player";
         game.playerId = 0;
 
@@ -114,7 +122,11 @@
     }
 
     public Action GetPickAction(int i) {
-        return async () => { await game.ProcessButtonPress(i); StateHasChanged();  };
+        return async () => { 
+            await game.ProcessButtonPress(i);
+            if (game.winCondition.Check(game) && game.gameState != GameState.GameOverLoss && game.gameState != GameState.GameOverWin) await game.EndGame();
+            StateHasChanged();  
+        };
     }
 
     private async Task OnClickCook() {
