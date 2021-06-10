@@ -143,19 +143,25 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.OnBeingCookedBefore) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (!CommonConditions.ElementalCondition(game)) return Task.CompletedTask;
-                    
-                    var kitchen = game.player.kitchen.GetAllNonNullIngredients();
-                    foreach (var ingr in kitchen)
+                    try
                     {
-                        ingr.points+=3;
+                        if (!CommonConditions.ElementalCondition(game)) return;
+
+                        var kitchen = game.player.kitchen.GetAllNonNullIngredients();
+                        foreach (var ingr in kitchen)
+                        {
+                            ingr.points += 3;
+                        }
+
+                        game.feedback.Add("Your Rising Dough gives all ingredients in the Kitchen +3p.");
                     }
-
-                    game.feedback.Add("Your Rising Dough gives all ingredients in the Kitchen +3p.");                    
-
-                    return Task.CompletedTask;
+                    catch (Exception e)
+                    {
+                        await BotHandler.reportsChannel.SendMessageAsync("Rising Dough threw an exception. Check the console <@237264833433567233>.");
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
 
@@ -174,16 +180,22 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 public EF() : base(EffectType.OnBeingCookedBefore) { }
 
-                public override Task Call(Ingredient caller, Game game, EffectArgs args)
+                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    if (!CommonConditions.ElementalCondition(game)) return Task.CompletedTask;
+                    try
+                    {
+                        if (!CommonConditions.ElementalCondition(game)) return;
 
-                    game.player.kitchen.nextOption = game.pool.GetRandomIngredient(x => x.tribe == Tribe.Elemental && x.name != "Creampooch");
-                    game.player.kitchen.nextOption.points += 5;
+                        game.player.kitchen.nextOption = game.pool.GetRandomIngredient(x => x.tribe == Tribe.Elemental && x.name != "Creampooch");
+                        game.player.kitchen.nextOption.points += 5;
 
-                    game.feedback.Add("Your Creampooch replaces the next ingredient in the kitchen with an Elemental with +5p.");
-                    
-                    return Task.CompletedTask;
+                        game.feedback.Add("Your Creampooch replaces the next ingredient in the kitchen with an Elemental with +5p.");                        
+                    }
+                    catch (Exception e)
+                    {
+                        await BotHandler.reportsChannel.SendMessageAsync("Creampooch threw an exception. Check the console <@237264833433567233>.");
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
             public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.ElementalCondition(game);
@@ -265,7 +277,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 while (game.player.dishHistory.Count >= depth)
                 {
-                    if (game.player.dishHistory[game.player.pickHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
+                    if (game.player.dishHistory[game.player.dishHistory.Count - depth].FindAll(x => x.tribe == Tribe.Elemental).Count > 0)
                     {
                         depth++;
                     }
@@ -332,6 +344,5 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public AppetiserElemental() : base("Appetiser Elemental", 5, Rarity.Common, Tribe.Elemental) { }
             }
         }
-
     }
 }

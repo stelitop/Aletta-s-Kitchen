@@ -274,7 +274,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
             embed.Footer = new DiscordEmbedBuilder.EmbedFooter
             {
-                Text = "To end early, type a!endgame. For a new game interace, type a!newui."
+                Text = "To end early, type a!endgame. For a new game interface, type a!newui."
             };
 
             //Kitchen Stats
@@ -699,10 +699,10 @@ namespace Aletta_s_Kitchen.GameRelated
         public static readonly List<Gamemode> gamemodes = new List<Gamemode>
         {
             new Gamemode.TutorialGamemode(),
-            new Gamemode.AnonymousMethodGamemode("Easy", "Reach 100 points. For those new to deckbuilders.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 100); }),
-            new Gamemode.AnonymousMethodGamemode("Medium", "Reach 300 points. For those new to Aletta's Kitchen.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 300); }),
-            new Gamemode.AnonymousMethodGamemode("Hard", "Reach 500 points. For those looking for a challenge.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 500); }),
-            new Gamemode.AnonymousMethodGamemode("Endless", "No cap. For those looking to break the game.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => false); }),
+            //new Gamemode.AnonymousMethodGamemode("Easy", "Reach 100 points. For those new to deckbuilders.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 100); }),
+            //new Gamemode.AnonymousMethodGamemode("Medium", "Reach 300 points. For those new to Aletta's Kitchen.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 300); }),
+            //new Gamemode.AnonymousMethodGamemode("Hard", "Reach 500 points. For those looking for a challenge.", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => x.player.curPoints >= 500); }),
+            new Gamemode.AnonymousMethodGamemode("Play the game", "Let's get cooking!", game => { game.goalGenerator = new SquareIncrGoalGenerator(); game.winCondition = new WinCondition(x => false); }),
         };
 
         private struct TutorialPage

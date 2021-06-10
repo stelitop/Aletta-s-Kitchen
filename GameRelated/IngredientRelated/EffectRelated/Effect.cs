@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Aletta_s_Kitchen.BotRelated;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
 
             for (int i=0; i<toBeCast.Count; i++)
             {
-                await toBeCast[i].Call(caller, game, args);                
+                try
+                {
+                    await toBeCast[i].Call(caller, game, args);
+                }
+                catch (Exception e)
+                {
+                    await BotHandler.reportsChannel.SendMessageAsync($"{caller.name} threw an exception. EffectType = {type}. Check the console <@237264833433567233>.");
+                    Console.WriteLine(e.Message);
+                }
             }
 
             if (!removeAfterCall)

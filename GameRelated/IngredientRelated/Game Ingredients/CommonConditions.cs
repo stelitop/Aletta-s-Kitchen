@@ -11,7 +11,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         public static bool ElementalCondition(Game game)
         {
             if (game.player.dishHistory.Count == 0) return false;
-            if (game.player.dishHistory.Last().FindAll(x => x.tribe == Tribe.Elemental).Count > 0) return true;
+            if (game.player.dishHistory.Last().FindAll(x => { if (x == null) return false; return x.tribe == Tribe.Elemental; }).Count > 0) return true;
             return false;
         }
 

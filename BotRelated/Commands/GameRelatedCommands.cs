@@ -17,6 +17,14 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
         [Command("play")]
         public async Task StartGame(CommandContext ctx)
         {
+            if (BotHandler.resetExpected)
+            {
+                await ctx.RespondAsync("Currently a reset is planned to take place soon, so the play function has been disabled. We sorry for your inconvenience.");
+
+                return;
+            }
+
+
             if (BotHandler.GetUserState(ctx.User.Id) != UserState.Idle)
             {
                 await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 

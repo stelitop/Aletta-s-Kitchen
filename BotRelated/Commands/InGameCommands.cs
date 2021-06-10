@@ -16,13 +16,19 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
         [Command("endgame")]
         public async Task EndGame(CommandContext ctx)
         {
-            BotHandler.SetUserState(ctx.User.Id, UserState.Idle);
+            BotHandler.SetUserState(ctx.User.Id, UserState.Idle);                       
 
-            await BotHandler.playerGames[ctx.User.Id].EndGame();
+            if (!BotHandler.playerGames.ContainsKey(ctx.User.Id)) return;
 
-            await BotHandler.playerGames[ctx.User.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
+            Game game = BotHandler.playerGames[ctx.User.Id];
+
+            await game.EndGame();
+
+            await game.UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
 
             BotHandler.playerGames.Remove(ctx.User.Id);
+
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false) ;
         }
 
         [Command("newui")]
@@ -44,6 +50,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             }
 
             game.gameState = gameState;
+
+            await gameMessage.ModifyAsync(embed: (await game.GetUIEmbed()).Build()).ConfigureAwait(false);
         }
     }
 }

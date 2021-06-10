@@ -50,7 +50,7 @@ namespace Aletta_s_Kitchen
             Client = new DiscordClient(config);
 
             //listens to events
-            Client.Ready += OnClientReady;
+            Client.Ready += OnClientReady;            
             Client.GuildAvailable += OnGuildAvailable;
 
             Client.UseInteractivity(new InteractivityConfiguration
@@ -107,10 +107,9 @@ namespace Aletta_s_Kitchen
             BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":arrow_left:"));
             BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":arrow_right:"));
             //BotHandler.emojiButtons.Add(DiscordEmoji.FromName(client, ":no_entry_sign:"));            
-
-            //load the events for clicking buttons
+            
             this.Client.MessageReactionAdded += InGameButtonClickReactionAdded;
-            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;                        
+            this.Client.MessageReactionRemoved += InGameButtonClickReactionRemoved;            
 
             return Task.CompletedTask;
         }
