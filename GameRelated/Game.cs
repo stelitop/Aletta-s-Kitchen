@@ -31,6 +31,8 @@ namespace Aletta_s_Kitchen.GameRelated
         private int gamemodeChoicePage;
         private int tutorialPage;
 
+        public string gamemodeName;
+
         public Game()
         {
             this.curRound = 1;
@@ -48,6 +50,8 @@ namespace Aletta_s_Kitchen.GameRelated
 
             this.gamemodeChoicePage = 1;
             this.tutorialPage = 0;
+
+            this.gamemodeName = string.Empty;
         }
 
         public async Task Start(Gamemode gamemode) => await this.Start(BotHandler.genericPool, gamemode);
@@ -225,7 +229,7 @@ namespace Aletta_s_Kitchen.GameRelated
                 else embed.AddField("\u200B", "```\u200B     You Win!```", true);
                 embed.AddField("\u200B", emptyDesc, true);
 
-                embed.AddField("\u200B", $"```fix\n\u200BYou've finished the game with a score of {this.player.curPoints}p and lasted {this.curRound} rounds! To play again, use a!play.```");
+                embed.AddField("\u200B", $"```fix\n\u200BYou've finished the game with a score of {this.player.curPoints}p and lasted {this.curRound} rounds on {this.gamemodeName}! To play again, use a!play.```");
 
                 return embed;
             }
@@ -665,7 +669,10 @@ namespace Aletta_s_Kitchen.GameRelated
                             this.gameState = GameState.PickFromKitchen;
                             this.feedback.Add($"You've picked {Game.gamemodes[choice].title} as the gamemode!");
 
-                            await this.Start(Game.gamemodes[choice]);                            
+                            await this.Start(Game.gamemodes[choice]);
+
+                            this.gamemodeName = Game.gamemodes[choice].title;
+
                             this.playerId = user.Id;
                         }
                         break;
