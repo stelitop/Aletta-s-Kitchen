@@ -180,10 +180,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
 
             //2)
             var handTemp = this.GetAllNonNullIngredients();
-            game.player.dishHistory.Add(handTemp);
             
             this.Clear();
-                    
+
+            game.player.dishHistory.Add(handTemp);
+
             //3)
             for (int i = 0; i < handTemp.Count; i++)
             {

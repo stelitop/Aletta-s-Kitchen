@@ -14,16 +14,25 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
     public class InGameCommands : BaseCommandModule
     {
         [Command("endgame")]
-        public async Task EndGame(CommandContext ctx)
+        public async Task EndGame(CommandContext ctx) => await EndGameStatic(ctx);
+
+        public static async Task EndGameStatic(CommandContext ctx)
         {
             BotHandler.SetUserState(ctx.User.Id, UserState.Idle);
 
-            await BotHandler.playerGames[ctx.User.Id].EndGame();
+            if (!BotHandler.playerGames.ContainsKey(ctx.User.Id)) return;
 
-            await BotHandler.playerGames[ctx.User.Id].UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
+            Game game = BotHandler.playerGames[ctx.User.Id];
+
+            await game.EndGame();
+
+            //await game.UIMessage.ModifyAsync(embed: (await BotHandler.playerGames[ctx.User.Id].GetUIEmbed()).Build()).ConfigureAwait(false);
+            await game.UpdateUI();
 
             BotHandler.playerGames.Remove(ctx.User.Id);
-        }
+
+            await ctx.Message.CreateReactionAsync(DiscordEmoji.FromName(ctx.Client, ":+1:")).ConfigureAwait(false);
+        }        
 
         [Command("newui")]
         public async Task NewUI(CommandContext ctx)
@@ -44,6 +53,8 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
             }
 
             game.gameState = gameState;
+
+            await game.UpdateUI();            
         }
     }
 }

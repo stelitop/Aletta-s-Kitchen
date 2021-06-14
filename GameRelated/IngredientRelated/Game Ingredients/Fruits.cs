@@ -235,16 +235,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                 foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                 {
-                    if (ingr == this) continue;
-
                     if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                     else pairs.Add(ingr.name, 1);
                 }
 
                 foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
                 {
-                    if (ingr == this) continue;
-
                     if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                     else pairs.Add(ingr.name, 1);
                 }
@@ -264,16 +260,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     foreach (var ingr in game.player.kitchen.GetAllNonNullIngredients())
                     {
-                        if (ingr == caller) continue;
-                             
                         if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                         else pairs.Add(ingr.name, 1);
                     }
 
                     foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
                     {
-                        if (ingr == caller) continue;
-
                         if (pairs.ContainsKey(ingr.name)) pairs[ingr.name]++;
                         else pairs.Add(ingr.name, 1);
                     }

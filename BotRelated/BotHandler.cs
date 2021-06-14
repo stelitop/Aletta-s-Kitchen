@@ -15,6 +15,8 @@ namespace Aletta_s_Kitchen.BotRelated
 
         public static Bot bot = new Bot();
 
+        public static bool resetExpected = false;
+
         public static Dictionary<ulong, Game> playerGames = new Dictionary<ulong, Game>();
 
         private static Dictionary<ulong, UserState> _userState = new Dictionary<ulong, UserState>();

@@ -126,11 +126,26 @@ namespace Aletta_s_Kitchen
                 ListBoxFeedback.Items.Add($"{game.Value.player.name}");
             }
         }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            BotHandler.genericPool.ingredients = BotHandler.genericPool.ingredients.FindAll(x => x.tribe != Tribe.Elemental);
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            BotHandler.resetExpected = !BotHandler.resetExpected;
+        }
+
+        private void ButtonToggleConsole_Click(object sender, EventArgs e)
+        {
+            TextBoxConsole.Enabled = !TextBoxConsole.Enabled;
+        }
     }
 
     public class ControlWriter : TextWriter
     {
-        private const int ConsoleCharLimit = 1500;
+        private const int ConsoleCharLimit = 10000;
 
         private readonly TextBox textBox;
         public ControlWriter(TextBox tb)
