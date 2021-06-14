@@ -24,7 +24,6 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
                 return;
             }
 
-
             if (BotHandler.GetUserState(ctx.User.Id) != UserState.Idle)
             {
                 //await ctx.Channel.SendMessageAsync(embed: new DiscordEmbedBuilder { 
@@ -44,8 +43,9 @@ namespace Aletta_s_Kitchen.BotRelated.Commands
 
             Game game = new Game();
             BotHandler.playerGames.Add(ctx.User.Id, game);
-            game.gameState = GameState.Loading;
+            game.gameState = GameState.Loading;            
             game.player.name = ctx.User.Username;
+
             game.playerId = ctx.User.Id;
 
             DiscordMessage gameMessage = await ctx.RespondAsync((await game.GetUIEmbed()).Build()).ConfigureAwait(false);

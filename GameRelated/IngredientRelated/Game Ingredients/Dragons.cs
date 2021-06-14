@@ -95,7 +95,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class ScaledSaltshaker : Ingredient
         {
-            public ScaledSaltshaker() : base("Scaled Saltshaker", 4, Rarity.Rare, Tribe.Dragon, "Cook: If your kitchen has a Dragon, give Dragons +2p this game.")
+            public ScaledSaltshaker() : base("Scaled Saltshaker", 4, Rarity.Rare, Tribe.Dragon, "Cook: If your kitchen has a Dragon, give Dragons +1p this game.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Hand;
@@ -105,9 +105,9 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public EF() : base(EffectType.OnBeingCookedAfter) { }
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    game.feedback.Add("Scaled Saltshaker gives you Dragons this game +2p.");
+                    game.feedback.Add("Scaled Saltshaker gives you Dragons this game +1p.");
 
-                    game.RestOfGameBuff(x => x.tribe == Tribe.Dragon, x => { x.points += 2; });
+                    game.RestOfGameBuff(x => x.tribe == Tribe.Dragon, x => { x.points += 1; });
 
                     return Task.CompletedTask;
                 }
@@ -179,7 +179,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HighTeaLadyPrestor : Ingredient
         {
-            public HighTeaLadyPrestor() : base("High Tea Lady Prestor", 4, Rarity.Legendary, Tribe.Dragon, "Cook: If your dish has another ingredient with 10 or more points, it will return to your kitchen next turn.")
+            public HighTeaLadyPrestor() : base("High Tea Lady Prestor", 4, Rarity.Legendary, Tribe.Dragon, "Cook: If your dish has another ingredient with 10 or more points, make it the next ingredient in your kitchen.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Hand;
@@ -203,7 +203,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             }
             public override bool GlowCondition(Game game, int kitchenPos)
             {
-                var cands = game.player.hand.GetAllNonNullIngredients().FindAll(x => x.points >= 10);
+                var cands = game.player.hand.GetAllNonNullIngredients().FindAll(x => x.points >= 10 && x != this);
 
                 return cands.Count > 0;
             }
@@ -314,7 +314,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class PureDragon : Ingredient
         {
-            public PureDragon() : base("Pure Dragon", 4, Rarity.Common, Tribe.Dragon, "After you cook a dish with a Dragon, give Dragons +1p this game.")
+            public PureDragon() : base("Pure Dragon", 4, Rarity.Common, Tribe.Dragon, "After you cook 2 dishes with a Dragon in each, give Dragons +2p this game.")
             {
                 this.effects.Add(new EF());
                 this.glowLocation = GameLocation.Kitchen;
@@ -323,12 +323,22 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             {
                 return game.player.hand.GetAllNonNullIngredients().FindAll(x => x.tribe == Tribe.Dragon).Count > 0;
             }
+            public override string GetDescriptionText(Game game, GameLocation gameLocation)
+            {
+                EF effect = (EF)this.effects.Find(x => x is EF);
+
+                if (effect == null) return base.GetDescriptionText(game, gameLocation);
+
+                return base.GetDescriptionText(game, gameLocation) + $" ({effect.left} left)";
+            }
             private class EF : Effect
             {
-                public EF() : base(EffectType.AfterYouCook) { }
+                public int left;
+
+                public EF() : base(EffectType.AfterYouCook) { this.left = 2; }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
+                {                    
                     var cookArgs = args as EffectArgs.AfterCookArgs;
 
                     bool trig = false;
@@ -343,11 +353,24 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     }
                     if (!trig) return Task.CompletedTask;
 
-                    game.feedback.Add("Pure Dragon gives your Dragons this game +1p.");
+                    left--;
+                    if (left != 0) return Task.CompletedTask;
+                    left = 2;
 
-                    game.RestOfGameBuff(x => x.tribe == Tribe.Dragon, x => { x.points++; });
+                    game.feedback.Add("Pure Dragon gives your Dragons this game +2p.");
+
+                    game.RestOfGameBuff(x => x.tribe == Tribe.Dragon, x => { x.points+=2; });
 
                     return Task.CompletedTask;
+                }
+
+                public override Effect Copy()
+                {
+                    EF ret = (EF)base.Copy();
+
+                    ret.left = this.left;
+
+                    return ret;
                 }
             }
         }

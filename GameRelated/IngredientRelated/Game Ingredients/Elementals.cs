@@ -187,6 +187,13 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                         if (!CommonConditions.ElementalCondition(game)) return;
 
                         game.player.kitchen.nextOption = game.pool.GetRandomIngredient(x => x.tribe == Tribe.Elemental && x.name != "Creampooch");
+
+                        if (game.player.kitchen.nextOption == null)
+                        {
+                            game.player.kitchen.nextOption = game.pool.GetRandomIngredient();
+                            return;
+                        }
+
                         game.player.kitchen.nextOption.points += 5;
 
                         game.feedback.Add("Your Creampooch replaces the next ingredient in the kitchen with an Elemental with +5p.");                        
@@ -217,13 +224,15 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     var ingrs = game.player.kitchen.GetAllIngredients();
                     List<int> indexes = new List<int>();
 
-                    for (int i = 0; i < ingrs.Count; i++)
+                    for (int i = 0; i < ingrs.Count && i<5; i++)
                     {
                         if (ingrs[i] != null)
                         {
                             if (ingrs[i].tribe != Tribe.Elemental) indexes.Add(i);
                         }
                     }
+
+                    if (indexes.Count == 0) return Task.CompletedTask;
 
                     int index = indexes[BotHandler.globalRandom.Next(indexes.Count)];
 
@@ -312,37 +321,37 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             }
         }
 
-        [GameIngredient]
-        public class FastfoodChainer : Ingredient
-        {
-            public FastfoodChainer() : base("Fastfood Chainer", 3, Rarity.Rare, Tribe.Elemental, "Cook: If you cooked an Elemental last, create a 5p one and put another to enter your kitchen next.")
-            {
-                this.glowLocation = GameLocation.Any;
-                this.effects.Add(new EF());
-            }
-            private class EF : Effect
-            {
-                public EF() : base(EffectType.OnBeingCookedAfter) { }
+        //[GameIngredient]
+        //public class FastfoodChainer : Ingredient
+        //{
+        //    public FastfoodChainer() : base("Fastfood Chainer", 3, Rarity.Rare, Tribe.Elemental, "Cook: If you cooked an Elemental last, create a 5p one and put another to enter your kitchen next.")
+        //    {
+        //        this.glowLocation = GameLocation.Any;
+        //        this.effects.Add(new EF());
+        //    }
+        //    private class EF : Effect
+        //    {
+        //        public EF() : base(EffectType.OnBeingCookedAfter) { }
 
-                public override async Task Call(Ingredient caller, Game game, EffectArgs args)
-                {
-                    if (!CommonConditions.ElementalCondition(game)) return;
+        //        public override async Task Call(Ingredient caller, Game game, EffectArgs args)
+        //        {
+        //            if (!CommonConditions.ElementalCondition(game)) return;
 
-                    await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Appetiser Elemental"));
+        //            await game.player.hand.AddIngredient(game, game.pool.GetTokenIngredient("Appetiser Elemental"));
 
-                    game.player.kitchen.nextOption = game.pool.GetTokenIngredient("Appetiser Elemental");
+        //            game.player.kitchen.nextOption = game.pool.GetTokenIngredient("Appetiser Elemental");
 
-                    game.feedback.Add("Fastfood Chainer adds a 5p Appetiser Elemental to your dish and next in the kitchen.");
-                }
-            }
+        //            game.feedback.Add("Fastfood Chainer adds a 5p Appetiser Elemental to your dish and next in the kitchen.");
+        //        }
+        //    }
 
-            public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.ElementalCondition(game);            
+        //    public override bool GlowCondition(Game game, int kitchenPos) => CommonConditions.ElementalCondition(game);            
 
-            [TokenIngredient]
-            public class AppetiserElemental : Ingredient
-            {
-                public AppetiserElemental() : base("Appetiser Elemental", 5, Rarity.Common, Tribe.Elemental) { }
-            }
-        }
+        //    [TokenIngredient]
+        //    public class AppetiserElemental : Ingredient
+        //    {
+        //        public AppetiserElemental() : base("Appetiser Elemental", 5, Rarity.Common, Tribe.Elemental) { }
+        //    }
+        //}
     }
 }

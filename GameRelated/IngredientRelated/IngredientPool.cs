@@ -100,6 +100,8 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated
         {
             List<Ingredient> subList = this.ingredients.FindAll(x => condition(x));
 
+            if (subList.Count == 0) return null;
+
             int pick = BotHandler.globalRandom.Next(subList.Count);
             return subList[pick].Copy();
         }

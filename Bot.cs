@@ -148,7 +148,7 @@ namespace Aletta_s_Kitchen
         }
 
         private async Task InGameButtonClickReactionAdded(DiscordClient client, MessageReactionAddEventArgs args)
-            => await InGameButtonClick(client, args.User, args.Message, args.Emoji);
+            => await InGameButtonClick(client, args.User, args.Message, args.Emoji);        
 
         private async Task InGameButtonClickReactionRemoved(DiscordClient client, MessageReactionRemoveEventArgs args)
             => await InGameButtonClick(client, args.User, args.Message, args.Emoji);
