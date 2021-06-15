@@ -9,7 +9,7 @@ namespace Aletta_s_Kitchen.GameRelated.GoalTypes
 {
     public class PointsGoal : Goal
     {
-        private int _pointsRequired;
+        public int _pointsRequired;
         public PointsGoal(int pointsRequired, int round)
         {
             this._pointsRequired = pointsRequired;

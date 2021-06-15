@@ -9,7 +9,7 @@
         </span>
         @GetTribeString()
     </h6>
-    <p class="card-text">@ingredient.GetDescriptionText(game, GetGameLocation())</p>
+    <p class="card-text desc">@ingredient.GetDescriptionText(game, GetGameLocation())</p>
     @if (onClick != null) {
         <button class="btn btn-primary pick-button mt-auto" @onclick="@InvokeOnClick">Pick</button>
     } else if (onDeck) {

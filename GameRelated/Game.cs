@@ -675,7 +675,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
                             this.gamemodeName = Game.gamemodes[choice].title;
 
-                            this.playerId = user.Id;
+                            //this.playerId = user.Id;
 
                         }
                         break;

@@ -13,6 +13,10 @@
   box-shadow: 0 0 10px #dcb02d;
 }
 
+.desc {
+  font-family: 'Bitter', serif;
+}
+
 /* Diagonal stacked paper effect */
 .paper {
     background-color: #fff;

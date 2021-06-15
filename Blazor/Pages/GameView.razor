@@ -8,10 +8,10 @@
 
 @if (game.gameState == GameState.None) {
     @* <button class="btn btn-primary" @onclick="@(() => StartGame(0))">Tutorial</button> *@
-    <button class="btn btn-primary" @onclick="@(() => StartGame(1))">Easy</button>
-    <button class="btn btn-primary" @onclick="@(() => StartGame(2))">Medium</button>
-    <button class="btn btn-primary" @onclick="@(() => StartGame(3))">Hard</button>
-    <button class="btn btn-primary" @onclick="@(() => StartGame(4))">Endless</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(1))">Endless</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(2))">Limited (Random Tribe Omitted)</button>
+    @* <button class="btn btn-primary" @onclick="@(() => StartGame(3))">Hard</button>
+    <button class="btn btn-primary" @onclick="@(() => StartGame(4))">Endless</button> *@
 } else if (game.gameState == GameState.Loading) {
     <p>Preparing your Kitchen. This may take a while...</p>
 } else if (game.gameState == GameState.GameOverLoss || game.gameState == GameState.GameOverWin) {
@@ -55,20 +55,21 @@
         </div>
         
         <div class="events-col">
-            <h5>Current Score: @game.player.curPoints</h5>
-            <h5>Round: @game.curRound</h5>
-            
+            @{var goal = GetQuota();}
+            <h5>Current Score: @game.player.curPoints → @(((PointsGoal)goal)._pointsRequired)</h5>
+            <h5>Round: @game.curRound → @goal.round @(game.goalGenerator.CurrentGoal(game).round - game.curRound == 1 ? "(quota next round!)" : "")</h5>
+@*             
             @if (game.goalGenerator.CurrentGoal(game).round - game.curRound == 1) {
                 <b>(quota next turn!)</b>
-            }
-
-            @{var goal = GetQuota();}
+            } *@
+@* 
+            
             @if (goal == null) {
                 <h5>There is no goal.</h5>
             } else {
                 <h5>Next Quota: Round @goal.round</h5>
                 <i>@goal.GetDescription(game)</i>
-            }
+            } *@
             <h4>Game Events</h4>
             <ul>
                 @for(int i = 0; i < game.feedback.Count; i++) {
@@ -76,7 +77,7 @@
                 }
             </ul> 
             @* <button class="btn btn-warning" @onclick="@(() => {
-                Ingredient ingr = game.pool.GetVanillaIngredient("Icecream Conenberg");
+                Ingredient ingr = game.pool.GetVanillaIngredient("Scarab Snack");
                 game.player.kitchen.nextOption = ingr;
                 })">Debug</button>    *@
         </div>
