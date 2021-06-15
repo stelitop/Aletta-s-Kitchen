@@ -182,6 +182,7 @@
     <Compile Include="GameRelated\Game.cs" />
     <Compile Include="GameRelated\Gamemodes\AnonymousMethodGamemode.cs" />
     <Compile Include="GameRelated\Gamemodes\Gamemode.cs" />
+    <Compile Include="GameRelated\Gamemodes\LimitedGamemode.cs" />
     <Compile Include="GameRelated\Gamemodes\TutorialGamemode.cs" />
     <Compile Include="GameRelated\GameState.cs" />
     <Compile Include="GameRelated\GoalTypes\SquareIncrGoalGenerator.cs" />

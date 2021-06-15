@@ -71,13 +71,14 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     int replace = cands[BotHandler.globalRandom.Next(cands.Count)];
                     string name = game.player.kitchen.OptionAt(replace).name;
 
-                    game.player.kitchen.ReplaceIngredient(replace, new SmallFry());
+                    game.player.kitchen.ReplaceIngredient(replace, game.pool.GetTokenIngredient("Small Fry"));
 
                     game.feedback.Add($"Big Mac replaces {name} in your Kitchen with a Small Fry.");
 
                     return Task.CompletedTask;
                 }
             }
+            [TokenIngredient]
             public class SmallFry : Ingredient
             {
                 public SmallFry() : base("Small Fry", 1, Rarity.Common, Tribe.NoTribe) { }

@@ -69,7 +69,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
 
                     int index = candidates[BotHandler.globalRandom.Next(candidates.Count)];
 
-                    game.feedback.Add($"Saladmander destroys {game.player.kitchen.OptionAt(index).name} and gains +3p this gmae.");
+                    game.feedback.Add($"Saladmander destroys {game.player.kitchen.OptionAt(index).name} and gains +3p this game.");
                     game.RestOfGameBuff(x => x.name == "Saladmander", x => { x.points += 3; });                    
 
                     await game.player.kitchen.DestroyIngredient(game, index);
@@ -80,7 +80,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class HorseRadish : Ingredient
         {
-            public HorseRadish() : base("Horse Radish", 2, Rarity.Common, Tribe.Beast, "When picked, give a random Beast in your kitchen +3p.")
+            public HorseRadish() : base("Horse Radish", 2, Rarity.Common, Tribe.Beast, "When picked, give a random Beast in your kitchen +3p this game.")
             {
                 this.glowLocation = GameLocation.Kitchen;
 
@@ -97,9 +97,10 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     if (candidates.Count == 0) return Task.CompletedTask;
 
                     Ingredient pick = candidates[BotHandler.globalRandom.Next(candidates.Count)];
-                    pick.points+=3;
 
-                    game.feedback.Add($"Horse Radish gives {pick.name} +3p.");
+                    game.RestOfGameBuff(x => x.name == pick.name, x => { x.points += 3; });                    
+
+                    game.feedback.Add($"Horse Radish gives {pick.name} +3p this game.");
 
                     return Task.CompletedTask;
                 }
@@ -109,7 +110,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class ShrimpshellBento : Ingredient
         {
-            public ShrimpshellBento() : base("Shrimpshell Bento", 2, Rarity.Common, Tribe.Beast, "When picked, give another random Beast in your kitchen and dish +2p.")
+            public ShrimpshellBento() : base("Shrimpshell Bento", 2, Rarity.Common, Tribe.Beast, "When picked, give another random Beast in your kitchen and dish +2p this game.")
             {
                 this.effects.Add(new EF());
             }
@@ -123,16 +124,16 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                     if (candidatesKitchen.Count > 0)
                     {
                         Ingredient pickKitchen = candidatesKitchen[BotHandler.globalRandom.Next(candidatesKitchen.Count)];
-                        pickKitchen.points += 2;
-                        game.feedback.Add($"Shrimpshell Bento gives {pickKitchen.name} in the kitchen +2p.");
+                        game.RestOfGameBuff(x => x.name == pickKitchen.name, x => { x.points += 2; });
+                        game.feedback.Add($"Shrimpshell Bento gives {pickKitchen.name} in the kitchen +2p this game.");
                     }
 
                     List<Ingredient> candidatesDish = game.player.hand.GetAllIngredients().FindAll(x => x.tribe == Tribe.Beast && x != caller);
                     if (candidatesDish.Count > 0)
                     {
                         Ingredient pickDish = candidatesDish[BotHandler.globalRandom.Next(candidatesDish.Count)];
-                        pickDish.points += 2;
-                        game.feedback.Add($"Shrimpshell Bento gives {pickDish.name} in the dish +2p.");
+                        game.RestOfGameBuff(x => x.name == pickDish.name, x => { x.points += 2; });
+                        game.feedback.Add($"Shrimpshell Bento gives {pickDish.name} in the dish +2p this game.");
                     }                    
 
                     return Task.CompletedTask;
@@ -183,6 +184,11 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     var options = BotHandler.genericPool.ingredients.FindAll(x => x.points == 3);
+                    if (options.Count == 0)
+                    {
+                        game.feedback.Add($"There are no 3p ingredients available!");
+                        return Task.CompletedTask;
+                    }
 
                     Ingredient ingr = game.pool.GetVanillaIngredient(options[BotHandler.globalRandom.Next(options.Count)].name);
 
@@ -211,6 +217,12 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
                     var options = BotHandler.genericPool.ingredients.FindAll(x => x.points == 4);
+                    if (options.Count == 0)
+                    {
+                        game.feedback.Add($"There are no 4p ingredients available!");
+                        return Task.CompletedTask;
+                    }
+
 
                     Ingredient ingr = game.pool.GetVanillaIngredient(options[BotHandler.globalRandom.Next(options.Count)].name);
 

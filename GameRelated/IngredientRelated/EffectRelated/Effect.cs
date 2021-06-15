@@ -51,7 +51,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.EffectRelated
                 }
                 catch (Exception e)
                 {
-                    await BotHandler.reportsChannel.SendMessageAsync($"{caller.name} threw an exception. EffectType = {type}. Check the console <@237264833433567233>.");
+                    //await BotHandler.reportsChannel.SendMessageAsync($"{caller.name} threw an exception. EffectType = {type}. Check the console <@237264833433567233>.");
                     Console.WriteLine(e.Message);
                 }
             }

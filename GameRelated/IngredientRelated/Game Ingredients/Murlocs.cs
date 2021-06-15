@@ -177,7 +177,7 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
             public override string GetDescriptionText(Game game, GameLocation gameLocation)
             {
                 int matches = game.player.dishHistory.FindAll(x => x.Count == 3).FindAll(x => x.FindAll(y => y.tribe == Tribe.Murloc).Count == 3).Count;
-                return base.GetDescriptionText(game, gameLocation) + $" ({2*matches})";
+                return base.GetDescriptionText(game, gameLocation) + $" (+{2*matches})p";
             }
             private class EF : Effect
             {
@@ -243,23 +243,28 @@ namespace Aletta_s_Kitchen.GameRelated.IngredientRelated.Game_Ingredients
         [GameIngredient]
         public class Yummyfin : Ingredient
         {
-            public Yummyfin() : base("Yummyfin", 2, Rarity.Rare, Tribe.Murloc, "Whenever you pick or create another Murloc, give it +1p.")
+            public Yummyfin() : base("Yummyfin", 3, Rarity.Rare, Tribe.Murloc, "Cook: If this is a full Murloc dish, give the ones in it +1p this game.")
             {
+                this.glowLocation = GameLocation.Hand;
                 this.effects.Add(new EF());
+            }
+            public override bool GlowCondition(Game game, int kitchenPos)
+            {
+                return (game.player.hand.GetAllNonNullIngredients().Count == 3 && game.player.hand.GetAllNonNullIngredients().FindAll(x => x.tribe == Tribe.Murloc).Count == 3) ;
             }
             private class EF : Effect
             {
-                public EF() : base(EffectType.AfterYouAddIngredientToHand) { }
+                public EF() : base(EffectType.OnBeingCookedBefore) { }
 
                 public override Task Call(Ingredient caller, Game game, EffectArgs args)
                 {
-                    var addArgs = args as EffectArgs.IngredientAddedToHand;
-
-                    if (addArgs.ingredient.tribe == Tribe.Murloc)
+                    if (game.player.hand.GetAllNonNullIngredients().Count == 3 && game.player.hand.GetAllNonNullIngredients().FindAll(x => x.tribe == Tribe.Murloc).Count == 3)
                     {
-                        addArgs.ingredient.points++;
-
-                        game.feedback.Add($"Yummyfin gives {addArgs.ingredient.name} 1p.");
+                        foreach (var ingr in game.player.hand.GetAllNonNullIngredients())
+                        {
+                            game.RestOfGameBuff(x => x.name == ingr.name, x => { x.points++; });
+                            game.feedback.Add($"Yummyfin gives {ingr.name} permanent +1p.");
+                        }
                     }
 
                     return Task.CompletedTask;

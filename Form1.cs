@@ -139,7 +139,7 @@ namespace Aletta_s_Kitchen
 
         private void ButtonToggleConsole_Click(object sender, EventArgs e)
         {
-            TextBoxConsole.Enabled = !TextBoxConsole.Enabled;
+            TextBoxConsole.Visible = !TextBoxConsole.Visible;
         }
     }
 

@@ -21,9 +21,9 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public List<List<Ingredient>> dishHistory;
 
-        public Player()
+        public Player(string name = "Player")
         {
-            this.name = "Player";
+            this.name = name;
 
             this.hand = new Hand();
             this.kitchen = new Kitchen();
