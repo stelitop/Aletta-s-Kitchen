@@ -179,7 +179,7 @@ namespace Aletta_s_Kitchen.GameRelated
 
         public async Task UpdateUI()
         {
-            await this.UIMessage.ModifyAsync(embed: (await this.GetUIEmbed()).Build()).ConfigureAwait(false);
+            //await this.UIMessage.ModifyAsync(embed: (await this.GetUIEmbed()).Build()).ConfigureAwait(false);
         }
 
         public async Task<DiscordEmbedBuilder> GetUIEmbed()
@@ -601,20 +601,20 @@ namespace Aletta_s_Kitchen.GameRelated
          */
         public async Task ProcessButtonPress(int emojiIndex)
         {
-            if (BotHandler.GetUserState(user.Id) == UserState.Tutorial && this.player.curPoints >= 75)
-            {
-                if (emojiIndex == 5)
-                {
-                    BotHandler.SetUserState(user.Id, UserState.InGame);
+            // if (BotHandler.GetUserState(user.Id) == UserState.Tutorial && this.player.curPoints >= 75)
+            // {
+            //     if (emojiIndex == 5)
+            //     {
+            //         BotHandler.SetUserState(user.Id, UserState.InGame);
 
-                    await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_left:")).ConfigureAwait(false);
-                    await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_right:")).ConfigureAwait(false);
+            //         await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_left:")).ConfigureAwait(false);
+            //         await this.UIMessage.DeleteOwnReactionAsync(DiscordEmoji.FromName(BotHandler.bot.Client, ":arrow_right:")).ConfigureAwait(false);
 
-                    await this.UpdateUI();
-                }
+            //         await this.UpdateUI();
+            //     }
 
-                return;
-            }
+            //     return;
+            // }
 
             switch (this.gameState)
             {
